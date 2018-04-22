@@ -28,7 +28,7 @@ data class Mannschaft(
         private val spielRepository: SpielRepository
 
 ) {
-    //@Transient
-    //var allSpiel: List<Spiel> = spielRepository.findAllByMannschaft(this)
+    @Transient
+    var allSpiel: List<Spiel> = spielRepository.findAllByMannschaft(this)
 
 }

@@ -15,6 +15,4 @@ data class Verein(
         val allMannschaft: List<Mannschaft>,
         val name: String
 
-) {
-
-}
+)

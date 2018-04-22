@@ -20,5 +20,4 @@ data class Jugend(
         @OneToOne
         @JoinColumn(name = "tabelle_id")
         val tabelle: Tabelle
-) {
-}
+)

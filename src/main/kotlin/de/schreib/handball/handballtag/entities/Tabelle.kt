@@ -18,5 +18,4 @@ data class Tabelle(
         @JoinColumn(name = "jugend_id")
         val jugend: Jugend
 
-) {
-}
+)
