@@ -67,3 +67,26 @@ dependencies {
     testCompile 'org.mockito:mockito-inline:2.16.0'
 
 }
+task dockerRest(type: Copy) {
+    from 'build/libs'
+    include "wetter-${version}.jar"
+
+    into "docker/rest/deploy/"
+    rename '.*', 'wetter-service.jar'
+}
+
+task buildDatabase(type: Exec){
+    workingDir 'docker/postgres'
+    commandLine 'docker', 'build', '.', '-t', 'handballtag-postgres'
+}
+
+task databaseUp(type: Exec) {
+    workingDir 'docker/postgres'
+    commandLine 'docker', 'run', '-d', '-p', '5432:5432', '-v',
+            '/home/robert/postgres/handballtag/data:/var/lib/postgresql/data',
+            '--name=handballtag-postgres', '--rm=true','handballtag-postgres'
+}
+
+task databaseDown(type: Exec){
+    commandLine 'docker', 'rm','-f', 'handballtag-postgres'
+}
