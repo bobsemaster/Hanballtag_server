@@ -5,6 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import javax.persistence.*
 
 
+/**
+ * Diese Klasse bildet eine Mannschaft ab und speichert den Namen der Mannschaft den Zugehörigen verein, die Tabelle
+ * in der Diese Mannschaft zu finden ist, das Zorverhältnis nud PunkteVerhältnis der Mannschaft und die jugend ab.
+ * Die Spiele der Mannschaft werden bei erstellen Der klasse aus dem SPiel repository nachgeladen. Die Spiele weden auch nicht
+ * in der Datenbank Tabelle zur Mannschaft abgespeichert.
+ */
 @Entity
 data class Mannschaft(
         @Id
