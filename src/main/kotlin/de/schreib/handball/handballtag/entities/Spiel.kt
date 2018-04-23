@@ -1,6 +1,7 @@
 package de.schreib.handball.handballtag.entities
 
 import java.time.Duration
+import java.time.LocalDateTime
 import javax.persistence.*
 
 
@@ -25,6 +26,8 @@ data class Spiel(
         val gastTore: Int,
         val hasHalfTime: Boolean,
         val halftimeDuration: Duration,
+        val currentDuration: Duration,
+        val dateTime:LocalDateTime,
 
         @OneToMany(
                 mappedBy = "mannschaft",
