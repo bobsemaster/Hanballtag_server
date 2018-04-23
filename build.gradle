@@ -69,10 +69,10 @@ dependencies {
 }
 task dockerRest(type: Copy) {
     from 'build/libs'
-    include "wetter-${version}.jar"
+    include "handballtag-${version}.jar"
 
     into "docker/rest/deploy/"
-    rename '.*', 'wetter-service.jar'
+    rename '.*', 'handballtag-service.jar'
 }
 
 task buildDatabase(type: Exec){
