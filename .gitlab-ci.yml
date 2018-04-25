@@ -1,0 +1,74 @@
+image: emundo/docker-compose-openjdk-node-gradle:latest
+
+variables:
+  # Deaktiviere den Gradle Daemon: https://docs.gradle.org/current/userguide/gradle_daemon.html#sec:why_the_daemon
+  # Verwende nicht GRADLE_OPTS sondern JAVA_OPTS, sonst wird die JVM nicht mit den Settings gestartet
+  JAVA_OPTS: "-Dorg.gradle.daemon=false"
+
+stages:
+  - lint
+  - test
+  - analysis
+  - build
+  - deploy
+
+cache:
+  paths:
+    - .gradle
+
+before_script:
+  # Wir legen die Gradle und die Java Libs in den Job-übergreifenden Cache
+  - export GRADLE_USER_HOME=`pwd`/.gradle
+
+#formatted:
+#  stage: lint
+#  script:
+#    - gradle spotlessCheck
+
+unittest:
+  stage: test
+  script:
+    # Test laufen lassen
+    - gradle --parallel test
+
+#sonar-preview:
+#  stage: analysis
+#  except:
+#    - master
+#  script:
+#    - gradle -Dsonar.analysis.mode=preview -Dsonar.gitlab.project_id=$CI_PROJECT_PATH -Dsonar.gitlab.commit_sha=$CI_COMMIT_SHA -Dsonar.gitlab.ref_name=$CI_BUILD_REF_NAME sonarqube
+
+#sonarqube:
+#  stage: analysis
+#  only:
+#    - master
+#  script:
+#    - gradle sonarqube
+
+docker-container:
+  stage: build
+  only:
+    - master
+  script:
+    # Wir bauen die Anwendung
+    - gradle clean assemble dockerRest
+
+    # Docker Login, weil die Registry zugriffsbeschränkt ist.
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+
+    - docker build docker/rest -t "$CI_REGISTRY_IMAGE/handballtag-server"
+    - docker push "$CI_REGISTRY_IMAGE/handballtag-server"
+
+#deploy-dev:
+#  stage: deploy
+#  only:
+#    - master
+#  when: manual
+#  script:
+#    - rancher-compose -f docker-compose.rancher.yml -r rancher-compose.yml -p salatkind pull
+#    - rancher-compose -f docker-compose.rancher.yml -r rancher-compose.yml -p salatkind up -d --force-upgrade --pull --confirm-upgrade
+#  environment:
+#    # Das hier ist für die Anzeige in https://gitlab.emundo.eu/salatkind/server/environments
+#    # damit man alle Deploys auf die Umgebung sieht und per Click reployen kann
+#    name: dev
+#    url: https://nginx-salatkind.rsdyn.emundo.eu/
