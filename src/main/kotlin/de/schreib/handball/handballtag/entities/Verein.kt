@@ -8,9 +8,10 @@ import javax.persistence.*
  */
 @Entity
 data class Verein(
+        // Lass hibernate die Id generieren val damit user die id nicht verändern kann
         @Id
         @GeneratedValue
-        val id: Long,
+        val id: Long = 0,
         @OneToMany(
                 mappedBy = "verein",
                 cascade = [CascadeType.ALL],

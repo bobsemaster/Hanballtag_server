@@ -2,6 +2,7 @@ package de.schreib.handball.handballtag.entities
 
 import java.time.Duration
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import javax.persistence.*
 
 
@@ -15,19 +16,20 @@ import javax.persistence.*
  */
 @Entity
 data class Spiel(
+        // Lass hibernate die Id generieren val damit user die id nicht verändern kann
         @Id
         @GeneratedValue
-        val id: Long,
+        val id: Long = 0,
         @ManyToOne
         val heimMannschaft: Mannschaft,
         @ManyToOne
         val gastMannschaft: Mannschaft,
-        val heimTore: Int,
-        val gastTore: Int,
-        val hasHalfTime: Boolean,
-        val halftimeDuration: Duration,
-        val currentDuration: Duration,
-        val dateTime:LocalDateTime,
+        val heimTore: Int = 0,
+        val gastTore: Int = 0,
+        val hasHalfTime: Boolean = true,
+        val halftimeDuration: Duration = Duration.of(15, ChronoUnit.MINUTES),
+        val currentDuration: Duration = Duration.ZERO,
+        val dateTime: LocalDateTime,
 
         @OneToMany(
                 mappedBy = "mannschaft",
@@ -36,7 +38,7 @@ data class Spiel(
                 fetch = FetchType.EAGER
 
         )
-        val allGeworfeneTore: List<SpielTor>
+        val allGeworfeneTore: List<SpielTor> = emptyList()
 )
 
 /**
@@ -45,9 +47,10 @@ data class Spiel(
  */
 @Entity
 data class SpielTor(
+        // Lass hibernate die Id generieren val damit user die id nicht verändern kann
         @Id
         @GeneratedValue
-        val id: Long,
+        val id: Long = 0,
         @ManyToOne
         @JoinColumn(name = "spiel_id")
         val mannschaft: Mannschaft,

@@ -2,6 +2,7 @@ package de.schreib.handball.handballtag.entities
 
 import de.schreib.handball.handballtag.repositories.SpielRepository
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 import javax.persistence.*
 
 
@@ -13,9 +14,10 @@ import javax.persistence.*
  */
 @Entity
 data class Mannschaft(
+        // Lass hibernate die Id generieren val damit user die id nicht verändern kann
         @Id
         @GeneratedValue
-        val id: Long,
+        val id: Long = 0,
         val name: String,
         @ManyToOne
         @JoinColumn(name = "verein_id")
@@ -28,12 +30,16 @@ data class Mannschaft(
         val jugend: Jugend
 ) {
 
+    @Component
+    companion object {
         @Transient
         @Autowired
-        private val spielRepository: SpielRepository
+        private lateinit var spielRepository: SpielRepository
+    }
 
-) {
-    @Transient
-    var allSpiel: List<Spiel> = spielRepository.findAllByMannschaft(this)
+    fun getAllSpiel(): List<Spiel> {
+        return spielRepository.findAllByMannschaft(this)
+    }
 
 }
+
