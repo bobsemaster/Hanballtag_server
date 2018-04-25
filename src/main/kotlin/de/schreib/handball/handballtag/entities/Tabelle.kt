@@ -19,8 +19,5 @@ data class Tabelle(
 
         )
         val allMannschaft: List<Mannschaft>,
-        @OneToOne
-        @JoinColumn(name = "jugend_id")
         val jugend: Jugend
-
 )

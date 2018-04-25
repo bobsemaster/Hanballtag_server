@@ -23,11 +23,10 @@ data class Mannschaft(
         @ManyToOne
         @JoinColumn(name = "tabelle_id")
         val tabelle: Tabelle,
-        val torverhaeltnis: Pair<Int, Int>,
-        val punkteverhaeltnis: Pair<Int, Int>,
-        @ManyToOne
-        @JoinColumn(name = "jugend_id")
-        val jugend: Jugend,
+        val torverhaeltnis: Pair<Int, Int> = Pair(0, 0),
+        val punkteverhaeltnis: Pair<Int, Int> = Pair(0, 0),
+        val jugend: Jugend
+) {
 
         @Transient
         @Autowired
