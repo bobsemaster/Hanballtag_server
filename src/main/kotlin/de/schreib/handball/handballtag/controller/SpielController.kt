@@ -57,14 +57,14 @@ class SpielController(
         val spiel = spielOptional.get()
         if (spiel.heimMannschaft.id == mannschaftsId) {
             val newSpiel = spiel.copy(heimTore = spiel.heimTore + 1, allGeworfeneTore = spiel.allGeworfeneTore
-                    .plus(SpielTor(-1, spiel.heimMannschaft, spiel.currentDuration)))
+                    .plus(SpielTor(mannschaft = spiel.heimMannschaft, time = spiel.currentDuration)))
             spielRepository.save(newSpiel)
             return
         }
         if (spiel.gastMannschaft.id == mannschaftsId) {
             // Minus eins als Id bei Spiel tor, damit eine passende Id autogeneriert wird
             val newSpiel = spiel.copy(gastTore = spiel.gastTore + 1, allGeworfeneTore = spiel.allGeworfeneTore
-                    .plus(SpielTor(-1, spiel.gastMannschaft, spiel.currentDuration)))
+                    .plus(SpielTor(mannschaft = spiel.gastMannschaft, time = spiel.currentDuration)))
             spielRepository.save(newSpiel)
             return
         }
