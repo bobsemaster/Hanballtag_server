@@ -18,6 +18,7 @@ data class Verein(
                 orphanRemoval = true
         )
         val allMannschaft: List<Mannschaft>,
+        @Column(unique = true)
         val name: String
 
 )

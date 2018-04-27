@@ -13,6 +13,9 @@ import javax.persistence.*
  *
  *  In der variable allGeworfeneTore wird eine Histore der Tore für das Spiel aufgezeichnet, wenn es in echtzeit getrackt wird.
  *
+ *  Falls ein Spiel pausiert wurde wird in der Variable isPaused abgespeichert, dass das Spiel pausiert wurde und die Passende
+ *  Zeit muss in currentDuration gespeichert werden. Das geschieht mithilfe des aufrufes der copy methode.
+ *
  */
 @Entity
 data class Spiel(
@@ -29,6 +32,7 @@ data class Spiel(
         val hasHalfTime: Boolean = true,
         val halftimeDuration: Duration = Duration.of(15, ChronoUnit.MINUTES),
         val currentDuration: Duration = Duration.ZERO,
+        val isPaused: Boolean = false,
         val dateTime: LocalDateTime,
 
         @OneToMany(
