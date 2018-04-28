@@ -12,6 +12,7 @@ import org.springframework.test.context.junit4.SpringRunner
 import java.time.LocalDateTime
 import org.junit.Assert.assertThat
 import org.hamcrest.CoreMatchers.`is`
+import org.junit.After
 
 @RunWith(SpringRunner::class)
 @SpringBootTest
@@ -84,5 +85,13 @@ class TestRepositories {
 
         assertThat(spiel.id, `is`(spielCJugend.id))
         assertThat(spiel.heimMannschaft.name, `is`(spielCJugend.heimMannschaft.name))
+    }
+
+    @After
+    fun cleanDatabase(){
+        spielRepository.deleteAll()
+        mannschaftRepository.deleteAll()
+        tabelleRepository.deleteAll()
+        vereinRepository.deleteAll()
     }
 }
