@@ -34,6 +34,12 @@ data class Spiel(
         val currentDuration: Duration = Duration.ZERO,
         val isPaused: Boolean = false,
         val dateTime: LocalDateTime,
+        val isKampfgerichtAnwesend: Boolean = false,
+        val isSchiedsrichterAnwesend:Boolean = false,
+        val isHeimmannschaftAnwesend: Boolean = false,
+        val isGastMannschaftAnwesend:Boolean = false,
+        val spielPlatz:String = "Noch nicht festgelegt",
+        val spielTyp:SpielTyp,
 
         @OneToMany(
                 mappedBy = "mannschaft",
@@ -44,6 +50,11 @@ data class Spiel(
         )
         val allGeworfeneTore: List<SpielTor> = emptyList()
 )
+
+enum class SpielTyp {
+        GRUPPENSPIEL,
+        KO_PHASE
+}
 
 /**
  * Ein SpielTor spiegelt ein Tor das In einem Spiel gefallen ist wieder, dazu wird die Mannschaft, die das Spiel geworfen Hat

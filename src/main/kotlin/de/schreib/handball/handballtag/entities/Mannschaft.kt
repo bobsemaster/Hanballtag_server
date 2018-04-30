@@ -27,7 +27,10 @@ data class Mannschaft(
         val tabelle: Tabelle,
         val torverhaeltnis: Pair<Int, Int> = Pair(0, 0),
         val punkteverhaeltnis: Pair<Int, Int> = Pair(0, 0),
-        val jugend: Jugend
+        val jugend: Jugend,
+        val hasFoto:Boolean = false,
+        val tabellenPlatz:Int = 0,
+        val gruppe:Int = 0
 ) {
 
     @Component
