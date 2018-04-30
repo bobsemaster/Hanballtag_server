@@ -24,7 +24,10 @@ class VerkaufController(
                 verkaufRepository.save(newVerkauf)
                 verkauf = newVerkauf
             }
-            1L -> verkauf = verkaufRepository.findAll()[0]
+            1L -> {
+                verkauf = verkaufRepository.findAll()[0]
+                verkauf.verkaufArtikel.count()
+            }
             else -> {
                 verkaufRepository.deleteAll(mutableListOf(verkaufRepository.findAll().removeAt(0)))
                 verkauf = verkaufRepository.findAll()[0]
@@ -36,7 +39,7 @@ class VerkaufController(
     }
 
     @GetMapping("all")
-    fun getAllVerkauf(): List<Verkauf> = verkaufRepository.findAll()
+    fun getVerkaufObject(): Verkauf = verkauf
 
     @PostMapping("artikel")
     fun setArtikelList(@RequestBody allVerkaufArtikel: List<VerkaufArtikel>) {

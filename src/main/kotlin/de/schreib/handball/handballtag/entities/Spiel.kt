@@ -39,7 +39,7 @@ data class Spiel(
         val isHeimmannschaftAnwesend: Boolean = false,
         val isGastMannschaftAnwesend:Boolean = false,
         val spielPlatz:String = "Noch nicht festgelegt",
-        val spielTyp:SpielTyp,
+        val spielTyp:SpielTyp = SpielTyp.NONE,
 
         @OneToMany(
                 mappedBy = "mannschaft",
@@ -52,6 +52,8 @@ data class Spiel(
 )
 
 enum class SpielTyp {
+        // Für die Initialisierung des SPiels bei tests
+        NONE,
         GRUPPENSPIEL,
         KO_PHASE
 }
