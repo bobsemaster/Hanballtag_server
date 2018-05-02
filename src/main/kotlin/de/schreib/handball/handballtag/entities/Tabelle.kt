@@ -20,5 +20,6 @@ data class Tabelle(
 
         )
         val allMannschaft: List<Mannschaft>,
+        @Column(unique = true)
         val jugend: Jugend
 )
