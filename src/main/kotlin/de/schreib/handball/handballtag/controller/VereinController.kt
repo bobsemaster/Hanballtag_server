@@ -5,7 +5,9 @@ import de.schreib.handball.handballtag.exceptions.VereinAlreadyExistException
 import de.schreib.handball.handballtag.exceptions.VereinNotFoundException
 import de.schreib.handball.handballtag.repositories.MannschaftRepository
 import de.schreib.handball.handballtag.repositories.VereinRepository
+import de.schreib.handball.handballtag.security.SPIELLEITER
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.access.annotation.Secured
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -27,6 +29,7 @@ class VereinController(
         throw VereinNotFoundException("Verein mit id $id konnte nicht gefunden werden!")
     }
 
+    @Secured(SPIELLEITER)
     @PostMapping("new")
     fun createNewVerein(@RequestBody verein: Verein) {
         if (vereinRepository.findByName(verein.name) != null) {
@@ -39,6 +42,7 @@ class VereinController(
         vereinRepository.save(verein)
     }
 
+    @Secured(SPIELLEITER)
     @DeleteMapping("delete/{id}")
     fun deleteVerein(id: Long) {
         vereinRepository.deleteById(id)
