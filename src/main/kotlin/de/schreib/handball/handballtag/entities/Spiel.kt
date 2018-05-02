@@ -51,6 +51,7 @@ data class Spiel(
         val allGeworfeneTore: List<SpielTor> = emptyList()
 )
 
+
 enum class SpielTyp {
         // Für die Initialisierung des SPiels bei tests
         NONE,

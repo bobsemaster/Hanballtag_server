@@ -37,13 +37,23 @@ class MannschaftController(
     @Secured(SPIELLEITER)
     @PostMapping("new")
     fun createMannschaft(@RequestBody mannschaft: Mannschaft) {
-        if (!vereinRepository.findById(mannschaft.verein.id).isPresent) {
+        val vereinOptional = vereinRepository.findById(mannschaft.verein.id)
+        if (!vereinOptional.isPresent) {
             throw VereinNotFoundException("Der Verein '${mannschaft.verein.name}' existiert nicht")
         }
-        if (!tabelleRepository.findByJugend(mannschaft.jugend).isPresent) {
+        val tabelleOptional = tabelleRepository.findByJugend(mannschaft.jugend)
+        if (tabelleOptional.isPresent) {
             throw TabelleNotFoundException("Tabelle der ${mannschaft.jugend.typ} ${mannschaft.jugend.jahrgang} konnte nicht gefunden werden")
         }
         mannschaftRepository.save(mannschaft)
+
+        // Update foreign keys
+        val neueTabelle = tabelleOptional.get().copy(allMannschaft = tabelleOptional.get().allMannschaft.plus(mannschaft))
+        val neuerVerein = vereinOptional.get().copy(allMannschaft = vereinOptional.get().allMannschaft.plus(mannschaft))
+
+        tabelleRepository.save(neueTabelle)
+        vereinRepository.save(neuerVerein)
+
     }
 
     @Secured(SPIELLEITER)
