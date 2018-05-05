@@ -4,7 +4,6 @@ import de.schreib.handball.handballtag.entities.Verkauf
 import de.schreib.handball.handballtag.entities.VerkaufArtikel
 import de.schreib.handball.handballtag.repositories.VerkaufArtikelRepository
 import de.schreib.handball.handballtag.repositories.VerkaufRepository
-import de.schreib.handball.handballtag.security.SPIELLEITER
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.annotation.Secured
 import org.springframework.web.bind.annotation.*
@@ -43,7 +42,7 @@ class VerkaufController(
     @GetMapping("all")
     fun getVerkaufObject(): Verkauf = verkauf
 
-    @Secured(SPIELLEITER)
+    @Secured(ROLE_SPIELLEITER)
     @PostMapping("artikel")
     fun setArtikelList(@RequestBody allVerkaufArtikel: List<VerkaufArtikel>) {
         verkaufArtikelRepository.saveAll(allVerkaufArtikel)
@@ -56,14 +55,14 @@ class VerkaufController(
         return Pair(verkauf.isLosverkaufGestartet, verkauf.isPreisvergabeGestartet)
     }
 
-    @Secured(SPIELLEITER)
+    @Secured(ROLE_SPIELLEITER)
     @GetMapping("/tombola/verkauf/{newStatus}")
     fun setTombolaVerkauf(@PathVariable newStatus: Boolean) {
         verkauf = verkauf.copy(isLosverkaufGestartet = newStatus)
         verkaufRepository.save(verkauf)
     }
 
-    @Secured(SPIELLEITER)
+    @Secured(ROLE_SPIELLEITER)
     @GetMapping("/tombola/preisvergabe/{newStatus}")
     fun setTombolaPreisvergabe(@PathVariable newStatus: Boolean) {
         verkauf = verkauf.copy(isPreisvergabeGestartet = newStatus)
@@ -73,7 +72,7 @@ class VerkaufController(
     @GetMapping("grill")
     fun getGrillStatus(): Boolean = verkauf.isGrillAn
 
-    @Secured(SPIELLEITER)
+    @Secured(ROLE_SPIELLEITER)
     @GetMapping("grill/{newStatus}")
     fun setGrillStatus(@PathVariable newStatus: Boolean) {
         verkauf = verkauf.copy(isGrillAn = newStatus)

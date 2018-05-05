@@ -3,17 +3,20 @@ package de.schreib.handball.handballtag.controller
 import de.schreib.handball.handballtag.entities.VerkaufArtikel
 import de.schreib.handball.handballtag.repositories.VerkaufArtikelRepository
 import de.schreib.handball.handballtag.repositories.VerkaufRepository
+import de.schreib.handball.handballtag.security.SPIELLEITER
 import org.hamcrest.CoreMatchers.`is`
 import org.junit.Assert.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.junit4.SpringRunner
 import javax.transaction.Transactional
 
 @RunWith(SpringRunner::class)
 @SpringBootTest
+@WithMockUser(roles = [SPIELLEITER])
 class VerkaufControllerTest {
 
     @Autowired

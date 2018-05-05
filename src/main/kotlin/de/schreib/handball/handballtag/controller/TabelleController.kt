@@ -3,7 +3,6 @@ package de.schreib.handball.handballtag.controller
 import de.schreib.handball.handballtag.entities.Tabelle
 import de.schreib.handball.handballtag.exceptions.TabelleNotFoundException
 import de.schreib.handball.handballtag.repositories.TabelleRepository
-import de.schreib.handball.handballtag.security.SPIELLEITER
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.annotation.Secured
 import org.springframework.web.bind.annotation.*
@@ -25,7 +24,7 @@ class TabelleController(
         return tabelleOptional.get()
     }
 
-    @Secured(SPIELLEITER)
+    @Secured(ROLE_SPIELLEITER)
     @PostMapping("new")
     fun newTabelle(@RequestBody tabelle: Tabelle) {
         if (tabelle.allMannschaft.isNotEmpty()) {
@@ -34,9 +33,9 @@ class TabelleController(
         tabelleRepository.save(tabelle)
     }
 
-    @Secured(SPIELLEITER)
+    @Secured(ROLE_SPIELLEITER)
     @DeleteMapping("{id}")
-    fun deleteTabelle(@PathVariable id: Long){
+    fun deleteTabelle(@PathVariable id: Long) {
         tabelleRepository.deleteById(id)
     }
 

@@ -1,14 +1,10 @@
 package de.schreib.handball.handballtag.controller
 
-import de.schreib.handball.handballtag.entities.Jugend
-import de.schreib.handball.handballtag.entities.Mannschaft
-import de.schreib.handball.handballtag.entities.Tabelle
 import de.schreib.handball.handballtag.entities.Verein
-import de.schreib.handball.handballtag.enums.JugendEnum
-import de.schreib.handball.handballtag.enums.JugendGender
 import de.schreib.handball.handballtag.exceptions.VereinAlreadyExistException
 import de.schreib.handball.handballtag.exceptions.VereinNotFoundException
 import de.schreib.handball.handballtag.repositories.VereinRepository
+import de.schreib.handball.handballtag.security.SPIELLEITER
 import org.hamcrest.CoreMatchers.`is`
 import org.junit.After
 import org.junit.Assert.assertThat
@@ -17,10 +13,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 @SpringBootTest
+@WithMockUser(roles = [SPIELLEITER])
 class VereinControllerTest {
 
 
@@ -32,6 +30,7 @@ class VereinControllerTest {
     var vereinId = -1L
 
     @Before
+
     fun setup() {
         vereinRepository.save(verein)
         vereinId = verein.id
@@ -71,7 +70,7 @@ class VereinControllerTest {
     }
 
     @Test
-    fun `test ob verein loeschen funktioniert`(){
+    fun `test ob verein loeschen funktioniert`() {
         vereinController.deleteVerein(verein.id)
         assertThat(vereinRepository.count(), `is`(0L))
     }

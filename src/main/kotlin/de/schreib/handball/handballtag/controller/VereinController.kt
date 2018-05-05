@@ -5,10 +5,15 @@ import de.schreib.handball.handballtag.exceptions.VereinAlreadyExistException
 import de.schreib.handball.handballtag.exceptions.VereinNotFoundException
 import de.schreib.handball.handballtag.repositories.MannschaftRepository
 import de.schreib.handball.handballtag.repositories.VereinRepository
-import de.schreib.handball.handballtag.security.SPIELLEITER
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.annotation.Secured
 import org.springframework.web.bind.annotation.*
+
+
+const val ROLE_BASIC_USER = "ROLE_BASIC_USER"
+const val ROLE_SPIELLEITER = "ROLE_SPIELLEITER"
+const val ROLE_KAMPFGERICHT = "ROLE_KAMPFGERICHT"
+
 
 @RestController
 @RequestMapping("Verein/")
@@ -21,19 +26,21 @@ class VereinController(
     fun getAllVerein() = vereinRepository.findAll()
 
     @GetMapping("{id}")
+    @Throws(VereinNotFoundException::class)
     fun findVereinById(@PathVariable id: Long): Verein {
         val verein = vereinRepository.findById(id)
-        if(verein.isPresent){
+        if (verein.isPresent) {
             return verein.get()
         }
         throw VereinNotFoundException("Verein mit id $id konnte nicht gefunden werden!")
     }
 
-    @Secured(SPIELLEITER)
+    @Secured(ROLE_SPIELLEITER)
     @PostMapping("new")
+    @Throws(VereinAlreadyExistException::class, IllegalArgumentException::class)
     fun createNewVerein(@RequestBody verein: Verein) {
         if (vereinRepository.findByName(verein.name) != null) {
-            throw VereinAlreadyExistException("Der Verein mit der Id ${verein.id} existiert bereits")
+            throw VereinAlreadyExistException("Der Verein mit dem namen ${verein.name} existiert bereits")
         }
         if (verein.allMannschaft.isNotEmpty()) {
             throw IllegalArgumentException("Ein neuer Verein kann keine Mannschaften haben bitte " +
@@ -42,7 +49,7 @@ class VereinController(
         vereinRepository.save(verein)
     }
 
-    @Secured(SPIELLEITER)
+    @Secured(ROLE_SPIELLEITER)
     @DeleteMapping("delete/{id}")
     fun deleteVerein(id: Long) {
         vereinRepository.deleteById(id)

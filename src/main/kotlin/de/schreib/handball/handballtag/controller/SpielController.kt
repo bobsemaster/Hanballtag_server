@@ -6,8 +6,6 @@ import de.schreib.handball.handballtag.exceptions.SpielNotFoundException
 import de.schreib.handball.handballtag.repositories.MannschaftRepository
 import de.schreib.handball.handballtag.repositories.SpielRepository
 import de.schreib.handball.handballtag.repositories.SpielTorRepository
-import de.schreib.handball.handballtag.security.KAMPFGERICHT
-import de.schreib.handball.handballtag.security.SPIELLEITER
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.AuthorizationServiceException
 import org.springframework.security.access.annotation.Secured
@@ -32,41 +30,41 @@ class SpielController(
         return spielOptional.get()
     }
 
-    @Secured(SPIELLEITER)
+    @Secured(ROLE_SPIELLEITER)
     @PostMapping("new")
     fun newSpiel(@RequestBody newSpiel: Spiel) {
         //TODO falls spielplan nicht autogeneriert wird
     }
 
-    @Secured(KAMPFGERICHT)
+    @Secured(ROLE_KAMPFGERICHT)
     @GetMapping("{id}/heimmannschaft/anwesend")
     fun setHeimmannschaftAnwesend(@PathVariable id: Long) {
         val spiel = getSpielById(id).copy(isHeimmannschaftAnwesend = true)
         spielRepository.save(spiel)
     }
 
-    @Secured(KAMPFGERICHT)
+    @Secured(ROLE_KAMPFGERICHT)
     @GetMapping("{id}/gastmannschaft/anwesend")
     fun setGastMannschaftAnwesend(@PathVariable id: Long) {
         val spiel = getSpielById(id).copy(isGastMannschaftAnwesend = true)
         spielRepository.save(spiel)
     }
 
-    @Secured(KAMPFGERICHT)
+    @Secured(ROLE_KAMPFGERICHT)
     @GetMapping("{id}/kampfgericht/anwesend")
     fun setKampfgerichtAnwesend(@PathVariable id: Long) {
         val spiel = getSpielById(id).copy(isKampfgerichtAnwesend = true)
         spielRepository.save(spiel)
     }
 
-    @Secured(KAMPFGERICHT)
+    @Secured(ROLE_KAMPFGERICHT)
     @GetMapping("{id}/schiedsrichter/anwesend")
     fun setSchiedsrichterAnwesend(@PathVariable id: Long) {
         val spiel = getSpielById(id).copy(isSchiedsrichterAnwesend = true)
         spielRepository.save(spiel)
     }
 
-    @Secured(KAMPFGERICHT)
+    @Secured(ROLE_KAMPFGERICHT)
     @PostMapping("{id}/ergebnis")
     fun setSpielErgebnisKampfgericht(@RequestBody ergebnis: SpielErgebnis, @PathVariable id: Long) {
         val spiel = getSpielById(id)
@@ -76,14 +74,14 @@ class SpielController(
         spielRepository.save(spiel.copy(heimTore = ergebnis.toreHeim, gastTore = ergebnis.toreGast))
     }
 
-    @Secured(SPIELLEITER)
+    @Secured(ROLE_SPIELLEITER)
     @PostMapping("{id}/spielstand")
     fun setSpielstandSpielleiter(@RequestBody ergebnis: SpielErgebnis, @PathVariable id: Long) {
         val spiel = getSpielById(id)
         spielRepository.save(spiel.copy(heimTore = ergebnis.toreHeim, gastTore = ergebnis.toreGast))
     }
 
-    @Secured(KAMPFGERICHT)
+    @Secured(ROLE_KAMPFGERICHT)
     @GetMapping("{spielId}/tor/{mannschaftId}")
     fun tor(@PathVariable spielId: Long, @PathVariable mannschaftId: Long) {
         val spiel = getSpielById(spielId)

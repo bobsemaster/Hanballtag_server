@@ -8,7 +8,6 @@ import de.schreib.handball.handballtag.repositories.MannschaftRepository
 import de.schreib.handball.handballtag.repositories.SpielRepository
 import de.schreib.handball.handballtag.repositories.TabelleRepository
 import de.schreib.handball.handballtag.repositories.VereinRepository
-import de.schreib.handball.handballtag.security.SPIELLEITER
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.annotation.Secured
 import org.springframework.web.bind.annotation.*
@@ -34,7 +33,7 @@ class MannschaftController(
         return mannschaftOptional.get()
     }
 
-    @Secured(SPIELLEITER)
+    @Secured(ROLE_SPIELLEITER)
     @PostMapping("new")
     fun createMannschaft(@RequestBody mannschaft: Mannschaft) {
         val vereinOptional = vereinRepository.findById(mannschaft.verein.id)
@@ -56,7 +55,7 @@ class MannschaftController(
 
     }
 
-    @Secured(SPIELLEITER)
+    @Secured(ROLE_SPIELLEITER)
     @DeleteMapping("{id}")
     fun deleteMannschaftWithId(@PathVariable id: Long) {
         mannschaftRepository.deleteById(id)
