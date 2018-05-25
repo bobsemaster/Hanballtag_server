@@ -47,6 +47,9 @@ repositories {
 
 
 dependencies {
+    // Production Monitoring
+    runtime('org.springframework.boot:spring-boot-starter-actuator')
+
     compile('org.springframework.boot:spring-boot-starter-data-jpa')
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.springframework.boot:spring-boot-starter-security')
@@ -78,18 +81,23 @@ task dockerRest(type: Copy) {
     rename '.*', 'handballtag-service.jar'
 }
 
-task buildDatabase(type: Exec){
+def DEV_GROUP = 'Dev Environment'
+
+task buildDatabase(type: Exec) {
+    group=DEV_GROUP
     workingDir 'docker/postgres'
     commandLine 'docker', 'build', '.', '-t', 'handballtag-postgres'
 }
 
 task databaseUp(type: Exec) {
+    group=DEV_GROUP
     workingDir 'docker/postgres'
     commandLine 'docker', 'run', '-d', '-p', '5432:5432', '-v',
             '/home/robert/postgres/handballtag/data:/var/lib/postgresql/data',
-            '--name=handballtag-postgres', '--rm=true','handballtag-postgres'
+            '--name=handballtag-postgres', '--rm=true', 'handballtag-postgres'
 }
 
-task databaseDown(type: Exec){
-    commandLine 'docker', 'rm','-f', 'handballtag-postgres'
+task databaseDown(type: Exec) {
+    group=DEV_GROUP
+    commandLine 'docker', 'rm', '-f', 'handballtag-postgres'
 }

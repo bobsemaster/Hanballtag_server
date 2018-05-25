@@ -1,7 +1,6 @@
 package de.schreib.handball.handballtag.security
 
 import org.springframework.context.annotation.Bean
-import org.springframework.http.HttpStatus
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
@@ -12,7 +11,9 @@ import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.provisioning.InMemoryUserDetailsManager
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.CorsConfigurationSource
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 const val BASIC_USER = "BASIC_USER"
 const val SPIELLEITER = "SPIELLEITER"
@@ -35,8 +36,23 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
                 .permitAll()
                 .and().exceptionHandling().authenticationEntryPoint(Http403ForbiddenEntryPoint())
                 .and().logout().permitAll()
-                .and().cors().disable()
+                .and().cors().and()
                 .csrf().disable()
+    }
+
+    //https://stackoverflow.com/questions/40418441/spring-security-cors-filter
+    @Bean
+    public fun corsConfigurationSource(): CorsConfigurationSource {
+        val corsConfiguration = CorsConfiguration();
+        corsConfiguration.allowedOrigins = listOf("*")
+        corsConfiguration.allowedMethods = listOf("HEAD", "GET", "POST", "PUT", "DELETE", "PATH")
+        // setAllowCredentials(true) is important, otherwise:
+        // The value of the 'Access-Control-Allow-Origin' header in the response must not be the wildcard '*' when the request's credentials mode is 'include'.
+        corsConfiguration.allowCredentials = true
+        corsConfiguration.allowedHeaders = listOf("Authorization", "Cache-Control", "Content-Type")
+        val source = UrlBasedCorsConfigurationSource()
+        source.registerCorsConfiguration("/**", corsConfiguration)
+        return source
     }
 
     @Bean
@@ -61,6 +77,8 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
                 .build()
         return InMemoryUserDetailsManager(basicUser, kampfgerichtUser, spielleiterUser)
     }
+
+
 }
 
 
