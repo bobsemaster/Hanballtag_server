@@ -51,7 +51,7 @@ class VereinController(
 
     @Secured(ROLE_SPIELLEITER)
     @DeleteMapping("delete/{id}")
-    fun deleteVerein(id: Long) {
+    fun deleteVerein(@PathVariable id: Long) {
         vereinRepository.deleteById(id)
     }
 
