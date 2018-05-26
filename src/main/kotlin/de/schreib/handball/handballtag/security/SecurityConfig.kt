@@ -1,5 +1,6 @@
 package de.schreib.handball.handballtag.security
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -11,9 +12,12 @@ import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.provisioning.InMemoryUserDetailsManager
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler
+import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl
+import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
+import javax.sql.DataSource
 
 const val BASIC_USER = "BASIC_USER"
 const val SPIELLEITER = "SPIELLEITER"
@@ -22,6 +26,9 @@ const val KAMPFGERICHT = "KAMPFGERICHT"
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(securedEnabled = true)
 class SecurityConfig : WebSecurityConfigurerAdapter() {
+    @Autowired
+    lateinit var  source:DataSource
+
     override fun configure(http: HttpSecurity?) {
         if (http == null) {
             throw NullPointerException("Http was null")
@@ -34,13 +41,21 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
                 .loginPage("/login").failureHandler(SimpleUrlAuthenticationFailureHandler())
                 .successHandler(StatusCodeAuthenticationSuccessHandler())
                 .permitAll()
+                .and()
+                .rememberMe().tokenRepository(persistentTokenRepository())
+                .key("AppKey")
+                .alwaysRemember(true)
+                .rememberMeParameter("rememberMe")
+                .rememberMeCookieName("User")
+                // 1 Monat eingeloggt bleiben
+                .tokenValiditySeconds(30 * 24 * 60 * 60)
                 .and().exceptionHandling().authenticationEntryPoint(Http403ForbiddenEntryPoint())
                 .and().logout().permitAll()
                 .and().cors().and()
                 .csrf().disable()
     }
 
-    //https://stackoverflow.com/questions/40418441/spring-security-cors-filter
+    // https://stackoverflow.com/questions/40418441/spring-security-cors-filter
     @Bean
     public fun corsConfigurationSource(): CorsConfigurationSource {
         val corsConfiguration = CorsConfiguration();
@@ -54,6 +69,16 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
         source.registerCorsConfiguration("/**", corsConfiguration)
         return source
     }
+
+    @Bean
+    fun persistentTokenRepository(): PersistentTokenRepository {
+        val jdbcTokenRepositoryImpl = JdbcTokenRepositoryImpl()
+        jdbcTokenRepositoryImpl.setDataSource(source)
+        return jdbcTokenRepositoryImpl
+    }
+
+
+
 
     @Bean
     override fun userDetailsService(): UserDetailsService {
