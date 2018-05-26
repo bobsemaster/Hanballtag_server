@@ -41,7 +41,7 @@ class MannschaftController(
             throw VereinNotFoundException("Der Verein '${mannschaft.verein.name}' existiert nicht")
         }
         val tabelleOptional = tabelleRepository.findByJugend(mannschaft.jugend)
-        if (tabelleOptional.isPresent) {
+        if (!tabelleOptional.isPresent) {
             throw TabelleNotFoundException("Tabelle der ${mannschaft.jugend.typ} ${mannschaft.jugend.jahrgang} konnte nicht gefunden werden")
         }
         mannschaftRepository.save(mannschaft)
