@@ -48,10 +48,8 @@ class MannschaftController(
 
         // Update foreign keys
         val neueTabelle = tabelleOptional.get().copy(allMannschaft = tabelleOptional.get().allMannschaft.plus(mannschaft))
-        val neuerVerein = vereinOptional.get().copy(allMannschaft = vereinOptional.get().allMannschaft.plus(mannschaft))
 
         tabelleRepository.save(neueTabelle)
-        vereinRepository.save(neuerVerein)
 
     }
 

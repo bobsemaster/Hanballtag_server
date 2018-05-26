@@ -1,8 +1,13 @@
 package de.schreib.handball.handballtag.entities
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import de.schreib.handball.handballtag.repositories.SpielRepository
+import org.jboss.logging.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
+import javax.annotation.PostConstruct
 import javax.persistence.*
 
 
@@ -22,27 +27,39 @@ data class Mannschaft(
         @ManyToOne
         @JoinColumn(name = "verein_id")
         val verein: Verein,
-        @ManyToOne
-        @JoinColumn(name = "tabelle_id")
-        val tabelle: Tabelle,
         val torverhaeltnis: Pair<Int, Int> = Pair(0, 0),
         val punkteverhaeltnis: Pair<Int, Int> = Pair(0, 0),
         val jugend: Jugend,
-        val hasFoto:Boolean = false,
-        val tabellenPlatz:Int = 0,
-        val gruppe:Int = 0
+        val hasFoto: Boolean = false,
+        val tabellenPlatz: Int = 0,
+        val gruppe: Int = 0
 ) {
 
     @Component
     companion object {
         @Transient
-        @Autowired
-        private lateinit var spielRepository: SpielRepository
+        lateinit var spielRepository: SpielRepository
+        private val log = Logger.getLogger(this::class.java)
+
     }
 
-    fun getAllSpiel(): List<Spiel> {
+    @JsonIgnore
+    fun getAllSpiel():List<Spiel>{
         return spielRepository.findAllByMannschaft(this)
     }
 
+}
+
+@Service
+class MannschaftSpielService {
+    @Autowired
+    private lateinit var spielRepository: SpielRepository
+    val log = LoggerFactory.getLogger(this::class.java)
+
+    @PostConstruct
+    fun initializeVereinRepository() {
+        Mannschaft.spielRepository = this.spielRepository
+        log.info("Initialized Spiel Repository in Mannschaft")
+    }
 }
 

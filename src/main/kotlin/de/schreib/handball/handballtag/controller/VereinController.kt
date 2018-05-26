@@ -42,10 +42,6 @@ class VereinController(
         if (vereinRepository.findByName(verein.name) != null) {
             throw VereinAlreadyExistException("Der Verein mit dem namen ${verein.name} existiert bereits")
         }
-        if (verein.allMannschaft.isNotEmpty()) {
-            throw IllegalArgumentException("Ein neuer Verein kann keine Mannschaften haben bitte " +
-                    "schicke für allMannschaft eine leere Liste")
-        }
         vereinRepository.save(verein)
     }
 
