@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.annotation.Secured
 import org.springframework.web.bind.annotation.*
 import javax.annotation.PostConstruct
+import javax.transaction.Transactional
 
 @RestController
 @RequestMapping("verkauf/")
@@ -17,7 +18,8 @@ class VerkaufController(
 ) {
     lateinit var verkauf: Verkauf
 
-    @PostConstruct
+    //TODO bug fixen bei init wird fehler geworfewn keine SESSION!
+    @Transactional
     fun initVerkauf() {
         when (verkaufRepository.count()) {
             0L -> {

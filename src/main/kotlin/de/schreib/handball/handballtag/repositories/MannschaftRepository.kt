@@ -6,4 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 interface MannschaftRepository : JpaRepository<Mannschaft, Long> {
     fun findAllByVerein(verein: Verein): List<Mannschaft>
+    fun deleteAllByVerein(verein: Verein)
 }

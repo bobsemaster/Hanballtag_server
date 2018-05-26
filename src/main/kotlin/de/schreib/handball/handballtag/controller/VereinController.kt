@@ -1,5 +1,6 @@
 package de.schreib.handball.handballtag.controller
 
+import de.schreib.handball.handballtag.entities.Mannschaft
 import de.schreib.handball.handballtag.entities.Verein
 import de.schreib.handball.handballtag.exceptions.VereinAlreadyExistException
 import de.schreib.handball.handballtag.exceptions.VereinNotFoundException
@@ -8,6 +9,7 @@ import de.schreib.handball.handballtag.repositories.VereinRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.annotation.Secured
 import org.springframework.web.bind.annotation.*
+import javax.transaction.Transactional
 
 
 const val ROLE_BASIC_USER = "ROLE_BASIC_USER"
@@ -24,6 +26,16 @@ class VereinController(
 
     @GetMapping("all")
     fun getAllVerein() = vereinRepository.findAll()
+
+    @GetMapping("{id}/mannschaften")
+    fun getAllVereinMannschaften(@PathVariable id: Long): List<Mannschaft> {
+        val vereinOptional = vereinRepository.findById(id)
+        return if (vereinOptional.isPresent) {
+            vereinOptional.get().getAllMannschaft()
+        } else {
+            listOf()
+        }
+    }
 
     @GetMapping("{id}")
     @Throws(VereinNotFoundException::class)
@@ -47,7 +59,12 @@ class VereinController(
 
     @Secured(ROLE_SPIELLEITER)
     @DeleteMapping("delete/{id}")
+    @Transactional
     fun deleteVerein(@PathVariable id: Long) {
+        val verein = findVereinById(id)
+
+        mannschaftRepository.deleteAllByVerein(verein)
+        mannschaftRepository.flush()
         vereinRepository.deleteById(id)
     }
 
