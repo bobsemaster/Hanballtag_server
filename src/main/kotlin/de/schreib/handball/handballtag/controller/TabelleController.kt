@@ -1,5 +1,6 @@
 package de.schreib.handball.handballtag.controller
 
+import de.schreib.handball.handballtag.entities.Jugend
 import de.schreib.handball.handballtag.entities.Tabelle
 import de.schreib.handball.handballtag.exceptions.TabelleNotFoundException
 import de.schreib.handball.handballtag.repositories.TabelleRepository
@@ -14,6 +15,17 @@ class TabelleController(
 ) {
     @GetMapping("all")
     fun getAllTabelle(): List<Tabelle> = tabelleRepository.findAll()
+
+    @PostMapping("jugend")
+    fun getTabelleToJugend(@RequestBody jugend:Jugend): Tabelle? {
+        val tabelleOptional = tabelleRepository.findByJugend(jugend)
+        return if(tabelleOptional.isPresent){
+            tabelleOptional.get()
+        } else {
+            null
+        }
+
+    }
 
     @GetMapping("{id}")
     fun getTabelleById(@PathVariable id: Long): Tabelle {
