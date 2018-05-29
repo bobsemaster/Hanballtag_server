@@ -2,7 +2,6 @@ package de.schreib.handball.handballtag.entities
 
 import java.time.Duration
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 import javax.persistence.*
 
 
@@ -29,8 +28,8 @@ data class Spiel(
         val gastMannschaft: Mannschaft,
         val heimTore: Int = 0,
         val gastTore: Int = 0,
-        val hasHalfTime: Boolean = true,
-        val halftimeDuration: Duration = Duration.of(15, ChronoUnit.MINUTES),
+        val hasHalfTime: Boolean = false,
+        val halftimeDuration: Duration,
         val currentDuration: Duration = Duration.ZERO,
         val isPaused: Boolean = false,
         val dateTime: LocalDateTime,
@@ -38,7 +37,7 @@ data class Spiel(
         val isSchiedsrichterAnwesend:Boolean = false,
         val isHeimmannschaftAnwesend: Boolean = false,
         val isGastMannschaftAnwesend:Boolean = false,
-        val spielPlatz:String = "Noch nicht festgelegt",
+        val spielPlatz: Int? = null,
         val spielTyp:SpielTyp = SpielTyp.NONE,
 
         @OneToMany(

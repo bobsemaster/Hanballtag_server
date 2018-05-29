@@ -27,7 +27,7 @@ const val KAMPFGERICHT = "KAMPFGERICHT"
 @EnableGlobalMethodSecurity(securedEnabled = true)
 class SecurityConfig : WebSecurityConfigurerAdapter() {
     @Autowired
-    lateinit var  source:DataSource
+    lateinit var source: DataSource
 
     override fun configure(http: HttpSecurity?) {
         if (http == null) {
@@ -78,8 +78,6 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
     }
 
 
-
-
     @Bean
     override fun userDetailsService(): UserDetailsService {
 
@@ -98,7 +96,7 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
         val spielleiterUser: UserDetails = User.withUsername("spielleiter")
                 // AdminForstenriedArbeitWeniger
                 .password("{bcrypt}\$2a\$10\$s2DfUXc4fe9Jr7vPVSeoEOnXv.etJyaszrk0msejWFoxEG5XiSNr2")
-                .roles(SPIELLEITER)
+                .roles(SPIELLEITER, KAMPFGERICHT)
                 .build()
         return InMemoryUserDetailsManager(basicUser, kampfgerichtUser, spielleiterUser)
     }
