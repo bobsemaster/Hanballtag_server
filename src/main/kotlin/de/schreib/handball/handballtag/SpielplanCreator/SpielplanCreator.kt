@@ -24,13 +24,12 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
     private lateinit var pauseDuration: Duration
     private lateinit var turnierBeginn: LocalDateTime
     private lateinit var allJugendMannschaft: List<Mannschaft>
-    // Zwei Listen um doppelrunde einfacher Implementieren zu können
-    private val spielplanListGruppe1: MutableList<Spiel> = mutableListOf()
-    private val spielplanListGruppe2: MutableList<Spiel> = mutableListOf()
+    private val spielplanList: MutableList<Spiel> = mutableListOf()
     private var currentGroup = 1
+    private var spielplatz: Int = -1
 
     // sechsMannschaftenGruppe entscheidung ob man den spielplasn mit gruppen erstellt oder nicht
-    public fun createSpielplan(jugend: Jugend, spielDuration: Duration, pauseDuration: Duration, turnierBeginn: LocalDateTime, sechsMannschaftenGruppe: Boolean = false) {
+    public fun createSpielplan(jugend: Jugend, spielDuration: Duration, pauseDuration: Duration, turnierBeginn: LocalDateTime, spielplatz: Int, sechsMannschaftenGruppe: Boolean = false) {
         allJugendMannschaft = mannschaftRepository.findAllByJugend(jugend)
 
         this.pauseDuration = pauseDuration
@@ -38,8 +37,8 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
         this.turnierBeginn = turnierBeginn
 
         currentGroup = 1
-        spielplanListGruppe1.clear()
-        spielplanListGruppe2.clear()
+        this.spielplatz = spielplatz
+        spielplanList.clear()
 
         when (allJugendMannschaft.size) {
             1 -> {
@@ -57,6 +56,8 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
             10 -> createSpielplan10Mannschaften(allJugendMannschaft)
             else -> log.error("Es dürfen höchstens 10 Mannschaften für einen Spielplan übergeben werden!")
         }
+
+        spielRepository.saveAll(spielplanList)
     }
 
     private fun createSpielplan10Mannschaften(allJugendMannschaft: List<Mannschaft>) {
@@ -127,11 +128,17 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
         spiel(Kuerzel.A, Kuerzel.C)
         spiel(Kuerzel.C, Kuerzel.B)
 
-        // Doppelrunde! Jedes Spiel wird einfach und heim gast wird gewechselt.
-        spielplanListGruppe1.forEach {
-            spielplanListGruppe1.add(it.copy(dateTime = turnierBeginn, heimMannschaft = it.gastMannschaft, gastMannschaft = it.heimMannschaft))
-            turnierBeginn.plus(spielDuration.plus(pauseDuration))
+        // Doppelrunde! Jedes Spiel wird einfach wiederholt.
+        // Wir brauchen eine zweite liste um über spielplanList iterieren zu können und die Spiele später der spielplanliste hinzuzufügen
+        // Wenn man über die spielplanList iteriert und versucht dieser ein Element hinzuzufügen
+        // wird eine ConcurrentModificationException geworfen
+        val doppelRundeList = mutableListOf<Spiel>()
+        spielplanList.forEach {
+            val spielCopy = it.copy(dateTime = turnierBeginn, heimMannschaft = it.gastMannschaft, gastMannschaft = it.heimMannschaft)
+            doppelRundeList.add(spielCopy)
+            turnierBeginn = turnierBeginn.plus(spielDuration.plus(pauseDuration))
         }
+        spielplanList.addAll(doppelRundeList)
     }
 
     private fun createSpielplan2Mannschaften(allJugendMannschaft: List<Mannschaft>) {
@@ -168,26 +175,29 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
         // B gegen A
         spiel(Kuerzel.B, Kuerzel.A)
 
+
         // Doppelrunde! Jedes Spiel wird einfach wiederholt.
-        spielplanListGruppe1.forEach {
-            spielplanListGruppe1.add(it.copy(dateTime = turnierBeginn, heimMannschaft = it.gastMannschaft, gastMannschaft = it.heimMannschaft))
-            turnierBeginn.plus(spielDuration.plus(pauseDuration))
+        // Wir brauchen eine zweite liste um über spielplanList iterieren zu können und die Spiele später der spielplanliste hinzuzufügen
+        // Wenn man über die spielplanList iteriert und versucht dieser ein Element hinzuzufügen
+        // wird eine ConcurrentModificationException geworfen
+        val doppelRundeList = mutableListOf<Spiel>()
+        spielplanList.forEach {
+            val spielCopy = it.copy(dateTime = turnierBeginn, heimMannschaft = it.gastMannschaft, gastMannschaft = it.heimMannschaft)
+            doppelRundeList.add(spielCopy)
+            turnierBeginn = turnierBeginn.plus(spielDuration.plus(pauseDuration))
         }
-
-
+        spielplanList.addAll(doppelRundeList)
     }
 
     private fun spiel(heim: Kuerzel, gast: Kuerzel, spielTyp: SpielTyp = SpielTyp.GRUPPENSPIEL) {
         if (currentGroup == 1) {
-            spielplanListGruppe1.add(allJugendMannschaft.createSpiel(Kuerzel.A, Kuerzel.B, spielDuration, turnierBeginn, spielTyp))
-        } else if (currentGroup == 2) {
-            spielplanListGruppe2.add(allJugendMannschaft.createSpiel(Kuerzel.A, Kuerzel.B, spielDuration, turnierBeginn, spielTyp))
+            spielplanList.add(allJugendMannschaft.createSpiel(Kuerzel.A, Kuerzel.B, spielDuration, turnierBeginn, spielTyp))
         }
-        turnierBeginn.plus(spielDuration.plus(pauseDuration))
+        turnierBeginn = turnierBeginn.plus(spielDuration.plus(pauseDuration))
     }
 
     private fun List<Mannschaft>.createSpiel(heim: Kuerzel, gast: Kuerzel, spielDuration: Duration, time: LocalDateTime, spielTyp: SpielTyp): Spiel {
-        return Spiel(heimMannschaft = this[heim.index], gastMannschaft = this[gast.index], halftimeDuration = spielDuration, dateTime = time, spielTyp = spielTyp)
+        return Spiel(heimMannschaft = this[heim.index], gastMannschaft = this[gast.index], halftimeDuration = spielDuration, dateTime = time, spielTyp = spielTyp, spielPlatz = spielplatz)
 
     }
 
@@ -197,7 +207,9 @@ enum class Kuerzel(val index: Int) {
     A(0), B(1), C(2), D(3), E(4), F(5)
 }
 
-fun function(dataSet: List<Kuerzel>): ArrayList<ArrayList<Kuerzel>> {
+
+// https://stackoverflow.com/questions/18802997/given-a-set-of-number-how-do-you-permute-a-pair-of-numbers
+fun createUniquePairPermutations(dataSet: List<Kuerzel>): List<List<Kuerzel>> {
     val result = ArrayList<ArrayList<Kuerzel>>()
 
     for (i in dataSet.indices) {

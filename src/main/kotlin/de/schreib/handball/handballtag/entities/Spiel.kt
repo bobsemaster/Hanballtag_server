@@ -38,6 +38,7 @@ data class Spiel(
         val isHeimmannschaftAnwesend: Boolean = false,
         val isGastMannschaftAnwesend:Boolean = false,
         val spielPlatz: Int? = null,
+        //@Enumerated(EnumType.STRING)
         val spielTyp:SpielTyp = SpielTyp.NONE,
 
         @OneToMany(

@@ -18,7 +18,7 @@ class VerkaufController(
 ) {
     lateinit var verkauf: Verkauf
 
-    //TODO bug fixen bei init wird fehler geworfewn keine SESSION!
+    @PostConstruct
     @Transactional
     fun initVerkauf() {
         when (verkaufRepository.count()) {
