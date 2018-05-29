@@ -1,9 +1,6 @@
 package de.schreib.handball.handballtag.entities
 
-import javax.persistence.Entity
-import javax.persistence.GeneratedValue
-import javax.persistence.Id
-import javax.persistence.OneToMany
+import javax.persistence.*
 
 @Entity
 data class Verkauf(
@@ -11,7 +8,7 @@ data class Verkauf(
         @GeneratedValue
         val id: Long = 0,
         @OneToMany(
-
+                fetch = FetchType.EAGER
         )
         val verkaufArtikel: List<VerkaufArtikel>,
         val isLosverkaufGestartet: Boolean = false,
