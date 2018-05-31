@@ -50,7 +50,7 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
         // NICHT deleteAllByVerein benutzen, da wir nur die Mannschaften löschen wollen, die in der Jugend spielen für
         // die wir einen Spielplan erstellen
         mannschaftRepository.deleteAll(allJugendMannschaft.filter { it.verein.name == platzhalterVerein.name })
-        allJugendMannschaft = allJugendMannschaft.filter { it.verein.name !=  platzhalterVerein.name}
+        allJugendMannschaft = allJugendMannschaft.filter { it.verein.name != platzhalterVerein.name }
 
 
         this.pauseDuration = pauseDuration
@@ -84,15 +84,146 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
     }
 
     private fun createSpielplan10Mannschaften(allJugendMannschaft: List<Mannschaft>) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val ersterGruppeA = mannschaft("1. Gruppe A")
+        val zweiterGruppeA = mannschaft("2. Gruppe A")
+        val dritterGruppeA = mannschaft("3. Gruppe A")
+        val vierterGruppeA = mannschaft("4. Gruppe A")
+        val fuenfterGruppeA = mannschaft("5. Gruppe A")
+        val ersterGruppeB = mannschaft("1. Gruppe B")
+        val zweiterGruppeB = mannschaft("2. Gruppe B")
+        val dritterGruppeB = mannschaft("3. Gruppe B")
+        val vierterGruppeB = mannschaft("4. Gruppe B")
+        val fuenfterGruppeB = mannschaft("5. Gruppe B")
+        val verliererErstesHalbfinale = mannschaft("Verlierer 1. Halbfinale")
+        val verliererZweitesHalbfinale = mannschaft("Verlierer 2. Halbfinale")
+        val siegerErstesHalbfinale = mannschaft("Sieger 1. Halbfinale")
+        val siegerZweitesHalbfinale = mannschaft("Sieger 2. Halbfinale")
+
+        alternateGroup = true
+        spiel(Kuerzel.A, Kuerzel.B)
+        spiel(Kuerzel.F, Kuerzel.G)
+        spiel(Kuerzel.C, Kuerzel.D)
+        spiel(Kuerzel.H, Kuerzel.I)
+        spiel(Kuerzel.E, Kuerzel.A)
+        spiel(Kuerzel.J, Kuerzel.F)
+        spiel(Kuerzel.B, Kuerzel.C)
+        spiel(Kuerzel.G, Kuerzel.H)
+        spiel(Kuerzel.D, Kuerzel.E)
+        spiel(Kuerzel.I, Kuerzel.J)
+        spiel(Kuerzel.A, Kuerzel.C)
+        spiel(Kuerzel.F, Kuerzel.H)
+        spiel(Kuerzel.E, Kuerzel.B)
+        spiel(Kuerzel.J, Kuerzel.G)
+        spiel(Kuerzel.D, Kuerzel.A)
+        spiel(Kuerzel.I, Kuerzel.F)
+        spiel(Kuerzel.C, Kuerzel.E)
+        spiel(Kuerzel.H, Kuerzel.J)
+        spiel(Kuerzel.B, Kuerzel.D)
+        spiel(Kuerzel.G, Kuerzel.I)
+        alternateGroup = false
+
+        planSpiel(ersterGruppeA, zweiterGruppeB, SpielTyp.ERSTES_HALBFINALE)
+        planSpiel(ersterGruppeB, zweiterGruppeA, SpielTyp.ZWEITES_HALBFINALE)
+        planSpiel(fuenfterGruppeA, fuenfterGruppeB, SpielTyp.SPIEL_UM_PLATZ_9)
+        planSpiel(vierterGruppeA, vierterGruppeB, SpielTyp.SPIEL_UM_PLATZ_7)
+        planSpiel(dritterGruppeA, dritterGruppeB, SpielTyp.SPIEL_UM_PLATZ_5)
+        planSpiel(verliererErstesHalbfinale, verliererZweitesHalbfinale, SpielTyp.SPIEL_UM_PLATZ_3)
+        planSpiel(siegerErstesHalbfinale, siegerZweitesHalbfinale, SpielTyp.FINALE)
     }
 
     private fun createSpielplan9Mannschaften(allJugendMannschaft: List<Mannschaft>) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val ersterGruppeA = mannschaft("1. Gruppe A")
+        val zweiterGruppeA = mannschaft("2. Gruppe A")
+        val dritterGruppeA = mannschaft("3. Gruppe A")
+        val vierterGruppeA = mannschaft("4. Gruppe A")
+        val fuenfterGruppeA = mannschaft("5. Gruppe A")
+        val ersterGruppeB = mannschaft("1. Gruppe B")
+        val zweiterGruppeB = mannschaft("2. Gruppe B")
+        val dritterGruppeB = mannschaft("3. Gruppe B")
+        val vierterGruppeB = mannschaft("4. Gruppe B")
+        val verliererErstesHalbfinale = mannschaft("Verlierer 1. Halbfinale")
+        val verliererZweitesHalbfinale = mannschaft("Verlierer 2. Halbfinale")
+        val siegerErstesHalbfinale = mannschaft("Sieger 1. Halbfinale")
+        val siegerZweitesHalbfinale = mannschaft("Sieger 2. Halbfinale")
+
+        // Gruppenphase
+        currentGroup = 1
+        spiel(Kuerzel.A, Kuerzel.B)
+        spiel(Kuerzel.C, Kuerzel.D)
+        currentGroup = 2
+        spiel(Kuerzel.F, Kuerzel.G)
+        currentGroup = 1
+        spiel(Kuerzel.E, Kuerzel.A)
+        currentGroup = 2
+        spiel(Kuerzel.H, Kuerzel.I)
+        currentGroup = 1
+        spiel(Kuerzel.B, Kuerzel.C)
+        spiel(Kuerzel.D, Kuerzel.E)
+        currentGroup = 2
+        spiel(Kuerzel.G, Kuerzel.H)
+        currentGroup = 1
+        spiel(Kuerzel.A, Kuerzel.C)
+        currentGroup = 2
+        spiel(Kuerzel.F, Kuerzel.H)
+        currentGroup = 1
+        spiel(Kuerzel.E, Kuerzel.B)
+        spiel(Kuerzel.D, Kuerzel.A)
+        currentGroup = 2
+        spiel(Kuerzel.I, Kuerzel.F)
+        currentGroup = 1
+        spiel(Kuerzel.C, Kuerzel.E)
+        currentGroup = 2
+        spiel(Kuerzel.G, Kuerzel.I)
+        currentGroup = 1
+        spiel(Kuerzel.B, Kuerzel.D)
+
+        // K.O phase
+        planSpiel(fuenfterGruppeA, vierterGruppeB, SpielTyp.ERSTES_SPIEL_UM_PLATZ_7)
+        planSpiel(ersterGruppeA, zweiterGruppeB, SpielTyp.ERSTES_HALBFINALE)
+        planSpiel(vierterGruppeB, vierterGruppeA, SpielTyp.ZWEITES_SPIEL_UM_PLATZ_7)
+        planSpiel(ersterGruppeB, zweiterGruppeA, SpielTyp.ZWEITES_HALBFINALE)
+        planSpiel(vierterGruppeA, fuenfterGruppeA, SpielTyp.DRITTES_SPIEL_UM_PLATZ_7)
+        planSpiel(dritterGruppeA, dritterGruppeB, SpielTyp.SPIEL_UM_PLATZ_5)
+        planSpiel(verliererErstesHalbfinale, verliererZweitesHalbfinale, SpielTyp.SPIEL_UM_PLATZ_3)
+        planSpiel(siegerErstesHalbfinale, siegerZweitesHalbfinale, SpielTyp.FINALE)
     }
 
     private fun createSpielplan8Mannschaften(allJugendMannschaft: List<Mannschaft>) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val ersterGruppeA = mannschaft("1. Gruppe A")
+        val zweiterGruppeA = mannschaft("2. Gruppe A")
+        val dritterGruppeA = mannschaft("3. Gruppe A")
+        val vierterGruppeA = mannschaft("4. Gruppe A")
+        val ersterGruppeB = mannschaft("1. Gruppe B")
+        val zweiterGruppeB = mannschaft("2. Gruppe B")
+        val dritterGruppeB = mannschaft("3. Gruppe B")
+        val vierterGruppeB = mannschaft("4. Gruppe B")
+        val verliererErstesHalbfinale = mannschaft("Verlierer 1. Halbfinale")
+        val verliererZweitesHalbfinale = mannschaft("Verlierer 2. Halbfinale")
+        val siegerErstesHalbfinale = mannschaft("Sieger 1. Halbfinale")
+        val siegerZweitesHalbfinale = mannschaft("Sieger 2. Halbfinale")
+        //Gruppenphase
+        alternateGroup = true
+        spiel(Kuerzel.A, Kuerzel.B)
+        spiel(Kuerzel.E, Kuerzel.F)
+        spiel(Kuerzel.C, Kuerzel.D)
+        spiel(Kuerzel.G, Kuerzel.H)
+        spiel(Kuerzel.B, Kuerzel.C)
+        spiel(Kuerzel.F, Kuerzel.G)
+        spiel(Kuerzel.A, Kuerzel.C)
+        spiel(Kuerzel.E, Kuerzel.G)
+        spiel(Kuerzel.D, Kuerzel.A)
+        spiel(Kuerzel.H, Kuerzel.E)
+        spiel(Kuerzel.B, Kuerzel.D)
+        spiel(Kuerzel.F, Kuerzel.H)
+        alternateGroup = false
+
+        //K.O phase
+        planSpiel(ersterGruppeA, zweiterGruppeB, SpielTyp.ERSTES_HALBFINALE)
+        planSpiel(ersterGruppeB, zweiterGruppeA, SpielTyp.ZWEITES_HALBFINALE)
+        planSpiel(vierterGruppeA, vierterGruppeB, SpielTyp.SPIEL_UM_PLATZ_7)
+        planSpiel(dritterGruppeA, dritterGruppeB, SpielTyp.SPIEL_UM_PLATZ_5)
+        planSpiel(verliererErstesHalbfinale, verliererZweitesHalbfinale, SpielTyp.SPIEL_UM_PLATZ_3)
+        planSpiel(siegerErstesHalbfinale, siegerZweitesHalbfinale, SpielTyp.FINALE)
     }
 
     private fun createSpielplan7Mannschaften(allJugendMannschaft: List<Mannschaft>) {
@@ -144,6 +275,7 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
     }
 
     private fun createSpielplan6MannschaftenKeineGruppe(allJugendMannschaft: List<Mannschaft>) {
+
         spiel(Kuerzel.A, Kuerzel.B)
         spiel(Kuerzel.C, Kuerzel.D)
         spiel(Kuerzel.E, Kuerzel.F)
@@ -163,7 +295,40 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
     }
 
     private fun createSpielplan6MannschaftenGruppe(allJugendMannschaft: List<Mannschaft>) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val ersterGruppeA = mannschaft("1. Gruppe A")
+        val zweiterGruppeA = mannschaft("2. Gruppe A")
+        val dritterGruppeA = mannschaft("3. Gruppe A")
+        val ersterGruppeB = mannschaft("1. Gruppe B")
+        val zweiterGruppeB = mannschaft("2. Gruppe B")
+        val dritterGruppeB = mannschaft("3. Gruppe B")
+        val verliererErstesHalbfinale = mannschaft("Verlierer 1. Halbfinale")
+        val verliererZweitesHalbfinale = mannschaft("Verlierer 2. Halbfinale")
+        val siegerErstesHalbfinale = mannschaft("Sieger 1. Halbfinale")
+        val siegerZweitesHalbfinale = mannschaft("Sieger 2. Halbfinale")
+
+        //Gruppenphase
+        alternateGroup = true
+        spiel(Kuerzel.A, Kuerzel.B)
+        spiel(Kuerzel.D, Kuerzel.E)
+        spiel(Kuerzel.B, Kuerzel.C)
+        spiel(Kuerzel.E, Kuerzel.F)
+        spiel(Kuerzel.A, Kuerzel.C)
+        spiel(Kuerzel.D, Kuerzel.F)
+        spiel(Kuerzel.B, Kuerzel.A)
+        spiel(Kuerzel.E, Kuerzel.D)
+        spiel(Kuerzel.C, Kuerzel.B)
+        spiel(Kuerzel.F, Kuerzel.E)
+        spiel(Kuerzel.C, Kuerzel.A)
+        spiel(Kuerzel.F, Kuerzel.D)
+        alternateGroup = false
+
+        // K.O Phase
+        planSpiel(ersterGruppeA, zweiterGruppeB, SpielTyp.ERSTES_HALBFINALE)
+        planSpiel(ersterGruppeB, zweiterGruppeA, SpielTyp.ZWEITES_HALBFINALE)
+        planSpiel(dritterGruppeA, dritterGruppeB, SpielTyp.SPIEL_UM_PLATZ_5)
+        planSpiel(verliererErstesHalbfinale, verliererZweitesHalbfinale, SpielTyp.SPIEL_UM_PLATZ_3)
+        planSpiel(siegerErstesHalbfinale, siegerZweitesHalbfinale, SpielTyp.FINALE)
+
     }
 
     private fun createSpielplan5Mannschaften(allJugendMannschaft: List<Mannschaft>) {
@@ -271,12 +436,18 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
 
     /**
      * Erzeugt ein spiel mit platzhalter mannschaften für spiele wo noch nicht bekannt ist, welche mannschaft dort spielt
+     *
+     * Gruppe wird hier NICHT beachtet
+     *
      * @param heim muss als verein den platzhalter Verein haben
      * @param gast muss als verein den platzhalter Verein haben
      */
     private fun planSpiel(heim: Mannschaft, gast: Mannschaft, spielTyp: SpielTyp) {
         if (heim.verein != platzhalterVerein || gast.verein != platzhalterVerein) {
             throw IllegalArgumentException("Funktion planSpiel nur verwenden wenn man die Mannschaften nicht kennt die Spielen sollen!")
+        }
+        if (heim.name == gast.name) {
+            throw IllegalArgumentException("Heim und gast müssen verschiedene Mannschaften sein!")
         }
         spielplanList.add(Spiel(heimMannschaft = heim, gastMannschaft = gast, halftimeDuration = spielDuration,
                 dateTime = turnierBeginn, spielPlatz = spielplatz, spielTyp = spielTyp))
@@ -285,7 +456,10 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
     }
 
     private fun List<Mannschaft>.createSpiel(heim: Kuerzel, gast: Kuerzel, spielDuration: Duration, time: LocalDateTime, spielTyp: SpielTyp, gruppe: Int): Spiel {
-        return Spiel(heimMannschaft = this[heim.index], gastMannschaft = this[gast.index], halftimeDuration = spielDuration, dateTime = time, spielTyp = spielTyp, spielPlatz = spielplatz)
+        if (this[heim.index].id == this[gast.index].id) {
+            throw IllegalArgumentException("Heim und gast können nicht die selbe mannschaft sein")
+        }
+        return Spiel(heimMannschaft = this[heim.index], gastMannschaft = this[gast.index], halftimeDuration = spielDuration, dateTime = time, spielTyp = spielTyp, spielPlatz = spielplatz, gruppe = currentGroup)
 
     }
 
