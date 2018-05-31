@@ -3,13 +3,11 @@ package de.schreib.handball.handballtag.controller
 import de.schreib.handball.handballtag.SpielplanCreator.SpielplanCreatorService
 import de.schreib.handball.handballtag.entities.Jugend
 import de.schreib.handball.handballtag.entities.Spiel
-import de.schreib.handball.handballtag.entities.SpielTor
 import de.schreib.handball.handballtag.enums.JugendEnum
 import de.schreib.handball.handballtag.enums.JugendGender
 import de.schreib.handball.handballtag.exceptions.SpielNotFoundException
 import de.schreib.handball.handballtag.repositories.MannschaftRepository
 import de.schreib.handball.handballtag.repositories.SpielRepository
-import de.schreib.handball.handballtag.repositories.SpielTorRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.AuthorizationServiceException
 import org.springframework.security.access.annotation.Secured
@@ -23,7 +21,6 @@ import javax.transaction.Transactional
 class SpielController(
         @Autowired val mannschaftRepository: MannschaftRepository,
         @Autowired val spielRepository: SpielRepository,
-        @Autowired val spielTorRepository: SpielTorRepository,
         @Autowired val spielplanCreatorService: SpielplanCreatorService
 ) {
     @GetMapping("all")
@@ -89,52 +86,20 @@ class SpielController(
         spielRepository.save(spiel.copy(heimTore = ergebnis.toreHeim, gastTore = ergebnis.toreGast))
     }
 
-    @Secured(ROLE_KAMPFGERICHT)
-    @GetMapping("{spielId}/tor/{mannschaftId}")
-    fun tor(@PathVariable spielId: Long, @PathVariable mannschaftId: Long) {
-        val spiel = getSpielById(spielId)
-        if (!(spiel.heimMannschaft.id == mannschaftId || spiel.gastMannschaft.id == mannschaftId)) {
-            throw IllegalStateException("Die mannschaft mit der Id $mannschaftId spielt nicht im spiel mit der ID $spielId")
-        }
-        if (spiel.gastMannschaft.id == mannschaftId) {
-            val spielTor = SpielTor(mannschaft = spiel.gastMannschaft, time = spiel.currentDuration)
-            spielTorRepository.save(spielTor)
-            spielRepository.save(spiel.copy(gastTore = spiel.gastTore + 1, allGeworfeneTore = spiel.allGeworfeneTore.plus(spielTor)))
-        } else if (spiel.heimMannschaft.id == mannschaftId) {
-            val spielTor = SpielTor(mannschaft = spiel.heimMannschaft, time = spiel.currentDuration)
-            spielTorRepository.save(spielTor)
-            spielRepository.save(spiel.copy(gastTore = spiel.heimTore + 1, allGeworfeneTore = spiel.allGeworfeneTore.plus(spielTor)))
-        }
-    }
-
-    @GetMapping("test")
-    fun test(): Jugend {
-        return Jugend(JugendGender.WEIBLICH, JugendEnum.EJUGEND)
-    }
-
-    @Secured(ROLE_SPIELLEITER)
-    @PostMapping("test")
-    fun testPost(@RequestBody jugend: Jugend) {
-        println(jugend)
-        //return SpielCreatorInfo(Jugend(JugendGender.WEIBLICH, JugendEnum.EJUGEND), Duration.ofMinutes(15), Duration.ofMinutes(5), LocalDateTime.now())
-    }
-
     @Transactional
     @Secured(ROLE_KAMPFGERICHT)
     @PostMapping("createspielplan")
     fun createSpielplanForJugend(@RequestBody spielCreatorInfo: SpielCreatorInfo) {
-        val allMannschaft = mannschaftRepository.findAllByJugend(spielCreatorInfo.jugend)
-        spielRepository.deleteAllByHeimMannschaftInOrGastMannschaftIn(allMannschaft, allMannschaft)
-        spielplanCreatorService.createSpielplan(spielCreatorInfo.jugend, spielCreatorInfo.spielDuration,
-                spielCreatorInfo.pauseDuration, spielCreatorInfo.turnierBeginn, spielCreatorInfo.spielPlatz, spielCreatorInfo.sechsMannschaftenGruppe)
+        spielplanCreatorService.createSpielplan(spielCreatorInfo.jugend, Duration.ofMinutes(spielCreatorInfo.spielDuration),
+                Duration.ofMinutes(spielCreatorInfo.pauseDuration), spielCreatorInfo.turnierBeginn, spielCreatorInfo.spielPlatz, spielCreatorInfo.sechsMannschaftenGruppe)
     }
 
 }
 
 data class SpielCreatorInfo(
         val jugend: Jugend,
-        val spielDuration: Duration,
-        val pauseDuration: Duration,
+        val spielDuration: Long,
+        val pauseDuration: Long,
         val turnierBeginn: LocalDateTime,
         val sechsMannschaftenGruppe: Boolean,
         val spielPlatz: Int

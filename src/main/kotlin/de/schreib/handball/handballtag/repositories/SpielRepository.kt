@@ -2,7 +2,6 @@ package de.schreib.handball.handballtag.repositories
 
 import de.schreib.handball.handballtag.entities.Mannschaft
 import de.schreib.handball.handballtag.entities.Spiel
-import de.schreib.handball.handballtag.entities.SpielTor
 import org.intellij.lang.annotations.Language
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
@@ -16,5 +15,3 @@ interface SpielRepository : JpaRepository<Spiel, Long> {
     fun deleteAllByHeimMannschaftInOrGastMannschaftIn(mannschaftHeim: Collection<Mannschaft>, mannschaftGast: Collection<Mannschaft>)
 
 }
-
-interface SpielTorRepository : JpaRepository<SpielTor, Long>

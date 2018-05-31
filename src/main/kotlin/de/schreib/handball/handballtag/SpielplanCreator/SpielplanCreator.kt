@@ -1,12 +1,10 @@
 package de.schreib.handball.handballtag.SpielplanCreator
 
-import de.schreib.handball.handballtag.entities.Jugend
-import de.schreib.handball.handballtag.entities.Mannschaft
-import de.schreib.handball.handballtag.entities.Spiel
-import de.schreib.handball.handballtag.entities.SpielTyp
+import de.schreib.handball.handballtag.entities.*
 import de.schreib.handball.handballtag.exceptions.NotEnoughMannschaftenException
 import de.schreib.handball.handballtag.repositories.MannschaftRepository
 import de.schreib.handball.handballtag.repositories.SpielRepository
+import de.schreib.handball.handballtag.repositories.VereinRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,7 +15,8 @@ import java.util.*
 
 
 @Service
-class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRepository, @Autowired val spielRepository: SpielRepository) {
+class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRepository, @Autowired val spielRepository: SpielRepository,
+                              @Autowired val vereinRepository: VereinRepository) {
     private val log: Logger = LoggerFactory.getLogger(this::class.java)
 
     private lateinit var spielDuration: Duration
@@ -26,19 +25,41 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
     private lateinit var allJugendMannschaft: List<Mannschaft>
     private val spielplanList: MutableList<Spiel> = mutableListOf()
     private var currentGroup = 1
+    // Abwechselnd gruppe 1 und 2 muss aktiviert werden wenn man einen spielplan für 2 gruppen erstellen möchte
+    private var alternateGroup = false
     private var spielplatz: Int = -1
+    private val platzhalterVerein = loadPlatzhalter()
+
+    private fun loadPlatzhalter(): Verein {
+        val platzhalter: Verein? = vereinRepository.findByName("placeholder")
+        return if (platzhalter == null) {
+            val platzhalterVerein = Verein(name = "placeholder")
+            vereinRepository.save(platzhalterVerein)
+            platzhalterVerein
+        } else {
+            platzhalter
+        }
+    }
+
 
     // sechsMannschaftenGruppe entscheidung ob man den spielplasn mit gruppen erstellt oder nicht
-    public fun createSpielplan(jugend: Jugend, spielDuration: Duration, pauseDuration: Duration, turnierBeginn: LocalDateTime, spielplatz: Int, sechsMannschaftenGruppe: Boolean = false) {
+    fun createSpielplan(jugend: Jugend, spielDuration: Duration, pauseDuration: Duration, turnierBeginn: LocalDateTime, spielplatz: Int, sechsMannschaftenGruppe: Boolean = false) {
         allJugendMannschaft = mannschaftRepository.findAllByJugend(jugend)
+        // Alte Spiele löschen damit neuer Spielplan erzteugt werden kann
+        spielRepository.deleteAllByHeimMannschaftInOrGastMannschaftIn(allJugendMannschaft, allJugendMannschaft)
+        // NICHT deleteAllByVerein benutzen, da wir nur die Mannschaften löschen wollen, die in der Jugend spielen für
+        // die wir einen Spielplan erstellen
+        mannschaftRepository.deleteAll(allJugendMannschaft.filter { it.verein.name == platzhalterVerein.name })
+        allJugendMannschaft = allJugendMannschaft.filter { it.verein.name !=  platzhalterVerein.name}
+
 
         this.pauseDuration = pauseDuration
         this.spielDuration = spielDuration
         this.turnierBeginn = turnierBeginn
 
         currentGroup = 1
+        alternateGroup = false
         this.spielplatz = spielplatz
-        spielplanList.clear()
 
         when (allJugendMannschaft.size) {
             1 -> {
@@ -57,7 +78,9 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
             else -> log.error("Es dürfen höchstens 10 Mannschaften für einen Spielplan übergeben werden!")
         }
 
+        // TODO validierung dass der Platz auf dem die Spiele stattfinden zu jedem Zeitpunkt frei ist
         spielRepository.saveAll(spielplanList)
+        spielplanList.clear()
     }
 
     private fun createSpielplan10Mannschaften(allJugendMannschaft: List<Mannschaft>) {
@@ -73,7 +96,43 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
     }
 
     private fun createSpielplan7Mannschaften(allJugendMannschaft: List<Mannschaft>) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val ersterGruppeA = mannschaft("1. Gruppe A")
+        val zweiterGruppeA = mannschaft("2. Gruppe A")
+        val dritterGruppeA = mannschaft("3. Gruppe A")
+        val vierterGruppeA = mannschaft("4. Gruppe A")
+        val ersterGruppeB = mannschaft("1. Gruppe B")
+        val zweiterGruppeB = mannschaft("2. Gruppe B")
+        val dritterGruppeB = mannschaft("3. Gruppe B")
+        val verliererErstesHalbfinale = mannschaft("Verlierer 1. Halbfinale")
+        val verliererZweitesHalbfinale = mannschaft("Verlierer 2. Halbfinale")
+        val siegerErstesHalbfinale = mannschaft("Sieger 1. Halbfinale")
+        val siegerZweitesHalbfinale = mannschaft("Sieger 2. Halbfinale")
+
+        // Gruppenphase
+        alternateGroup = true
+        spiel(Kuerzel.A, Kuerzel.B)
+        spiel(Kuerzel.E, Kuerzel.F)
+        spiel(Kuerzel.C, Kuerzel.D)
+        spiel(Kuerzel.F, Kuerzel.G)
+        spiel(Kuerzel.B, Kuerzel.C)
+        spiel(Kuerzel.G, Kuerzel.E)
+        spiel(Kuerzel.A, Kuerzel.C)
+        spiel(Kuerzel.F, Kuerzel.E)
+        spiel(Kuerzel.D, Kuerzel.A)
+        spiel(Kuerzel.G, Kuerzel.F)
+        spiel(Kuerzel.B, Kuerzel.D)
+        spiel(Kuerzel.E, Kuerzel.G)
+        alternateGroup = false
+        currentGroup = 1
+
+        // K.O phase
+        planSpiel(vierterGruppeA, dritterGruppeB, SpielTyp.ERSTES_SPIEL_UM_PLATZ_5)
+        planSpiel(ersterGruppeA, zweiterGruppeB, SpielTyp.ERSTES_HALBFINALE)
+        planSpiel(dritterGruppeB, dritterGruppeA, SpielTyp.ZWEITES_SPIEL_UM_PLATZ_5)
+        planSpiel(ersterGruppeB, zweiterGruppeA, SpielTyp.ZWEITES_HALBFINALE)
+        planSpiel(dritterGruppeA, vierterGruppeA, SpielTyp.DRITTES_SPIEL_UM_PLATZ_5)
+        planSpiel(verliererErstesHalbfinale, verliererZweitesHalbfinale, SpielTyp.SPIEL_UM_PLATZ_3)
+        planSpiel(siegerErstesHalbfinale, siegerZweitesHalbfinale, SpielTyp.FINALE)
     }
 
     private fun createSpielplan6Mannschaften(allJugendMannschaft: List<Mannschaft>, sechsMannschaftenGruppe: Boolean) {
@@ -189,22 +248,60 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
         spielplanList.addAll(doppelRundeList)
     }
 
+    /**
+     * Erstellt ein spiel Objekt und fügt es der spielplanList hinzu.
+     * dabei Wird der Spielbeginn aus turnNierbeginn genommen datraufhin wird Turnierbeginn um die Spiellänge + Pause zwischen Spielen
+     * erhöht wenn alternateGroup auf true gesetzt ist wird abwechselnd gruppe 1 und 2 bei den SPielen genommen.
+     * @param gast gast Mannschaft Kuerzel kommt aus blanco Spielplan
+     * @param heim heim Mannschaft Kuerzel kommt aus blanco Spielplan
+     *
+     */
     private fun spiel(heim: Kuerzel, gast: Kuerzel, spielTyp: SpielTyp = SpielTyp.GRUPPENSPIEL) {
-        if (currentGroup == 1) {
-            spielplanList.add(allJugendMannschaft.createSpiel(Kuerzel.A, Kuerzel.B, spielDuration, turnierBeginn, spielTyp))
+        spielplanList.add(allJugendMannschaft.createSpiel(heim, gast, spielDuration, turnierBeginn, spielTyp, currentGroup))
+        if (alternateGroup) {
+            if (currentGroup == 1) {
+                currentGroup = 2
+            } else {
+                currentGroup = 1
+            }
         }
+
         turnierBeginn = turnierBeginn.plus(spielDuration.plus(pauseDuration))
     }
 
-    private fun List<Mannschaft>.createSpiel(heim: Kuerzel, gast: Kuerzel, spielDuration: Duration, time: LocalDateTime, spielTyp: SpielTyp): Spiel {
+    /**
+     * Erzeugt ein spiel mit platzhalter mannschaften für spiele wo noch nicht bekannt ist, welche mannschaft dort spielt
+     * @param heim muss als verein den platzhalter Verein haben
+     * @param gast muss als verein den platzhalter Verein haben
+     */
+    private fun planSpiel(heim: Mannschaft, gast: Mannschaft, spielTyp: SpielTyp) {
+        if (heim.verein != platzhalterVerein || gast.verein != platzhalterVerein) {
+            throw IllegalArgumentException("Funktion planSpiel nur verwenden wenn man die Mannschaften nicht kennt die Spielen sollen!")
+        }
+        spielplanList.add(Spiel(heimMannschaft = heim, gastMannschaft = gast, halftimeDuration = spielDuration,
+                dateTime = turnierBeginn, spielPlatz = spielplatz, spielTyp = spielTyp))
+
+        turnierBeginn = turnierBeginn.plus(spielDuration.plus(pauseDuration))
+    }
+
+    private fun List<Mannschaft>.createSpiel(heim: Kuerzel, gast: Kuerzel, spielDuration: Duration, time: LocalDateTime, spielTyp: SpielTyp, gruppe: Int): Spiel {
         return Spiel(heimMannschaft = this[heim.index], gastMannschaft = this[gast.index], halftimeDuration = spielDuration, dateTime = time, spielTyp = spielTyp, spielPlatz = spielplatz)
 
+    }
+
+    /**
+     * Hilfsfunkltion um platzhaltermannschagft zu erzeugen
+     */
+    private fun mannschaft(name: String): Mannschaft {
+        val mannschaft = Mannschaft(name = name, verein = platzhalterVerein, jugend = allJugendMannschaft[0].jugend)
+        mannschaftRepository.save(mannschaft)
+        return mannschaft
     }
 
 }
 
 enum class Kuerzel(val index: Int) {
-    A(0), B(1), C(2), D(3), E(4), F(5)
+    A(0), B(1), C(2), D(3), E(4), F(5), G(6), H(7), I(8), J(9)
 }
 
 

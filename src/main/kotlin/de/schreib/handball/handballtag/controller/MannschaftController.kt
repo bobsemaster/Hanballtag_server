@@ -1,5 +1,6 @@
 package de.schreib.handball.handballtag.controller
 
+import de.schreib.handball.handballtag.entities.Jugend
 import de.schreib.handball.handballtag.entities.Mannschaft
 import de.schreib.handball.handballtag.exceptions.MannschaftNotFoundException
 import de.schreib.handball.handballtag.exceptions.VereinNotFoundException
@@ -39,6 +40,11 @@ class MannschaftController(
             throw VereinNotFoundException("Der Verein '${mannschaft.verein.name}' existiert nicht")
         }
         mannschaftRepository.save(mannschaft)
+    }
+
+    @GetMapping("jugend/all")
+    fun getAllJugend():List<Jugend>{
+        return mannschaftRepository.findAll().map{ it.jugend }.distinct()
     }
 
     @Transactional

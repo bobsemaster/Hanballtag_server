@@ -30,47 +30,33 @@ data class Spiel(
         val gastTore: Int = 0,
         val hasHalfTime: Boolean = false,
         val halftimeDuration: Duration,
-        val currentDuration: Duration = Duration.ZERO,
-        val isPaused: Boolean = false,
         val dateTime: LocalDateTime,
         val isKampfgerichtAnwesend: Boolean = false,
-        val isSchiedsrichterAnwesend:Boolean = false,
+        val isSchiedsrichterAnwesend: Boolean = false,
         val isHeimmannschaftAnwesend: Boolean = false,
-        val isGastMannschaftAnwesend:Boolean = false,
+        val isGastMannschaftAnwesend: Boolean = false,
         val spielPlatz: Int? = null,
-        //@Enumerated(EnumType.STRING)
-        val spielTyp:SpielTyp = SpielTyp.NONE,
-
-        @OneToMany(
-                mappedBy = "mannschaft",
-                cascade = [CascadeType.ALL],
-                orphanRemoval = true,
-                fetch = FetchType.EAGER
-
-        )
-        val allGeworfeneTore: List<SpielTor> = emptyList()
+        @Enumerated(EnumType.STRING)
+        val spielTyp: SpielTyp = SpielTyp.NONE,
+        val gruppe: Int = 0
 )
 
 
 enum class SpielTyp {
-        // Für die Initialisierung des SPiels bei tests
-        NONE,
-        GRUPPENSPIEL,
-        KO_PHASE
+    // Für die Initialisierung des SPiels bei tests
+    NONE,
+    GRUPPENSPIEL,
+    ERSTES_HALBFINALE,
+    ZWEITES_HALBFINALE,
+    SPIEL_UM_PLATZ_3,
+    SPIEL_UM_PLATZ_5,
+    ERSTES_SPIEL_UM_PLATZ_5,
+    ZWEITES_SPIEL_UM_PLATZ_5,
+    DRITTES_SPIEL_UM_PLATZ_5,
+    SPIEL_UM_PLATZ_7,
+    ERSTES_SPIEL_UM_PLATZ_7,
+    ZWEITES_SPIEL_UM_PLATZ_7,
+    DRITTES_SPIEL_UM_PLATZ_7,
+    SPIEL_UM_PLATZ_9,
+    FINALE
 }
-
-/**
- * Ein SpielTor spiegelt ein Tor das In einem Spiel gefallen ist wieder, dazu wird die Mannschaft, die das Spiel geworfen Hat
- * gespeichert und nach wie vielen Minuten das Tor gefallen ist.
- */
-@Entity
-data class SpielTor(
-        // Lass hibernate die Id generieren val damit user die id nicht verändern kann
-        @Id
-        @GeneratedValue
-        val id: Long = 0,
-        @ManyToOne
-        @JoinColumn(name = "spiel_id")
-        val mannschaft: Mannschaft,
-        val time: Duration
-)
