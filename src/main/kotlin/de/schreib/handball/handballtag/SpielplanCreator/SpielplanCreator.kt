@@ -1,6 +1,10 @@
 package de.schreib.handball.handballtag.SpielplanCreator
 
-import de.schreib.handball.handballtag.entities.*
+import de.schreib.handball.handballtag.entities.Jugend
+import de.schreib.handball.handballtag.entities.Mannschaft
+import de.schreib.handball.handballtag.entities.Spiel
+import de.schreib.handball.handballtag.entities.SpielTyp
+import de.schreib.handball.handballtag.entities.Verein
 import de.schreib.handball.handballtag.exceptions.NotEnoughMannschaftenException
 import de.schreib.handball.handballtag.repositories.MannschaftRepository
 import de.schreib.handball.handballtag.repositories.SpielRepository
@@ -13,6 +17,7 @@ import java.time.Duration
 import java.time.LocalDateTime
 import java.util.*
 
+const val PLATZHALTER_VEREIN_NAME = "placeholder"
 
 @Service
 class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRepository, @Autowired val spielRepository: SpielRepository,
@@ -31,9 +36,9 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
     private val platzhalterVerein = loadPlatzhalter()
 
     private fun loadPlatzhalter(): Verein {
-        val platzhalter: Verein? = vereinRepository.findByName("placeholder")
+        val platzhalter: Verein? = vereinRepository.findByName(PLATZHALTER_VEREIN_NAME)
         return if (platzhalter == null) {
-            val platzhalterVerein = Verein(name = "placeholder")
+            val platzhalterVerein = Verein(name = PLATZHALTER_VEREIN_NAME)
             vereinRepository.save(platzhalterVerein)
             platzhalterVerein
         } else {
@@ -351,18 +356,6 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
         spiel(Kuerzel.B, Kuerzel.A)
         spiel(Kuerzel.A, Kuerzel.C)
         spiel(Kuerzel.C, Kuerzel.B)
-
-        // Doppelrunde! Jedes Spiel wird einfach wiederholt.
-        // Wir brauchen eine zweite liste um über spielplanList iterieren zu können und die Spiele später der spielplanliste hinzuzufügen
-        // Wenn man über die spielplanList iteriert und versucht dieser ein Element hinzuzufügen
-        // wird eine ConcurrentModificationException geworfen
-        val doppelRundeList = mutableListOf<Spiel>()
-        spielplanList.forEach {
-            val spielCopy = it.copy(dateTime = turnierBeginn, heimMannschaft = it.gastMannschaft, gastMannschaft = it.heimMannschaft)
-            doppelRundeList.add(spielCopy)
-            turnierBeginn = turnierBeginn.plus(spielDuration.plus(pauseDuration))
-        }
-        spielplanList.addAll(doppelRundeList)
     }
 
     private fun createSpielplan2Mannschaften(allJugendMannschaft: List<Mannschaft>) {
@@ -398,19 +391,6 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
         spiel(Kuerzel.D, Kuerzel.C)
         // B gegen A
         spiel(Kuerzel.B, Kuerzel.A)
-
-
-        // Doppelrunde! Jedes Spiel wird einfach wiederholt.
-        // Wir brauchen eine zweite liste um über spielplanList iterieren zu können und die Spiele später der spielplanliste hinzuzufügen
-        // Wenn man über die spielplanList iteriert und versucht dieser ein Element hinzuzufügen
-        // wird eine ConcurrentModificationException geworfen
-        val doppelRundeList = mutableListOf<Spiel>()
-        spielplanList.forEach {
-            val spielCopy = it.copy(dateTime = turnierBeginn, heimMannschaft = it.gastMannschaft, gastMannschaft = it.heimMannschaft)
-            doppelRundeList.add(spielCopy)
-            turnierBeginn = turnierBeginn.plus(spielDuration.plus(pauseDuration))
-        }
-        spielplanList.addAll(doppelRundeList)
     }
 
     /**

@@ -15,7 +15,7 @@ buildscript {
 
 plugins {
     id "org.jetbrains.kotlin.plugin.jpa" version "1.2.41"
-    id 'info.solidsoft.pitest' version '1.3.0'
+    id "io.gitlab.arturbosch.detekt" version "1.0.0.RC6"
 }
 
 apply plugin: 'idea'
@@ -24,6 +24,7 @@ apply plugin: 'kotlin-jpa'
 apply plugin: 'kotlin-spring'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
+apply plugin: "io.gitlab.arturbosch.detekt"
 
 group = 'de.schreib.handball'
 version = '0.0.1-SNAPSHOT'
@@ -79,6 +80,15 @@ task dockerRest(type: Copy) {
 
     into "docker/rest/deploy/"
     rename '.*', 'handballtag-service.jar'
+}
+
+detekt {
+    version = "1.0.0.RC6"
+    profile("main") {
+        input = "$projectDir/src/main/kotlin"
+        config = "$projectDir/detekt.yml"
+        filters = ".*test.*,.*/resources/.*,.*/tmp/.*"
+    }
 }
 
 def DEV_GROUP = 'Dev Environment'

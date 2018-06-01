@@ -1,5 +1,6 @@
 package de.schreib.handball.handballtag.controller
 
+import de.schreib.handball.handballtag.SpielplanCreator.PLATZHALTER_VEREIN_NAME
 import de.schreib.handball.handballtag.entities.Jugend
 import de.schreib.handball.handballtag.entities.Mannschaft
 import de.schreib.handball.handballtag.exceptions.MannschaftNotFoundException
@@ -9,7 +10,13 @@ import de.schreib.handball.handballtag.repositories.SpielRepository
 import de.schreib.handball.handballtag.repositories.VereinRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.annotation.Secured
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 import javax.transaction.Transactional
 
 @RestController
@@ -21,7 +28,7 @@ class MannschaftController(
 ) {
 
     @GetMapping("all")
-    fun getAllMannschaft(): List<Mannschaft> = mannschaftRepository.findAll()
+    fun getAllMannschaft(): List<Mannschaft> = mannschaftRepository.findAll().filter { it.verein.name != PLATZHALTER_VEREIN_NAME }
 
     @GetMapping("{id}")
     fun findMannschaftById(@PathVariable id: Long): Mannschaft {
@@ -43,8 +50,8 @@ class MannschaftController(
     }
 
     @GetMapping("jugend/all")
-    fun getAllJugend():List<Jugend>{
-        return mannschaftRepository.findAll().map{ it.jugend }.distinct()
+    fun getAllJugend(): List<Jugend> {
+        return mannschaftRepository.findAll().map { it.jugend }.distinct()
     }
 
     @Transactional
@@ -52,7 +59,7 @@ class MannschaftController(
     @DeleteMapping("{id}")
     fun deleteMannschaftWithId(@PathVariable id: Long) {
         val mannschaftOptional = mannschaftRepository.findById(id)
-        if(mannschaftOptional.isPresent) {
+        if (mannschaftOptional.isPresent) {
             val mannschaft = mannschaftOptional.get()
             // Lösche alle spiele in der diese Mannschaft mitspielt
             spielRepository.deleteAllByHeimMannschaftInOrGastMannschaftIn(listOf(mannschaft), listOf(mannschaft))

@@ -1,8 +1,14 @@
 package de.schreib.handball.handballtag.repositories
 
-import de.schreib.handball.handballtag.entities.*
+import de.schreib.handball.handballtag.entities.Jugend
+import de.schreib.handball.handballtag.entities.Mannschaft
+import de.schreib.handball.handballtag.entities.Spiel
+import de.schreib.handball.handballtag.entities.Verein
 import de.schreib.handball.handballtag.enums.JugendEnum
 import de.schreib.handball.handballtag.enums.JugendGender
+import org.hamcrest.CoreMatchers.`is`
+import org.junit.After
+import org.junit.Assert.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -10,9 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.junit4.SpringRunner
 import java.time.LocalDateTime
-import org.junit.Assert.assertThat
-import org.hamcrest.CoreMatchers.`is`
-import org.junit.After
 
 @RunWith(SpringRunner::class)
 @SpringBootTest

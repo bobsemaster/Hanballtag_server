@@ -8,14 +8,18 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 import javax.annotation.PostConstruct
-import javax.persistence.*
-
+import javax.persistence.Entity
+import javax.persistence.GeneratedValue
+import javax.persistence.Id
+import javax.persistence.JoinColumn
+import javax.persistence.ManyToOne
+import javax.persistence.Transient
 
 /**
  * Diese Klasse bildet eine Mannschaft ab und speichert den Namen der Mannschaft den Zugehörigen verein, die Tabelle
  * in der Diese Mannschaft zu finden ist, das Zorverhältnis nud PunkteVerhältnis der Mannschaft und die jugend ab.
- * Die Spiele der Mannschaft werden bei erstellen Der klasse aus dem SPiel repository nachgeladen. Die Spiele weden auch nicht
- * in der Datenbank Tabelle zur Mannschaft abgespeichert.
+ * Die Spiele der Mannschaft werden bei erstellen Der klasse aus dem SPiel repository nachgeladen. Die Spiele weden
+ *  auch nicht in der Datenbank Tabelle zur Mannschaft abgespeichert.
  */
 @Entity
 data class Mannschaft(
@@ -44,7 +48,7 @@ data class Mannschaft(
     }
 
     @JsonIgnore
-    fun getAllSpiel():List<Spiel>{
+    fun getAllSpiel(): List<Spiel> {
         return spielRepository.findAllByMannschaft(this)
     }
 

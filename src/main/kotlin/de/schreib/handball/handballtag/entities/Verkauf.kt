@@ -1,6 +1,10 @@
 package de.schreib.handball.handballtag.entities
 
-import javax.persistence.*
+import javax.persistence.Entity
+import javax.persistence.FetchType
+import javax.persistence.GeneratedValue
+import javax.persistence.Id
+import javax.persistence.OneToMany
 
 @Entity
 data class Verkauf(

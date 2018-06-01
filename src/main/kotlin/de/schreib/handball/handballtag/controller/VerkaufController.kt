@@ -6,7 +6,12 @@ import de.schreib.handball.handballtag.repositories.VerkaufArtikelRepository
 import de.schreib.handball.handballtag.repositories.VerkaufRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.annotation.Secured
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 import javax.annotation.PostConstruct
 import javax.transaction.Transactional
 

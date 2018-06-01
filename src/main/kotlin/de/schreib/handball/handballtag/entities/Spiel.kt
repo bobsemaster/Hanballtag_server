@@ -2,7 +2,12 @@ package de.schreib.handball.handballtag.entities
 
 import java.time.Duration
 import java.time.LocalDateTime
-import javax.persistence.*
+import javax.persistence.Entity
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
+import javax.persistence.GeneratedValue
+import javax.persistence.Id
+import javax.persistence.ManyToOne
 
 
 /**
