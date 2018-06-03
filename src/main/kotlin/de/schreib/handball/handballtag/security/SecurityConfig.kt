@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.config.annotation.web.builders.WebSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.core.userdetails.User
@@ -14,6 +15,8 @@ import org.springframework.security.web.authentication.Http403ForbiddenEntryPoin
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository
+import org.springframework.security.web.firewall.HttpFirewall
+import org.springframework.security.web.firewall.StrictHttpFirewall
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
@@ -34,6 +37,7 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
             throw NullPointerException("Http was null")
         }
         http.authorizeRequests()
+                .antMatchers("/ws/**").permitAll()
                 //Man muss für jeden Request authentifiziert sein
                 .anyRequest().authenticated()
                 .and()
@@ -51,7 +55,7 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
                 .tokenValiditySeconds(30 * 24 * 60 * 60)
                 .and().exceptionHandling().authenticationEntryPoint(Http403ForbiddenEntryPoint())
                 .and().logout().permitAll()
-                .and().cors().and()
+                .and().cors().disable()
                 .csrf().disable()
     }
 
@@ -70,6 +74,8 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
         return source
     }
 
+    //Braucht table der nicht automatisch erzeugt wird
+    // create table persistent_logins (username varchar(64) not null, series varchar(64) primary key,token varchar(64) not null, last_used timestamp not null)
     @Bean
     fun persistentTokenRepository(): PersistentTokenRepository {
         val jdbcTokenRepositoryImpl = JdbcTokenRepositoryImpl()
@@ -100,6 +106,7 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
                 .build()
         return InMemoryUserDetailsManager(basicUser, kampfgerichtUser, spielleiterUser)
     }
+
 
 
 }

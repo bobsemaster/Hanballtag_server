@@ -6,6 +6,7 @@ import de.schreib.handball.handballtag.exceptions.VereinAlreadyExistException
 import de.schreib.handball.handballtag.exceptions.VereinNotFoundException
 import de.schreib.handball.handballtag.repositories.MannschaftRepository
 import de.schreib.handball.handballtag.repositories.VereinRepository
+import de.schreib.handball.handballtag.spielplan.creator.PLATZHALTER_VEREIN_NAME
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.annotation.Secured
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -31,7 +32,7 @@ class VereinController(
 ) {
 
     @GetMapping("all")
-    fun getAllVerein(): List<Verein> = vereinRepository.findAll()
+    fun getAllVerein(): List<Verein> = vereinRepository.findAll().filter { it.name == PLATZHALTER_VEREIN_NAME }
 
     @GetMapping("{id}/mannschaften")
     fun getAllVereinMannschaften(@PathVariable id: Long): List<Mannschaft> {

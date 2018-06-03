@@ -72,4 +72,4 @@ deploy-dev:
     # Das hier ist für die Anzeige in https://gitlab.schreib.io/salatkind/server/environments
     # damit man alle Deploys auf die Umgebung sieht und per Click reployen kann
     name: dev
-    url: https://hanball-api.schreib.io/
+    url: https://handball-api.schreib.io/
