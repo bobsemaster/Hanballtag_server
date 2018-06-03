@@ -102,7 +102,7 @@ task buildDatabase(type: Exec) {
 task databaseUp(type: Exec) {
     group=DEV_GROUP
     workingDir 'docker/postgres'
-    commandLine 'docker', 'run', '-d', '-p', '5432:5432', '-v',
+    commandLine 'docker', 'run', '-d', '-p', '32423:5432', '-v',
             '/home/robert/postgres/handballtag/data:/var/lib/postgresql/data',
             '--name=handballtag-postgres', '--rm=true', 'handballtag-postgres'
 }

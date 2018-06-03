@@ -61,16 +61,16 @@ docker-container:
     # Docker Container in registry pushen
     - docker-compose push
 
-#deploy-dev:
-#  stage: deploy
-#  only:
-#    - master
-#  when: manual
-#  script:
-#    - rancher-compose -f docker-compose.rancher.yml -r rancher-compose.yml -p salatkind pull
-#    - rancher-compose -f docker-compose.rancher.yml -r rancher-compose.yml -p salatkind up -d --force-upgrade --pull --confirm-upgrade
-#  environment:
-#    # Das hier ist für die Anzeige in https://gitlab.emundo.eu/salatkind/server/environments
-#    # damit man alle Deploys auf die Umgebung sieht und per Click reployen kann
-#    name: dev
-#    url: https://nginx-salatkind.rsdyn.emundo.eu/
+deploy-dev:
+  stage: deploy
+  only:
+    - master
+  when: manual
+  script:
+    - rancher-compose -f docker-compose.rancher.yml -r rancher-compose.yml -p server pull
+    - rancher-compose -f docker-compose.rancher.yml -r rancher-compose.yml -p server up -d --force-upgrade --pull --confirm-upgrade
+  environment:
+    # Das hier ist für die Anzeige in https://gitlab.schreib.io/salatkind/server/environments
+    # damit man alle Deploys auf die Umgebung sieht und per Click reployen kann
+    name: dev
+    url: https://hanball-api.schreib.io/

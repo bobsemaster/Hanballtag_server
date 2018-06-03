@@ -26,6 +26,6 @@ services:
     tty: true
     stdin_open: true
     ports:
-      - 5432:5432
+      - 32423:5432
     environment:
       TZ: CET

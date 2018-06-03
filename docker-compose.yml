@@ -33,11 +33,11 @@ services:
     build: ./docker/postgres
     hostname: postgres
     ports:
-      - "5432:5432"
+      - "32423:5432"
     environment:
       TZ: CET
     expose:
-      - 5432
+      - 32423
     networks:
       handballtag-backend:
         aliases:
