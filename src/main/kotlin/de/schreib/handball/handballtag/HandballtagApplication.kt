@@ -4,6 +4,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
 import org.springframework.web.filter.CommonsRequestLoggingFilter
+import org.springframework.security.web.firewall.StrictHttpFirewall
+import org.springframework.security.web.firewall.HttpFirewall
+
+
 
 
 
@@ -21,6 +25,8 @@ class HandballtagApplication{
         loggingFilter.setBeforeMessagePrefix("<")
         return loggingFilter
     }
+
+
 }
 
 fun main(args: Array<String>) {

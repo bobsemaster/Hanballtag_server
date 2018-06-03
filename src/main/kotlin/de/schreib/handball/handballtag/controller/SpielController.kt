@@ -20,7 +20,7 @@ import java.time.LocalDateTime
 import javax.transaction.Transactional
 
 @RestController
-@RequestMapping("spiel/")
+@RequestMapping("/spiel/")
 class SpielController(
         @Autowired val mannschaftRepository: MannschaftRepository,
         @Autowired val spielRepository: SpielRepository,

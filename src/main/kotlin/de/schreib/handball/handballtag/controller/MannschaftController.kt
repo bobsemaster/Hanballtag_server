@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController
 import javax.transaction.Transactional
 
 @RestController
-@RequestMapping("mannschaft/")
+@RequestMapping("/mannschaft/")
 class MannschaftController(
         @Autowired val mannschaftRepository: MannschaftRepository,
         @Autowired val vereinRepository: VereinRepository,

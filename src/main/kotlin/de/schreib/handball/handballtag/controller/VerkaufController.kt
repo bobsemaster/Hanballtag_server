@@ -16,7 +16,7 @@ import javax.annotation.PostConstruct
 import javax.transaction.Transactional
 
 @RestController
-@RequestMapping("verkauf/")
+@RequestMapping("/verkauf/")
 class VerkaufController(
         @Autowired val verkaufRepository: VerkaufRepository,
         @Autowired val verkaufArtikelRepository: VerkaufArtikelRepository

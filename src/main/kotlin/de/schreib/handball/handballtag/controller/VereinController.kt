@@ -24,7 +24,7 @@ const val ROLE_KAMPFGERICHT = "ROLE_KAMPFGERICHT"
 
 
 @RestController
-@RequestMapping("verein/")
+@RequestMapping("/verein/")
 class VereinController(
         @Autowired val vereinRepository: VereinRepository,
         @Autowired val mannschaftRepository: MannschaftRepository

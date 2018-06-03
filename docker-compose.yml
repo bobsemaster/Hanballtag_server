@@ -1,10 +1,5 @@
 version: '3.2'
 
-networks:
-  handballtag-cluster:
-    driver: bridge
-  handballtag-backend:
-    driver: bridge
 
 
 services:
@@ -20,13 +15,6 @@ services:
       - 8081
     depends_on:
       - postgres
-    networks:
-      handballtag-cluster:
-        aliases:
-          - server
-      handballtag-backend:
-        aliases:
-          - server
 
   postgres:
       image: registry.schreib.io/tsv-forstenried/handballtag/server/postgres
@@ -41,10 +29,6 @@ services:
         POSTGRES_PASSWORD: JIHoiuo3i2rkbfd
       expose:
         - 35432
-      networks:
-        handballtag-backend:
-          aliases:
-            - postgres
 
 volumes:
     spirit2-dbdata:
