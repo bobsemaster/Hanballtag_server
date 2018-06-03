@@ -29,16 +29,22 @@ services:
           - server
 
   postgres:
-    image: registry.schreib.io/tsv-forstenried/handballtag/server/postgres
-    build: ./docker/postgres
-    hostname: postgres
-    ports:
-      - "32423:5432"
-    environment:
-      TZ: CET
-    expose:
-      - 32423
-    networks:
-      handballtag-backend:
-        aliases:
-          - postgres
+      image: registry.schreib.io/tsv-forstenried/handballtag/server/postgres
+      build: ./docker/postgres
+      hostname: postgres
+      ports:
+        - "35432:5432"
+      environment:
+        TZ: CET
+        POSTGRES_DB: handballtag
+        POSTGRES_USER: handball
+        POSTGRES_PASSWORD: JIHoiuo3i2rkbfd
+      expose:
+        - 35432
+      networks:
+        handballtag-backend:
+          aliases:
+            - postgres
+
+volumes:
+    spirit2-dbdata:

@@ -26,6 +26,9 @@ services:
     tty: true
     stdin_open: true
     ports:
-      - 32423:5432
+      - 35423:5432
     environment:
       TZ: CET
+      POSTGRES_DB: handballtag
+      POSTGRES_USER: handball
+      POSTGRES_PASSWORD: JIHoiuo3i2rkbfd
