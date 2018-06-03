@@ -10,7 +10,7 @@ networks:
 services:
   server:
     image: registry.schreib.io/tsv-forstenried/handballtag/server/server
-    build: ./docker/server
+    build: ./docker/rest
     hostname: server
     ports:
       - "8080:8080"
@@ -22,20 +22,22 @@ services:
       - postgres
     networks:
       handballtag-cluster:
-        driver: bridge
+        aliases:
+          - server
       handballtag-backend:
-        driver: bridge
+        aliases:
+          - server
 
   postgres:
     image: registry.schreib.io/tsv-forstenried/handballtag/server/postgres
     hostname: postgres
-      ports:
-        - "5432:5432"
-      environment:
-        TZ: CET
-      expose:
-        - 5432
-      networks:
-        handballtag-backend:
-          aliases:
-            - postgres
+    ports:
+      - "5432:5432"
+    environment:
+      TZ: CET
+    expose:
+      - 5432
+    networks:
+      handballtag-backend:
+        aliases:
+          - postgres
