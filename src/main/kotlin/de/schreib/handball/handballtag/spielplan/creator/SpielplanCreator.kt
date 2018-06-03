@@ -1,4 +1,4 @@
-package de.schreib.handball.handballtag.SpielplanCreator
+package de.schreib.handball.handballtag.spielplan.creator
 
 import de.schreib.handball.handballtag.entities.Jugend
 import de.schreib.handball.handballtag.entities.Mannschaft

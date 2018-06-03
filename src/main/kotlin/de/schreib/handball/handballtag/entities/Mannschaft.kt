@@ -58,7 +58,7 @@ data class Mannschaft(
 class MannschaftSpielService {
     @Autowired
     private lateinit var spielRepository: SpielRepository
-    val log = LoggerFactory.getLogger(this::class.java)
+    val log = LoggerFactory.getLogger(this::class.java)!!
 
     @PostConstruct
     fun initializeVereinRepository() {

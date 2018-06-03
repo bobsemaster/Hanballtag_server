@@ -1,6 +1,6 @@
 package de.schreib.handball.handballtag.controller
 
-import de.schreib.handball.handballtag.SpielplanCreator.SpielplanCreatorService
+import de.schreib.handball.handballtag.spielplan.creator.SpielplanCreatorService
 import de.schreib.handball.handballtag.entities.Jugend
 import de.schreib.handball.handballtag.entities.Spiel
 import de.schreib.handball.handballtag.exceptions.SpielNotFoundException

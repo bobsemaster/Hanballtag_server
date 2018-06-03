@@ -1,0 +1,41 @@
+version: '3.2'
+
+networks:
+  handballtag-cluster:
+    driver: bridge
+  handballtag-backend:
+    driver: bridge
+
+
+services:
+  server:
+    image: registry.schreib.io/tsv-forstenried/handballtag/server/server
+    build: ./docker/server
+    hostname: server
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    expose:
+      - 8080
+      - 8081
+    depends_on:
+      - postgres
+    networks:
+      handballtag-cluster:
+        driver: bridge
+      handballtag-backend:
+        driver: bridge
+
+  postgres:
+    image: registry.schreib.io/tsv-forstenried/handballtag/server/postgres
+    hostname: postgres
+      ports:
+        - "5432:5432"
+      environment:
+        TZ: CET
+      expose:
+        - 5432
+      networks:
+        handballtag-backend:
+          aliases:
+            - postgres

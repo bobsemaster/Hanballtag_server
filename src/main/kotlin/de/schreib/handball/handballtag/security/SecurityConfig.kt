@@ -57,8 +57,8 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
 
     // https://stackoverflow.com/questions/40418441/spring-security-cors-filter
     @Bean
-    public fun corsConfigurationSource(): CorsConfigurationSource {
-        val corsConfiguration = CorsConfiguration();
+    fun corsConfigurationSource(): CorsConfigurationSource {
+        val corsConfiguration = CorsConfiguration()
         corsConfiguration.allowedOrigins = listOf("*")
         corsConfiguration.allowedMethods = listOf("HEAD", "GET", "POST", "PUT", "DELETE", "PATH")
         // setAllowCredentials(true) is important, otherwise:

@@ -44,7 +44,7 @@ class VereinMannschaftService {
     @Autowired
     private lateinit var mannschaftRepository: MannschaftRepository
 
-    val log = LoggerFactory.getLogger(this::class.java)
+    val log = LoggerFactory.getLogger(this::class.java)!!
 
     @PostConstruct
     fun initializeVereinRepository() {

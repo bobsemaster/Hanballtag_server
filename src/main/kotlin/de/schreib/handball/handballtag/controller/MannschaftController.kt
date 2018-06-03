@@ -1,6 +1,6 @@
 package de.schreib.handball.handballtag.controller
 
-import de.schreib.handball.handballtag.SpielplanCreator.PLATZHALTER_VEREIN_NAME
+import de.schreib.handball.handballtag.spielplan.creator.PLATZHALTER_VEREIN_NAME
 import de.schreib.handball.handballtag.entities.Jugend
 import de.schreib.handball.handballtag.entities.Mannschaft
 import de.schreib.handball.handballtag.exceptions.MannschaftNotFoundException

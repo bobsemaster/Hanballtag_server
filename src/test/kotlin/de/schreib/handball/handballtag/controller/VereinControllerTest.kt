@@ -14,11 +14,13 @@ import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.security.test.context.support.WithMockUser
+import org.springframework.test.annotation.Rollback
 import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 @SpringBootTest
 @WithMockUser(roles = [SPIELLEITER])
+@Rollback
 class VereinControllerTest {
 
 
@@ -26,7 +28,7 @@ class VereinControllerTest {
     lateinit var vereinController: VereinController
     @Autowired
     lateinit var vereinRepository: VereinRepository
-    val verein = Verein(allMannschaft = emptyList(), name = "testVerein")
+    val verein = Verein(name = "testVerein")
     var vereinId = -1L
 
     @Before
@@ -58,14 +60,14 @@ class VereinControllerTest {
 
     @Test
     fun `test ob neuer verein gespeichert wird`() {
-        val neuerVerein = Verein(allMannschaft = emptyList(), name = "testVerein_2")
+        val neuerVerein = Verein(name = "testVerein_2")
         vereinController.createNewVerein(neuerVerein)
         assertThat(vereinRepository.count(), `is`(2L))
     }
 
     @Test(expected = VereinAlreadyExistException::class)
     fun `test dass nur ein Verein mit gleichem namen existiert`() {
-        val neuerVerein = Verein(allMannschaft = emptyList(), name = "testVerein")
+        val neuerVerein = Verein(name = "testVerein")
         vereinController.createNewVerein(neuerVerein)
     }
 

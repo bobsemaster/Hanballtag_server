@@ -56,8 +56,10 @@ docker-container:
     # Docker Login, weil die Registry zugriffsbeschränkt ist.
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
 
-    - docker build docker/rest -t "$CI_REGISTRY_IMAGE/handballtag-server"
-    - docker push "$CI_REGISTRY_IMAGE/handballtag-server"
+    #Container bauen
+    - docker-compose build --pull
+    # Docker Container in registry pushen
+    - docker-compose push
 
 #deploy-dev:
 #  stage: deploy

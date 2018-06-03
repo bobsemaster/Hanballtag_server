@@ -31,7 +31,7 @@ class VereinController(
 ) {
 
     @GetMapping("all")
-    fun getAllVerein() = vereinRepository.findAll()
+    fun getAllVerein(): List<Verein> = vereinRepository.findAll()
 
     @GetMapping("{id}/mannschaften")
     fun getAllVereinMannschaften(@PathVariable id: Long): List<Mannschaft> {
