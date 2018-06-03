@@ -65,10 +65,9 @@ deploy-dev:
   stage: deploy
   only:
     - master
-  when: manual
   script:
-    - rancher-compose -f docker-compose.rancher.yml -r rancher-compose.yml -p server pull
-    - rancher-compose -f docker-compose.rancher.yml -r rancher-compose.yml -p server up -d --force-upgrade --pull --confirm-upgrade
+    - rancher-compose -f docker-compose.rancher.yml -r rancher-compose.yml -p handballtag pull
+    - rancher-compose -f docker-compose.rancher.yml -r rancher-compose.yml -p handballtag up -d --force-upgrade --pull --confirm-upgrade
   environment:
     # Das hier ist für die Anzeige in https://gitlab.schreib.io/salatkind/server/environments
     # damit man alle Deploys auf die Umgebung sieht und per Click reployen kann
