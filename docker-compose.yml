@@ -30,6 +30,7 @@ services:
 
   postgres:
     image: registry.schreib.io/tsv-forstenried/handballtag/server/postgres
+    build: ./docker/postgres
     hostname: postgres
     ports:
       - "5432:5432"
