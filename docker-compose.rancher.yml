@@ -21,11 +21,11 @@ services:
     labels:
       io.rancher.container.pull_image: always
       io.rancher.container.hostname_override: container_name
+    volumes:
+      - handballtag-dbdata:/var/lib/postgresql/data
     tty: true
     stdin_open: true
     ports:
       - 5432:5432
     environment:
       TZ: CET
-    expose:
-      - 5432

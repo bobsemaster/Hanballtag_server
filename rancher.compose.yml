@@ -1,0 +1,10 @@
+version: '2'
+
+services:
+  server:
+    scale: 1
+    retain_ip: true
+
+  postgres:
+    scale: 1
+    retain_ip: true
