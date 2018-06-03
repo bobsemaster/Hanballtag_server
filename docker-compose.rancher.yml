@@ -1,0 +1,31 @@
+version: '2'
+
+
+
+services:
+  server:
+    image: registry.schreib.io/tsv-forstenried/handballtag/server/server
+    hostname: server
+    labels:
+      io.rancher.container.pull_image: always
+      io.rancher.container.hostname_override: container_name
+    tty: true
+    stdin_open: true
+    depends_on:
+      - postgres
+
+
+  postgres:
+    image: registry.schreib.io/tsv-forstenried/handballtag/server/postgres
+    hostname: postgres
+    labels:
+      io.rancher.container.pull_image: always
+      io.rancher.container.hostname_override: container_name
+    tty: true
+    stdin_open: true
+    ports:
+      - 5432:5432
+    environment:
+      TZ: CET
+    expose:
+      - 5432
