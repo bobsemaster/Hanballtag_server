@@ -67,7 +67,7 @@ dependencies {
     compile('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')
 
     // Mail
-    compile('org.springframework.boot:spring-boot-starter-mail')
+    //compile('org.springframework.boot:spring-boot-starter-mail')
 
 
     testCompile('org.springframework.boot:spring-boot-starter-test')

@@ -1,4 +1,4 @@
-package de.schreib.handball.handballtag.mail
+/*package de.schreib.handball.handballtag.mail
 
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -11,7 +11,7 @@ import javax.mail.MessagingException
 
 @Service
 class MailService(@Autowired val mailSender: JavaMailSender) {
-    val sendMail = true
+    val sendMail = false
 
 
     val mailFrom: String = "handballtag@schreib.io"
@@ -38,7 +38,7 @@ class MailService(@Autowired val mailSender: JavaMailSender) {
 
         try {
             if (!sendMail) {
-                log.info("NOT SENDING Mail:\nSubject: {}\nto: {}:\nBody: {}", subject, receiver[0], body)
+                log.info("NOT SENDING Mail:\nSubject: {}\nto '{}':\nBody: {}", subject, receiver[0], body)
                 return
             }
             mailSender.send(mimeMessage)
@@ -48,4 +48,4 @@ class MailService(@Autowired val mailSender: JavaMailSender) {
             throw e
         }
     }
-}
+}*/
