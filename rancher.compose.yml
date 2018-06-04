@@ -2,9 +2,11 @@ version: '2'
 
 services:
   server:
-    scale: 1
-    retain_ip: true
+      retain_ip: true
+      scale: 1
+      start_on_create: true
 
-  postgres:
-    scale: 1
-    retain_ip: true
+ postgres:
+     retain_ip: true
+     scale: 1
+     start_on_create: true
