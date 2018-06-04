@@ -66,6 +66,9 @@ dependencies {
     // Serializer for java8 Date types
     compile('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')
 
+    // Mail
+    compile('org.springframework.boot:spring-boot-starter-mail')
+
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile('org.springframework.security:spring-security-test')
@@ -102,7 +105,7 @@ task buildDatabase(type: Exec) {
 task databaseUp(type: Exec) {
     group=DEV_GROUP
     workingDir 'docker/postgres'
-    commandLine 'docker', 'run', '-d', '-p', '32423:5432', '-v',
+    commandLine 'docker', 'run', '-d', '-p', '5432:5432', '-v',
             '/home/robert/postgres/handballtag/data:/var/lib/postgresql/data',
             '--name=handballtag-postgres', '--rm=true', 'handballtag-postgres'
 }
