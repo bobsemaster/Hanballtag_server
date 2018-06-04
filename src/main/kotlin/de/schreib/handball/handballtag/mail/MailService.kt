@@ -17,11 +17,6 @@ class MailService(@Autowired val mailSender: JavaMailSender) {
     val mailFrom: String = "handballtag@schreib.io"
     val log = LoggerFactory.getLogger(this::class.java)
 
-    @PostConstruct
-    fun postConstruct(){
-        sendEmail("Test", "Test", listOf("robert.schreib@gmx.de"))
-    }
-
     fun sendEmail(subject: String, body: String, allTo: List<String>, attachment: Attachment? = null, bcc: String? = null) {
         if (allTo.isEmpty()) {
             return
