@@ -1,13 +1,14 @@
 package de.schreib.handball.handballtag.controller
 
-import de.schreib.handball.handballtag.spielplan.creator.PLATZHALTER_VEREIN_NAME
 import de.schreib.handball.handballtag.entities.Jugend
 import de.schreib.handball.handballtag.entities.Mannschaft
+import de.schreib.handball.handballtag.entities.Spiel
 import de.schreib.handball.handballtag.exceptions.MannschaftNotFoundException
 import de.schreib.handball.handballtag.exceptions.VereinNotFoundException
 import de.schreib.handball.handballtag.repositories.MannschaftRepository
 import de.schreib.handball.handballtag.repositories.SpielRepository
 import de.schreib.handball.handballtag.repositories.VereinRepository
+import de.schreib.handball.handballtag.spielplan.creator.PLATZHALTER_VEREIN_NAME
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.annotation.Secured
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -29,6 +30,16 @@ class MannschaftController(
 
     @GetMapping("all")
     fun getAllMannschaft(): List<Mannschaft> = mannschaftRepository.findAll().filter { it.verein.name != PLATZHALTER_VEREIN_NAME }
+
+    @GetMapping("{id}/spiele")
+    fun getAllSpielToMannschaft(@PathVariable id: Long): List<Spiel> {
+        val mannschaftOptional = mannschaftRepository.findById(id)
+        if (mannschaftOptional.isPresent) {
+            return mannschaftOptional.get().getAllSpiel()
+        } else {
+            return emptyList()
+        }
+    }
 
     @GetMapping("{id}")
     fun findMannschaftById(@PathVariable id: Long): Mannschaft {
