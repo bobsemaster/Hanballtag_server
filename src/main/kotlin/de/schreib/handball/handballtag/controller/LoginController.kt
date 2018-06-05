@@ -18,7 +18,6 @@ class LoginController {
     fun getAuthenticatedUser(@AuthenticationPrincipal user:UserDetails?): UserDetails? {
         if(user == null) {
             log.error("User nicht angemeldet!")
-            throw IllegalStateException("User muss angemeldet sein!")
         }
         return user
     }
