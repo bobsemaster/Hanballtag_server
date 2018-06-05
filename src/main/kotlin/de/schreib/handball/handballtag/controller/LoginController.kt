@@ -1,5 +1,6 @@
 package de.schreib.handball.handballtag.controller
 
+import javassist.tools.web.BadHttpRequest
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.userdetails.UserDetails
@@ -17,6 +18,7 @@ class LoginController {
     fun getAuthenticatedUser(@AuthenticationPrincipal user:UserDetails?): UserDetails? {
         if(user == null) {
             log.error("User nicht angemeldet!")
+            throw IllegalStateException("User muss angemeldet sein!")
         }
         return user
     }
