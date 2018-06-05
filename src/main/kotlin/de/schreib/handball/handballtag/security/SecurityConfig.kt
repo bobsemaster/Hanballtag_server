@@ -55,7 +55,7 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
                 .tokenValiditySeconds(30 * 24 * 60 * 60)
                 .and().exceptionHandling().authenticationEntryPoint(Http403ForbiddenEntryPoint())
                 .and().logout().permitAll()
-                .and().cors().disable()
+                .and().cors().and()
                 .csrf().disable()
     }
 
