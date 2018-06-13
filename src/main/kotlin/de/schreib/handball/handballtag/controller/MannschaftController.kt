@@ -65,6 +65,19 @@ class MannschaftController(
         return mannschaftRepository.findAll().map { it.jugend }.distinct()
     }
 
+    @GetMapping("{id}/{hasFoto}")
+    @Secured(ROLE_KAMPFGERICHT)
+    fun setHasFoto(@PathVariable hasFoto: Boolean, @PathVariable id: Long): Mannschaft {
+        val mannschaftOptional = mannschaftRepository.findById(id)
+        if (mannschaftOptional.isPresent) {
+            val mannschaft = mannschaftOptional.get()
+            val mannschaftUpdate = mannschaft.copy(hasFoto = hasFoto)
+            mannschaftRepository.save(mannschaftUpdate)
+            return mannschaftUpdate
+        }
+        throw MannschaftNotFoundException("Mannschaft mit id $id konnte nicht gefunden werden")
+    }
+
     @Transactional
     @Secured(ROLE_SPIELLEITER)
     @DeleteMapping("{id}")
