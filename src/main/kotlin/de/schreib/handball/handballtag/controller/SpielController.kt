@@ -1,11 +1,11 @@
 package de.schreib.handball.handballtag.controller
 
-import de.schreib.handball.handballtag.spielplan.creator.SpielplanCreatorService
 import de.schreib.handball.handballtag.entities.Jugend
 import de.schreib.handball.handballtag.entities.Spiel
 import de.schreib.handball.handballtag.exceptions.SpielNotFoundException
 import de.schreib.handball.handballtag.repositories.MannschaftRepository
 import de.schreib.handball.handballtag.repositories.SpielRepository
+import de.schreib.handball.handballtag.spielplan.creator.SpielplanCreatorService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.AuthorizationServiceException
 import org.springframework.security.access.annotation.Secured
@@ -27,7 +27,7 @@ class SpielController(
         @Autowired val spielplanCreatorService: SpielplanCreatorService
 ) {
     @GetMapping("all")
-    fun getAllSpiel(): List<Spiel> = spielRepository.findAll()
+    fun getAllSpiel(): List<Spiel> = spielRepository.findAll().sortedBy { it.dateTime }
 
     @GetMapping("{id}")
     fun getSpielById(@PathVariable id: Long): Spiel {

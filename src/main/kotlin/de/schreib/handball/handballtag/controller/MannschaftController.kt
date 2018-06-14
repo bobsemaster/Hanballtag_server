@@ -29,13 +29,15 @@ class MannschaftController(
 ) {
 
     @GetMapping("all")
-    fun getAllMannschaft(): List<Mannschaft> = mannschaftRepository.findAll().filter { it.verein.name != PLATZHALTER_VEREIN_NAME }
+    fun getAllMannschaft(): List<Mannschaft> = mannschaftRepository.findAll()
+            .filter { it.verein.name != PLATZHALTER_VEREIN_NAME }
+            .sortedBy { it.name }
 
     @GetMapping("{id}/spiele")
     fun getAllSpielToMannschaft(@PathVariable id: Long): List<Spiel> {
         val mannschaftOptional = mannschaftRepository.findById(id)
         if (mannschaftOptional.isPresent) {
-            return mannschaftOptional.get().getAllSpiel()
+            return mannschaftOptional.get().getAllSpiel().sortedBy { it.dateTime }
         } else {
             return emptyList()
         }
@@ -62,7 +64,7 @@ class MannschaftController(
 
     @GetMapping("jugend/all")
     fun getAllJugend(): List<Jugend> {
-        return mannschaftRepository.findAll().map { it.jugend }.distinct()
+        return mannschaftRepository.findAll().map { it.jugend }.distinct().sortedBy { it.jahrgang }
     }
 
     @GetMapping("{id}/{hasFoto}")
