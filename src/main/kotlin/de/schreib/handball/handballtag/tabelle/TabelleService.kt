@@ -2,6 +2,7 @@ package de.schreib.handball.handballtag.tabelle
 
 import de.schreib.handball.handballtag.entities.Mannschaft
 import de.schreib.handball.handballtag.entities.Spiel
+import de.schreib.handball.handballtag.entities.SpielTyp
 import de.schreib.handball.handballtag.repositories.MannschaftRepository
 import de.schreib.handball.handballtag.repositories.SpielRepository
 import org.springframework.beans.factory.annotation.Autowired
@@ -12,10 +13,12 @@ class TabelleService(@Autowired val mannschaftRepository: MannschaftRepository,
                      @Autowired val spielRepository: SpielRepository) {
     fun processSpielergebnis(spiel: Spiel) {
         updateMannschaften(spiel)
-        calculateNewTabellenPlatz(spiel)
+        if (spiel.spielTyp == SpielTyp.GRUPPENSPIEL) {
+            calculateNewTabellenPlatzGruppenphase(spiel)
+        }
     }
 
-    private fun calculateNewTabellenPlatz(spiel: Spiel) {
+    private fun calculateNewTabellenPlatzGruppenphase(spiel: Spiel) {
         val mannschaften = mannschaftRepository.findAllByJugend(spiel.heimMannschaft.jugend)
         val sortedByTabellenPlatz = sortMannschaftenByTabellenPlatz(mannschaften)
         sortedByTabellenPlatz.forEachIndexed({ index, mannschaft ->
