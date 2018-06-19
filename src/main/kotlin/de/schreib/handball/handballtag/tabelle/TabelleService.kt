@@ -5,28 +5,112 @@ import de.schreib.handball.handballtag.entities.Spiel
 import de.schreib.handball.handballtag.entities.SpielTyp
 import de.schreib.handball.handballtag.repositories.MannschaftRepository
 import de.schreib.handball.handballtag.repositories.SpielRepository
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
 class TabelleService(@Autowired val mannschaftRepository: MannschaftRepository,
                      @Autowired val spielRepository: SpielRepository) {
+
+    val log = LoggerFactory.getLogger(this::class.java)
+
     fun processSpielergebnis(spiel: Spiel) {
         updateMannschaften(spiel)
-        if (spiel.spielTyp == SpielTyp.GRUPPENSPIEL) {
-            calculateNewTabellenPlatzGruppenphase(spiel)
+        when (spiel.spielTyp) {
+            SpielTyp.GRUPPENSPIEL -> calculateNewTabellenPlatzGruppenphase(spiel)
+            SpielTyp.ERSTES_HALBFINALE -> handleHalbfinale(spiel, SpielTyp.ERSTES_HALBFINALE)
+            SpielTyp.ZWEITES_HALBFINALE -> handleHalbfinale(spiel, SpielTyp.ZWEITES_HALBFINALE)
+            SpielTyp.SPIEL_UM_PLATZ_3 -> handleSpielUmPlatzDrei(spiel)
+            SpielTyp.SPIEL_UM_PLATZ_5 -> handleSpielUmPlatzFuenf(spiel)
+            SpielTyp.ERSTES_SPIEL_UM_PLATZ_5 -> TODO()
+            SpielTyp.ZWEITES_SPIEL_UM_PLATZ_5 -> TODO()
+            SpielTyp.DRITTES_SPIEL_UM_PLATZ_5 -> TODO()
+            SpielTyp.SPIEL_UM_PLATZ_7 -> handleSpielUmPlatzSieben(spiel)
+            SpielTyp.ERSTES_SPIEL_UM_PLATZ_7 -> TODO()
+            SpielTyp.ZWEITES_SPIEL_UM_PLATZ_7 -> TODO()
+            SpielTyp.DRITTES_SPIEL_UM_PLATZ_7 -> TODO()
+            SpielTyp.SPIEL_UM_PLATZ_9 -> handleSpielUmPlatzNeun(spiel)
+            SpielTyp.FINALE -> handleFinale(spiel)
+            SpielTyp.NONE -> TODO()
         }
 
         TODO("Nach gruppenphase platzhalter spiele ersetzen")
         TODO("K.O phase plätze berechnen")
     }
 
+    private fun handleFinale(spiel: Spiel) {
+        val ersterPlatz = spiel.sieger().copy(tabellenPlatz = 1)
+        val zweiterPlatz = spiel.verlierer().copy(tabellenPlatz = 2)
+        mannschaftRepository.saveAll(listOf(ersterPlatz, zweiterPlatz))
+    }
+
+    private fun handleSpielUmPlatzNeun(spiel: Spiel) {
+        val neunterPlatz = spiel.sieger().copy(tabellenPlatz = 9)
+        val zehnterPlatz = spiel.sieger().copy(tabellenPlatz = 10)
+        mannschaftRepository.saveAll(listOf(neunterPlatz, zehnterPlatz))
+    }
+
+    private fun handleSpielUmPlatzSieben(spiel: Spiel) {
+        val siebterPlatz = spiel.sieger().copy(tabellenPlatz = 7)
+        val achterPlatz = spiel.sieger().copy(tabellenPlatz = 8)
+        mannschaftRepository.saveAll(listOf(siebterPlatz, achterPlatz))
+    }
+
+    private fun handleSpielUmPlatzFuenf(spiel: Spiel) {
+        val fuenfterPlatz = spiel.sieger().copy(tabellenPlatz = 5)
+        val sechsterPlatz = spiel.verlierer().copy(tabellenPlatz = 6)
+        mannschaftRepository.saveAll(listOf(fuenfterPlatz, sechsterPlatz))
+    }
+
+    private fun handleSpielUmPlatzDrei(spiel: Spiel) {
+        val dritterPlatz = spiel.sieger().copy(tabellenPlatz = 3)
+        val vierterPlatz = spiel.verlierer().copy(tabellenPlatz = 4)
+        mannschaftRepository.saveAll(listOf(dritterPlatz, vierterPlatz))
+    }
+
+    @Throws(IllegalArgumentException::class)
+    private fun handleHalbfinale(spiel: Spiel, halbfinalTyp: SpielTyp) {
+        val allFinale = spielRepository.findAllBySpielTypAndJugend(SpielTyp.FINALE, spiel.heimMannschaft.jugend)
+        if (allFinale.size > 1) {
+            log.error("Es kann nur ein Finale pro jugend geben, es wurden aber ${allFinale.size} final spiele gefunden!")
+            throw IllegalStateException("Es wurde mehr als ein finalspiel gefunden!")
+        }
+        val finale = allFinale[0]
+        val allSpielUmPlatzDrei = spielRepository.findAllBySpielTypAndJugend(SpielTyp.SPIEL_UM_PLATZ_3, spiel.heimMannschaft.jugend)
+        if (allSpielUmPlatzDrei.size > 1) {
+            log.error("Es kann nur ein Spiel um platz Drei pro jugend geben, es wurden aber ${allSpielUmPlatzDrei.size} final spiele gefunden!")
+            throw IllegalStateException("Es wurde mehr als ein finalspiel gefunden!")
+        }
+        val spielUmPlatzDrei = allSpielUmPlatzDrei[0]
+
+        when (halbfinalTyp) {
+            SpielTyp.ERSTES_HALBFINALE -> {
+                // Es muss einen sieger geben, weshalb man hier ohne probleme spiel.sieger() aufrufen kann
+                val finaleUpdate = finale.copy(heimMannschaft = spiel.sieger())
+                val spielUmPlatzDreiUpdate = spielUmPlatzDrei.copy(heimMannschaft = spiel.verlierer())
+                spielRepository.saveAll(listOf(finaleUpdate, spielUmPlatzDreiUpdate))
+            }
+            SpielTyp.ZWEITES_HALBFINALE -> {
+                // Es muss einen sieger geben, weshalb man hier ohne probleme spiel.sieger() aufrufen kann
+                val finaleUpdate = finale.copy(gastMannschaft = spiel.sieger())
+                val spielUmPlatzDreiUpdate = spielUmPlatzDrei.copy(gastMannschaft = spiel.verlierer())
+                spielRepository.saveAll(listOf(finaleUpdate, spielUmPlatzDreiUpdate))
+            }
+            else -> {
+                log.error("Es wurde der spielTyp $halbfinalTyp in die Methode handleHalbfinale übergeben!")
+                throw IllegalArgumentException("Ungültiger Spieltyp ${halbfinalTyp}")
+            }
+        }
+    }
+
+
     private fun calculateNewTabellenPlatzGruppenphase(spiel: Spiel) {
         val mannschaften = mannschaftRepository.findAllByJugend(spiel.heimMannschaft.jugend)
         val sortedByTabellenPlatz = sortMannschaftenByTabellenPlatz(mannschaften)
-        sortedByTabellenPlatz.forEachIndexed({ index, mannschaft ->
+        sortedByTabellenPlatz.forEachIndexed { index, mannschaft ->
             mannschaftRepository.save(mannschaft.copy(tabellenPlatz = index + 1))
-        })
+        }
 
     }
 
@@ -122,5 +206,42 @@ private fun <A, B> Pair<A, B>.flip(): Pair<B, A> {
 
 private operator fun Pair<Int, Int>.plus(other: Pair<Int, Int>): Pair<Int, Int> {
     return Pair(this.first + other.first, this.second + other.second)
+}
+
+/**
+ *
+ */
+fun Spiel.isUnentschieden(): Boolean {
+    return heimTore == gastTore
+}
+
+/**
+ * Liefert den sieger des spiels wenn es nicht unentschieden ausgegangen ist!
+ * @return Mannschaft die gewonnen hat
+ * @throws IllegalStateException wenn das spiel unentschieden ausgeht
+ */
+@Throws(IllegalStateException::class)
+fun Spiel.sieger(): Mannschaft {
+    if (heimTore > gastTore) {
+        return heimMannschaft
+    } else if (heimTore < gastTore) {
+        return gastMannschaft
+    }
+    throw IllegalStateException("Unentschieden")
+}
+
+/**
+ * Liefert den verlierer des spiels wenn es nicht unentschieden ausgegangen ist!
+ * @return Mannschaft die verloren hat
+ * @throws IllegalStateException wenn das spiel unentschieden ausgeht
+ */
+@Throws(IllegalStateException::class)
+fun Spiel.verlierer(): Mannschaft {
+    if (heimTore > gastTore) {
+        return gastMannschaft
+    } else if (heimTore < gastTore) {
+        return heimMannschaft
+    }
+    throw IllegalStateException("Unentschieden")
 }
 
