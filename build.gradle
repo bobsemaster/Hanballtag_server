@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        kotlinVersion = '1.2.41'
+        kotlinVersion = '1.2.50'
         springBootVersion = '2.0.1.RELEASE'
     }
     repositories {
@@ -14,7 +14,7 @@ buildscript {
 }
 
 plugins {
-    id "org.jetbrains.kotlin.plugin.jpa" version "1.2.41"
+    id "org.jetbrains.kotlin.plugin.jpa" version "1.2.50"
     id "io.gitlab.arturbosch.detekt" version "1.0.0.RC6"
 }
 
@@ -102,21 +102,13 @@ detekt {
 
 def DEV_GROUP = 'Dev Environment'
 
-task buildDatabase(type: Exec) {
-    group=DEV_GROUP
-    workingDir 'docker/postgres'
-    commandLine 'docker', 'build', '.', '-t', 'handballtag-postgres'
-}
 
 task databaseUp(type: Exec) {
     group=DEV_GROUP
-    workingDir 'docker/postgres'
-    commandLine 'docker', 'run', '-d', '-p', '5432:5432', '-v',
-            '/home/robert/postgres/handballtag/data:/var/lib/postgresql/data',
-            '--name=handballtag-postgres', '--rm=true', 'handballtag-postgres'
+    commandLine './start-dev.sh'
 }
 
 task databaseDown(type: Exec) {
     group=DEV_GROUP
-    commandLine 'docker', 'rm', '-f', 'handballtag-postgres'
+    commandLine './stop-dev.sh'
 }

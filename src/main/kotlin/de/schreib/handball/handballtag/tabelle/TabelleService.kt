@@ -16,6 +16,9 @@ class TabelleService(@Autowired val mannschaftRepository: MannschaftRepository,
         if (spiel.spielTyp == SpielTyp.GRUPPENSPIEL) {
             calculateNewTabellenPlatzGruppenphase(spiel)
         }
+
+        TODO("Nach gruppenphase platzhalter spiele ersetzen")
+        TODO("K.O phase plätze berechnen")
     }
 
     private fun calculateNewTabellenPlatzGruppenphase(spiel: Spiel) {
