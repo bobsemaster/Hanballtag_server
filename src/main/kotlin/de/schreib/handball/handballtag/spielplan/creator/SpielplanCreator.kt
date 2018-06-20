@@ -5,6 +5,8 @@ import de.schreib.handball.handballtag.entities.Mannschaft
 import de.schreib.handball.handballtag.entities.Spiel
 import de.schreib.handball.handballtag.entities.SpielTyp
 import de.schreib.handball.handballtag.entities.Verein
+import de.schreib.handball.handballtag.enums.JugendEnum
+import de.schreib.handball.handballtag.enums.JugendGender
 import de.schreib.handball.handballtag.exceptions.NotEnoughMannschaftenException
 import de.schreib.handball.handballtag.repositories.MannschaftRepository
 import de.schreib.handball.handballtag.repositories.SpielRepository
@@ -64,7 +66,7 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
 
         currentGroup = 1
         alternateGroup = false
-        this.spielplatz = spielplatz
+        this.spielplatz = getSpielplatzZuJugend(jugend)
 
         when (allJugendMannschaft.size) {
             1 -> {
@@ -86,6 +88,21 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
         // TODO validierung dass der Platz auf dem die Spiele stattfinden zu jedem Zeitpunkt frei ist
         spielRepository.saveAll(spielplanList)
         spielplanList.clear()
+    }
+
+    private fun getSpielplatzZuJugend(jugend: Jugend): Int {
+        return when{
+            jugend.jahrgang == JugendEnum.DJUGEND && jugend.typ == JugendGender.WEIBLICH -> 1
+            jugend.jahrgang == JugendEnum.DJUGEND && jugend.typ == JugendGender.MAENNLICH -> 2
+            jugend.jahrgang == JugendEnum.EJUGEND && jugend.typ == JugendGender.WEIBLICH -> 3
+            jugend.jahrgang == JugendEnum.EJUGEND && jugend.typ == JugendGender.MAENNLICH -> 5
+            jugend.jahrgang == JugendEnum.MINIS && jugend.typ == JugendGender.GEMISCHT -> 4
+            jugend.jahrgang == JugendEnum.BJUGEND && jugend.typ == JugendGender.MAENNLICH -> 1
+            jugend.jahrgang == JugendEnum.BJUGEND && jugend.typ == JugendGender.WEIBLICH -> 2
+            jugend.jahrgang == JugendEnum.CJUGEND && jugend.typ == JugendGender.WEIBLICH -> 3
+            jugend.jahrgang == JugendEnum.CJUGEND && jugend.typ == JugendGender.MAENNLICH -> 4
+            else -> 0
+        }
     }
 
     private fun createSpielplan10Mannschaften(allJugendMannschaft: List<Mannschaft>) {
