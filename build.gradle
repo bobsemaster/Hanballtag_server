@@ -60,7 +60,6 @@ dependencies {
     compile('com.fasterxml.jackson.module:jackson-module-kotlin')
     compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     compile("org.jetbrains.kotlin:kotlin-reflect")
-    runtime('com.h2database:h2')
     runtime('org.postgresql:postgresql')
 
     // Mapping java8 Date types to database types

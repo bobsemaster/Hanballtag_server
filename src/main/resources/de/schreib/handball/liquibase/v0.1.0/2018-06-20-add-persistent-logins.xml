@@ -11,14 +11,14 @@
         </preConditions>
         <comment>Füge persistent login table hinzu</comment>
         <createTable tableName="persistent_logins">
-            <column name="username" type="TEXT">
+            <column name="username" type="varchar(64)">
                 <constraints nullable="false"/>
             </column>
-            <column name="series" type="TEXT">
+            <column name="series" type="varchar(64)">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
 
-            <column name="token" type="TEXT">
+            <column name="token" type="varchar(64)">
                 <constraints nullable="false"/>
             </column>
 
