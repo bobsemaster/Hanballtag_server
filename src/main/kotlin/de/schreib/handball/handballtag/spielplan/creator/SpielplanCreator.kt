@@ -474,7 +474,7 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
      * Hilfsfunkltion um platzhaltermannschagft zu erzeugen
      */
     private fun mannschaft(name: String): Mannschaft {
-        val mannschaft = Mannschaft(name = name, verein = platzhalterVerein, jugend = allJugendMannschaft[0].jugend)
+        val mannschaft = Mannschaft(name = name, verein = platzhalterVerein, jugend = allJugendMannschaft[0].jugend, gruppe = Gruppe.C)
         mannschaftRepository.save(mannschaft)
         return mannschaft
     }
