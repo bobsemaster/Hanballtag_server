@@ -63,6 +63,9 @@ dependencies {
     // Mapping java8 Date types to database types
     compile('org.hibernate:hibernate-java8')
 
+    // Database migration
+    compile('org.liquibase:liquibase-core')
+
     // Serializer for java8 Date types
     compile('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')
 

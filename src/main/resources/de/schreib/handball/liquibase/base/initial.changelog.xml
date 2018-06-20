@@ -1,0 +1,171 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+    <changeSet author="robert (generated)" id="1529519745370-1">
+        <preConditions onFail="MARK_RAN" onFailMessage="Database already exists.">
+            <not>
+                <tableExists tableName="mannschaft"/>
+            </not>
+        </preConditions>
+        <comment>Erstelle initiale Datenbank</comment>
+        <createSequence sequenceName="hibernate_sequence"/>
+
+
+        <createTable tableName="mannschaft">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="gruppe" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="has_foto" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="jahrgang" type="VARCHAR(255)"/>
+            <column name="typ" type="VARCHAR(255)"/>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="punkteverhaeltnis" type="BYTEA"/>
+            <column name="tabellen_platz" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="torverhaeltnis" type="BYTEA"/>
+            <column name="verein_id" type="BIGINT"/>
+        </createTable>
+
+
+        <createTable tableName="spiel">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_time" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+            <column name="gast_tore" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="gruppe" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="halftime_duration" type="BIGINT"/>
+            <column name="has_half_time" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="heim_tore" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_gast_mannschaft_anwesend" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_heimmannschaft_anwesend" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_kampfgericht_anwesend" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_schiedsrichter_anwesend" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="spiel_platz" type="INT"/>
+            <column name="spiel_typ" type="VARCHAR(255)"/>
+            <column name="gast_mannschaft_id" type="BIGINT"/>
+            <column name="heim_mannschaft_id" type="BIGINT"/>
+        </createTable>
+
+
+        <createTable tableName="verein">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)"/>
+        </createTable>
+
+
+        <createTable tableName="verkauf">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_grill_an" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_losverkauf_gestartet" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_preisvergabe_gestartet" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+
+        <createTable tableName="verkauf_artikel">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="artikel_name" type="VARCHAR(255)"/>
+            <column name="artikel_preis" type="FLOAT8">
+                <constraints nullable="false"/>
+            </column>
+            <column name="verkaufsplatz" type="VARCHAR(255)"/>
+        </createTable>
+
+
+        <createTable tableName="verkauf_verkauf_artikel">
+            <column name="verkauf_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="verkauf_artikel_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+
+        <addPrimaryKey columnNames="id" constraintName="mannschaft_pkey" tableName="mannschaft"/>
+
+
+        <addPrimaryKey columnNames="id" constraintName="spiel_pkey" tableName="spiel"/>
+
+
+        <addPrimaryKey columnNames="id" constraintName="verein_pkey" tableName="verein"/>
+
+
+        <addPrimaryKey columnNames="id" constraintName="verkauf_artikel_pkey" tableName="verkauf_artikel"/>
+
+
+        <addPrimaryKey columnNames="id" constraintName="verkauf_pkey" tableName="verkauf"/>
+
+
+        <addUniqueConstraint columnNames="name" constraintName="uk_afao5d85edb0okkgnpp3qya0j" tableName="verein"/>
+
+
+        <addUniqueConstraint columnNames="verkauf_artikel_id" constraintName="uk_t3vqg6nxpu5bay0md0i53p3t"
+                             tableName="verkauf_verkauf_artikel"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="verkauf_id" baseTableName="verkauf_verkauf_artikel"
+                                 constraintName="fk4vhhry818695jvn9lke0s4tv8" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="verkauf"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="verein_id" baseTableName="mannschaft"
+                                 constraintName="fk9fdk6357mqnxrnvjs225cn0no" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="verein"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="gast_mannschaft_id" baseTableName="spiel"
+                                 constraintName="fkhhq2nulhqemro5bgdg08sve2s" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="mannschaft"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="verkauf_artikel_id" baseTableName="verkauf_verkauf_artikel"
+                                 constraintName="fkk00i1wqa9umgnqu0jy2x7mnpm" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="verkauf_artikel"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="heim_mannschaft_id" baseTableName="spiel"
+                                 constraintName="fkqovro5cr7oskcqaoyks2538cf" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="mannschaft"/>
+    </changeSet>
+</databaseChangeLog>
