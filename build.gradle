@@ -51,6 +51,9 @@ dependencies {
     // Production Monitoring
     runtime('org.springframework.boot:spring-boot-starter-actuator')
 
+    // Spring developement tools
+    compile('org.springframework.boot:spring-boot-devtools')
+
     compile('org.springframework.boot:spring-boot-starter-data-jpa')
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.springframework.boot:spring-boot-starter-security')
@@ -78,6 +81,7 @@ dependencies {
     testCompile "org.mockito:mockito-core:2.+"
     testCompile 'junit:junit:4.12'
     testCompile 'org.mockito:mockito-inline:2.16.0'
+    testCompile "com.opentable.components:otj-pg-embedded:$pgEmbeddedVersion"
 
 }
 task dockerRest(type: Copy) {
