@@ -1,0 +1,28 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+    <changeSet id="enums-1" author="RS">
+        <comment>Delete gruppe from Mannschaft</comment>
+        <dropColumn tableName="mannschaft" columnName="gruppe"/>
+    </changeSet>
+    <changeSet id="enums-2" author="RS">
+        <comment>Add string gruppe to Mannschaft</comment>
+        <addColumn tableName="mannschaft">
+            <column name="gruppe" type="TEXT"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="enums-3" author="RS">
+        <comment>Delete gruppe from Spiel</comment>
+        <dropColumn tableName="spiel" columnName="gruppe"/>
+    </changeSet>
+    <changeSet id="enums-4" author="RS">
+        <comment>Add string gruppe to Spiel</comment>
+        <addColumn tableName="spiel">
+            <column name="gruppe" type="TEXT"/>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

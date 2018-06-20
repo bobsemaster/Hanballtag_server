@@ -1,0 +1,17 @@
+version: '3.2'
+
+services:
+
+  postgres:
+      image: registry.schreib.io/tsv-forstenried/handballtag/server/postgres
+      build: ./docker/postgres
+      hostname: postgres
+      ports:
+        - "5432:5432"
+      environment:
+        TZ: CET
+        POSTGRES_DB: handballtag
+        POSTGRES_USER: handball
+        POSTGRES_PASSWORD: JIHoiuo3i2rkbfd
+      expose:
+        - 5432

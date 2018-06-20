@@ -6,6 +6,7 @@ import de.schreib.handball.handballtag.exceptions.SpielNotFoundException
 import de.schreib.handball.handballtag.repositories.MannschaftRepository
 import de.schreib.handball.handballtag.repositories.SpielRepository
 import de.schreib.handball.handballtag.spielplan.creator.SpielplanCreatorService
+import de.schreib.handball.handballtag.tabelle.TabelleService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.AuthorizationServiceException
 import org.springframework.security.access.annotation.Secured
@@ -24,7 +25,8 @@ import javax.transaction.Transactional
 class SpielController(
         @Autowired val mannschaftRepository: MannschaftRepository,
         @Autowired val spielRepository: SpielRepository,
-        @Autowired val spielplanCreatorService: SpielplanCreatorService
+        @Autowired val spielplanCreatorService: SpielplanCreatorService,
+        @Autowired val tabelleService: TabelleService
 ) {
     @GetMapping("all")
     fun getAllSpiel(): List<Spiel> = spielRepository.findAll().sortedBy { it.dateTime }
@@ -79,14 +81,16 @@ class SpielController(
         if (spiel.gastTore != 0 || spiel.heimTore != 0) {
             throw AuthorizationServiceException("Kampfgericht ist nicht autorisert das spielergebnis nachträglich zu ändern")
         }
-        spielRepository.save(spiel.copy(heimTore = ergebnis.toreHeim, gastTore = ergebnis.toreGast))
+        val updatedSpiel = spielRepository.save(spiel.copy(heimTore = ergebnis.toreHeim, gastTore = ergebnis.toreGast))
+        tabelleService.processSpielergebnis(updatedSpiel)
     }
 
     @Secured(ROLE_SPIELLEITER)
     @PostMapping("{id}/spielstand")
     fun setSpielstandSpielleiter(@RequestBody ergebnis: SpielErgebnis, @PathVariable id: Long) {
         val spiel = getSpielById(id)
-        spielRepository.save(spiel.copy(heimTore = ergebnis.toreHeim, gastTore = ergebnis.toreGast))
+        val updatedSpiel = spielRepository.save(spiel.copy(heimTore = ergebnis.toreHeim, gastTore = ergebnis.toreGast))
+        tabelleService.processSpielergebnis(updatedSpiel)
     }
 
     @Transactional
