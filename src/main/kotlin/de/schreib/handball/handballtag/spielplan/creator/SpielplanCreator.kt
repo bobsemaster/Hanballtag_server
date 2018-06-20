@@ -449,7 +449,7 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
             throw IllegalArgumentException("Heim und gast müssen verschiedene Mannschaften sein!")
         }
         spielplanList.add(Spiel(heimMannschaft = heim, gastMannschaft = gast, halftimeDuration = spielDuration,
-                dateTime = turnierBeginn, spielPlatz = spielplatz, spielTyp = spielTyp))
+                dateTime = turnierBeginn, spielPlatz = spielplatz, spielTyp = spielTyp, gruppe = Gruppe.C))
 
         turnierBeginn = turnierBeginn.plus(spielDuration.plus(pauseDuration))
     }
