@@ -15,6 +15,7 @@ import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.annotation.Rollback
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
 import java.time.Duration
 import java.time.LocalDateTime
@@ -22,6 +23,7 @@ import java.time.LocalDateTime
 @RunWith(SpringRunner::class)
 @SpringBootTest
 @Rollback
+@ActiveProfiles("test")
 class TestRepositories {
     @Autowired
     lateinit var spielRepository: SpielRepository
@@ -73,7 +75,7 @@ class TestRepositories {
     }
 
     @Test
-    public fun `test if findByAllMannschaft for AJugemd Mannschaft returns Ajugend Spiel`() {
+    fun `test if findByAllMannschaft for AJugemd Mannschaft returns Ajugend Spiel`() {
         val spiel = spielRepository.findAllByMannschaft(heimMannschaftCjugend)[0]
 
 
