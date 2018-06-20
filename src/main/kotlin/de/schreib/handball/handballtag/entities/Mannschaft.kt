@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 import javax.annotation.PostConstruct
 import javax.persistence.Entity
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
 import javax.persistence.GeneratedValue
 import javax.persistence.Id
 import javax.persistence.JoinColumn
@@ -36,7 +38,8 @@ data class Mannschaft(
         val jugend: Jugend,
         val hasFoto: Boolean = false,
         val tabellenPlatz: Int = 0,
-        val gruppe: Int = 0
+        @Enumerated(EnumType.STRING)
+        val gruppe: Gruppe = Gruppe.A
 ) {
 
     @Component

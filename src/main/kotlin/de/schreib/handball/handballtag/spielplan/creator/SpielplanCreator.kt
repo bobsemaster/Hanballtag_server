@@ -1,5 +1,6 @@
 package de.schreib.handball.handballtag.spielplan.creator
 
+import de.schreib.handball.handballtag.entities.Gruppe
 import de.schreib.handball.handballtag.entities.Jugend
 import de.schreib.handball.handballtag.entities.Mannschaft
 import de.schreib.handball.handballtag.entities.Spiel
@@ -31,7 +32,7 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
     private lateinit var turnierBeginn: LocalDateTime
     private lateinit var allJugendMannschaft: List<Mannschaft>
     private val spielplanList: MutableList<Spiel> = mutableListOf()
-    private var currentGroup = 1
+    private var currentGroup = Gruppe.A
     // Abwechselnd gruppe 1 und 2 muss aktiviert werden wenn man einen spielplan für 2 gruppen erstellen möchte
     private var alternateGroup = false
     private var spielplatz: Int = -1
@@ -64,7 +65,7 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
         this.spielDuration = spielDuration
         this.turnierBeginn = turnierBeginn
 
-        currentGroup = 1
+        currentGroup = Gruppe.A
         alternateGroup = false
         this.spielplatz = getSpielplatzZuJugend(jugend)
 
@@ -90,8 +91,9 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
         spielplanList.clear()
     }
 
+    // Aus vorläufigem spielplan 2018
     private fun getSpielplatzZuJugend(jugend: Jugend): Int {
-        return when{
+        return when {
             jugend.jahrgang == JugendEnum.DJUGEND && jugend.typ == JugendGender.WEIBLICH -> 1
             jugend.jahrgang == JugendEnum.DJUGEND && jugend.typ == JugendGender.MAENNLICH -> 2
             jugend.jahrgang == JugendEnum.EJUGEND && jugend.typ == JugendGender.WEIBLICH -> 3
@@ -169,34 +171,34 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
         val siegerZweitesHalbfinale = mannschaft("Sieger 2. Halbfinale")
 
         // Gruppenphase
-        currentGroup = 1
+        currentGroup = Gruppe.A
         spiel(Kuerzel.A, Kuerzel.B)
         spiel(Kuerzel.C, Kuerzel.D)
-        currentGroup = 2
+        currentGroup = Gruppe.B
         spiel(Kuerzel.F, Kuerzel.G)
-        currentGroup = 1
+        currentGroup = Gruppe.A
         spiel(Kuerzel.E, Kuerzel.A)
-        currentGroup = 2
+        currentGroup = Gruppe.B
         spiel(Kuerzel.H, Kuerzel.I)
-        currentGroup = 1
+        currentGroup = Gruppe.A
         spiel(Kuerzel.B, Kuerzel.C)
         spiel(Kuerzel.D, Kuerzel.E)
-        currentGroup = 2
+        currentGroup = Gruppe.B
         spiel(Kuerzel.G, Kuerzel.H)
-        currentGroup = 1
+        currentGroup = Gruppe.A
         spiel(Kuerzel.A, Kuerzel.C)
-        currentGroup = 2
+        currentGroup = Gruppe.B
         spiel(Kuerzel.F, Kuerzel.H)
-        currentGroup = 1
+        currentGroup = Gruppe.A
         spiel(Kuerzel.E, Kuerzel.B)
         spiel(Kuerzel.D, Kuerzel.A)
-        currentGroup = 2
+        currentGroup = Gruppe.B
         spiel(Kuerzel.I, Kuerzel.F)
-        currentGroup = 1
+        currentGroup = Gruppe.A
         spiel(Kuerzel.C, Kuerzel.E)
-        currentGroup = 2
+        currentGroup = Gruppe.B
         spiel(Kuerzel.G, Kuerzel.I)
-        currentGroup = 1
+        currentGroup = Gruppe.A
         spiel(Kuerzel.B, Kuerzel.D)
 
         // K.O phase
@@ -276,7 +278,7 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
         spiel(Kuerzel.B, Kuerzel.D)
         spiel(Kuerzel.E, Kuerzel.G)
         alternateGroup = false
-        currentGroup = 1
+        currentGroup = Gruppe.A
 
         // K.O phase
         planSpiel(vierterGruppeA, dritterGruppeB, SpielTyp.ERSTES_SPIEL_UM_PLATZ_5)
@@ -421,10 +423,10 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
     private fun spiel(heim: Kuerzel, gast: Kuerzel, spielTyp: SpielTyp = SpielTyp.GRUPPENSPIEL) {
         spielplanList.add(allJugendMannschaft.createSpiel(heim, gast, spielDuration, turnierBeginn, spielTyp, currentGroup))
         if (alternateGroup) {
-            if (currentGroup == 1) {
-                currentGroup = 2
+            if (currentGroup == Gruppe.A) {
+                currentGroup = Gruppe.B
             } else {
-                currentGroup = 1
+                currentGroup = Gruppe.A
             }
         }
 
@@ -452,12 +454,20 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
         turnierBeginn = turnierBeginn.plus(spielDuration.plus(pauseDuration))
     }
 
-    private fun List<Mannschaft>.createSpiel(heim: Kuerzel, gast: Kuerzel, spielDuration: Duration, time: LocalDateTime, spielTyp: SpielTyp, gruppe: Int): Spiel {
+    private fun List<Mannschaft>.createSpiel(heim: Kuerzel, gast: Kuerzel, spielDuration: Duration, time: LocalDateTime, spielTyp: SpielTyp, gruppe: Gruppe): Spiel {
         if (this[heim.index].id == this[gast.index].id) {
             throw IllegalArgumentException("Heim und gast können nicht die selbe mannschaft sein")
         }
-        return Spiel(heimMannschaft = this[heim.index], gastMannschaft = this[gast.index], halftimeDuration = spielDuration, dateTime = time, spielTyp = spielTyp, spielPlatz = spielplatz, gruppe = currentGroup)
 
+        // Gruppe der mannschaften ggf. updaten
+        if (this[heim.index].gruppe != currentGroup) {
+            mannschaftRepository.save(this[heim.index].copy(gruppe = currentGroup))
+        }
+        if (this[gast.index].gruppe != currentGroup) {
+            mannschaftRepository.save(this[gast.index].copy(gruppe = currentGroup))
+        }
+
+        return Spiel(heimMannschaft = this[heim.index], gastMannschaft = this[gast.index], halftimeDuration = spielDuration, dateTime = time, spielTyp = spielTyp, spielPlatz = spielplatz, gruppe = currentGroup)
     }
 
     /**

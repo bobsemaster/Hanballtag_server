@@ -18,4 +18,5 @@ interface SpielRepository : JpaRepository<Spiel, Long> {
 
     fun deleteAllByHeimMannschaftInOrGastMannschaftIn(mannschaftHeim: Collection<Mannschaft>, mannschaftGast: Collection<Mannschaft>)
 
+    fun findAllByJugend(jugend: Jugend): List<Spiel>
 }

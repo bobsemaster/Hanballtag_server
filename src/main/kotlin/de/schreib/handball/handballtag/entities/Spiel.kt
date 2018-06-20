@@ -43,9 +43,13 @@ data class Spiel(
         val spielPlatz: Int? = null,
         @Enumerated(EnumType.STRING)
         val spielTyp: SpielTyp = SpielTyp.NONE,
-        val gruppe: Int = 0
+        @Enumerated(EnumType.STRING)
+        val gruppe: Gruppe = Gruppe.A
 )
 
+enum class Gruppe {
+    A, B, C
+}
 
 enum class SpielTyp {
     // Für die Initialisierung des SPiels bei tests

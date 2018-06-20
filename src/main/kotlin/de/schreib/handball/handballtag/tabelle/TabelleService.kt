@@ -1,5 +1,7 @@
 package de.schreib.handball.handballtag.tabelle
 
+import de.schreib.handball.handballtag.entities.Gruppe
+import de.schreib.handball.handballtag.entities.Jugend
 import de.schreib.handball.handballtag.entities.Mannschaft
 import de.schreib.handball.handballtag.entities.Spiel
 import de.schreib.handball.handballtag.entities.SpielTyp
@@ -23,20 +25,180 @@ class TabelleService(@Autowired val mannschaftRepository: MannschaftRepository,
             SpielTyp.ZWEITES_HALBFINALE -> handleHalbfinale(spiel, SpielTyp.ZWEITES_HALBFINALE)
             SpielTyp.SPIEL_UM_PLATZ_3 -> handleSpielUmPlatzDrei(spiel)
             SpielTyp.SPIEL_UM_PLATZ_5 -> handleSpielUmPlatzFuenf(spiel)
-            SpielTyp.ERSTES_SPIEL_UM_PLATZ_5 -> TODO()
-            SpielTyp.ZWEITES_SPIEL_UM_PLATZ_5 -> TODO()
-            SpielTyp.DRITTES_SPIEL_UM_PLATZ_5 -> TODO()
+            SpielTyp.DRITTES_SPIEL_UM_PLATZ_5 -> handleDreiSpielePlatzFuenf(spiel)
             SpielTyp.SPIEL_UM_PLATZ_7 -> handleSpielUmPlatzSieben(spiel)
-            SpielTyp.ERSTES_SPIEL_UM_PLATZ_7 -> TODO()
-            SpielTyp.ZWEITES_SPIEL_UM_PLATZ_7 -> TODO()
-            SpielTyp.DRITTES_SPIEL_UM_PLATZ_7 -> TODO()
+            SpielTyp.DRITTES_SPIEL_UM_PLATZ_7 -> handleDreiSpielePlatzSieben(spiel)
             SpielTyp.SPIEL_UM_PLATZ_9 -> handleSpielUmPlatzNeun(spiel)
             SpielTyp.FINALE -> handleFinale(spiel)
-            SpielTyp.NONE -> TODO()
+            SpielTyp.NONE -> return
+
+            SpielTyp.ERSTES_SPIEL_UM_PLATZ_5 -> return
+            SpielTyp.ZWEITES_SPIEL_UM_PLATZ_5 -> return
+            SpielTyp.ERSTES_SPIEL_UM_PLATZ_7 -> return
+            SpielTyp.ZWEITES_SPIEL_UM_PLATZ_7 -> return
         }
+
+        checkIfGruppenphaseOver(spiel.gastMannschaft.jugend)
 
         TODO("Nach gruppenphase platzhalter spiele ersetzen")
         TODO("K.O phase plätze berechnen")
+    }
+
+    private fun checkIfGruppenphaseOver(jugend: Jugend) {
+        val gruppenSpiele = spielRepository.findAllBySpielTypAndJugend(SpielTyp.GRUPPENSPIEL, jugend)
+
+        // kein spiel mehr das 0:0 als ergebnis hat -> alle spiele gespielt!
+        if (gruppenSpiele.filter { it.heimTore == 0 && it.gastTore == 0 }.count() == 0) {
+            updateKOSpiele(jugend)
+        }
+    }
+
+    private fun updateKOSpiele(jugend: Jugend) {
+        // Mannschaften in Reihenfolge erster hat index 0 letzter hat letzten index
+        val mannschaften = mannschaftRepository.findAllByJugend(jugend).sortedBy { it.tabellenPlatz }
+        val spieleKORunde = spielRepository.findAllByJugend(jugend).filter { it.spielTyp != SpielTyp.GRUPPENSPIEL }
+        if (spieleKORunde.size == 0) {
+            log.info("Die jugend $jugend hat keine K.O phase!")
+            return
+        }
+
+        val allSpielUpdateList = mutableListOf<Spiel>()
+        // halbfinals updaten da jeder mit ko runde diese hat!
+        val erstesHalbfinale = spieleKORunde.find { it.spielTyp == SpielTyp.ERSTES_HALBFINALE }!!
+        val zweitesHalbfinale = spieleKORunde.find { it.spielTyp == SpielTyp.ZWEITES_HALBFINALE }!!
+        val erstesHalbfinaleUpdate = erstesHalbfinale.copy(heimMannschaft = mannschaften.findMannschaft(1, Gruppe.A),
+                gastMannschaft = mannschaften.findMannschaft(2, Gruppe.B))
+        val zweitesHalbfinaleUpdate = zweitesHalbfinale.copy(heimMannschaft = mannschaften.findMannschaft(1, Gruppe.B),
+                gastMannschaft = mannschaften.findMannschaft(2, Gruppe.A))
+        allSpielUpdateList.addAll(listOf(erstesHalbfinaleUpdate, zweitesHalbfinaleUpdate))
+        when (mannschaften.size) {
+            6 -> {
+                val spielUmPlatzFuenf = spieleKORunde.find { it.spielTyp == SpielTyp.SPIEL_UM_PLATZ_5 }!!
+                allSpielUpdateList.add(spielUmPlatzFuenf.copy(heimMannschaft = mannschaften.findMannschaft(3, Gruppe.A),
+                        gastMannschaft = mannschaften.findMannschaft(3, Gruppe.B)))
+            }
+            7 -> {
+                val erstesSpielUmPlatzFuenf = spieleKORunde.find { it.spielTyp == SpielTyp.ERSTES_SPIEL_UM_PLATZ_5 }!!
+                val zweitesSpielUmPlatzFuenf = spieleKORunde.find { it.spielTyp == SpielTyp.ZWEITES_SPIEL_UM_PLATZ_5 }!!
+                val drittesSpielUmPlatzFuenf = spieleKORunde.find { it.spielTyp == SpielTyp.DRITTES_SPIEL_UM_PLATZ_5 }!!
+                allSpielUpdateList.add(erstesSpielUmPlatzFuenf.copy(heimMannschaft = mannschaften.findMannschaft(4, Gruppe.A),
+                        gastMannschaft = mannschaften.findMannschaft(3, Gruppe.B)))
+
+                allSpielUpdateList.add(zweitesSpielUmPlatzFuenf.copy(heimMannschaft = mannschaften.findMannschaft(3, Gruppe.B),
+                        gastMannschaft = mannschaften.findMannschaft(3, Gruppe.A)))
+
+                allSpielUpdateList.add(drittesSpielUmPlatzFuenf.copy(heimMannschaft = mannschaften.findMannschaft(3, Gruppe.A),
+                        gastMannschaft = mannschaften.findMannschaft(4, Gruppe.A)))
+            }
+            8 -> {
+                val spielUmPlatzFuenf = spieleKORunde.find { it.spielTyp == SpielTyp.SPIEL_UM_PLATZ_5 }!!
+                val spielUmPlatzSieben = spieleKORunde.find { it.spielTyp == SpielTyp.SPIEL_UM_PLATZ_7 }!!
+
+                allSpielUpdateList.add(spielUmPlatzFuenf.copy(heimMannschaft = mannschaften.findMannschaft(3, Gruppe.A),
+                        gastMannschaft = mannschaften.findMannschaft(3, Gruppe.B)))
+                allSpielUpdateList.add(spielUmPlatzSieben.copy(heimMannschaft = mannschaften.findMannschaft(4, Gruppe.A),
+                        gastMannschaft = mannschaften.findMannschaft(4, Gruppe.B)))
+            }
+            9 -> {
+                val erstesSpielUmPlatzSieben = spieleKORunde.find { it.spielTyp == SpielTyp.ERSTES_SPIEL_UM_PLATZ_7 }!!
+                val zweitesSpielUmPlatzSieben = spieleKORunde.find { it.spielTyp == SpielTyp.ZWEITES_SPIEL_UM_PLATZ_7 }!!
+                val drittesSpielUmPlatzSieben = spieleKORunde.find { it.spielTyp == SpielTyp.DRITTES_SPIEL_UM_PLATZ_7 }!!
+                allSpielUpdateList.add(erstesSpielUmPlatzSieben.copy(heimMannschaft = mannschaften.findMannschaft(5, Gruppe.A),
+                        gastMannschaft = mannschaften.findMannschaft(4, Gruppe.B)))
+
+                allSpielUpdateList.add(zweitesSpielUmPlatzSieben.copy(heimMannschaft = mannschaften.findMannschaft(4, Gruppe.B),
+                        gastMannschaft = mannschaften.findMannschaft(4, Gruppe.A)))
+
+                allSpielUpdateList.add(drittesSpielUmPlatzSieben.copy(heimMannschaft = mannschaften.findMannschaft(4, Gruppe.A),
+                        gastMannschaft = mannschaften.findMannschaft(5, Gruppe.A)))
+            }
+            10 -> {
+                val spielUmPlatzFuenf = spieleKORunde.find { it.spielTyp == SpielTyp.SPIEL_UM_PLATZ_5 }!!
+                val spielUmPlatzSieben = spieleKORunde.find { it.spielTyp == SpielTyp.SPIEL_UM_PLATZ_7 }!!
+                val spielUmPlatzNeun = spieleKORunde.find { it.spielTyp == SpielTyp.SPIEL_UM_PLATZ_9 }!!
+
+                allSpielUpdateList.add(spielUmPlatzFuenf.copy(heimMannschaft = mannschaften.findMannschaft(3, Gruppe.A),
+                        gastMannschaft = mannschaften.findMannschaft(3, Gruppe.B)))
+                allSpielUpdateList.add(spielUmPlatzSieben.copy(heimMannschaft = mannschaften.findMannschaft(4, Gruppe.A),
+                        gastMannschaft = mannschaften.findMannschaft(4, Gruppe.B)))
+                allSpielUpdateList.add(spielUmPlatzNeun.copy(heimMannschaft = mannschaften.findMannschaft(5, Gruppe.A),
+                        gastMannschaft = mannschaften.findMannschaft(5, Gruppe.B)))
+            }
+        }
+        spielRepository.saveAll(allSpielUpdateList)
+    }
+
+    private fun List<Mannschaft>.findMannschaft(tabellenPlatz: Int, gruppe: Gruppe): Mannschaft {
+        val mannschaft = this.find { it.tabellenPlatz == tabellenPlatz && it.gruppe == gruppe }
+        if (mannschaft == null) {
+            log.error("Es existiert keine Mannschaft mit tabellenplatz '$tabellenPlatz' und gruppe '$gruppe' in der '${this[0].jugend}'")
+            throw IllegalStateException("Mannschaft nicht gefunden!")
+        }
+        return mannschaft
+    }
+
+    private fun handleDreiSpielePlatzSieben(spiel: Spiel) {
+        val jugend = spiel.heimMannschaft.jugend
+        val erstesSpiel = spielRepository.findAllBySpielTypAndJugend(SpielTyp.ERSTES_SPIEL_UM_PLATZ_7, jugend)[0]
+        val zweitesSpiel = spielRepository.findAllBySpielTypAndJugend(SpielTyp.ZWEITES_SPIEL_UM_PLATZ_7, jugend)[0]
+        val spiele = listOf(erstesSpiel, zweitesSpiel, spiel)
+        val mannschaften = spiele.flatMap { listOf(it.heimMannschaft, it.gastMannschaft) }.distinctBy { it.id }
+        val siegeMannschaftenMap = mutableMapOf<Mannschaft, Int>()
+        mannschaften.forEach {
+            siegeMannschaftenMap.put(it, 0)
+        }
+        spiele.forEach {
+            // Muss da sein, da wir alle Mannschaften der Spiele in die Map eingetragen haben!
+            siegeMannschaftenMap[it.sieger()] = siegeMannschaftenMap[it.sieger()]!! + 1
+        }
+        val siebter = siegeMannschaftenMap.maxBy { it.value }?.key
+        val neunter = siegeMannschaftenMap.minBy { it.value }?.key
+        if (siebter == null || neunter == null) {
+            log.error("Es wurde kein siebter '$siebter' oder neunter platz '$neunter' gefunden!")
+            throw IllegalStateException("Es muss einen siebten und einen neunten platz geben!")
+        }
+        siegeMannschaftenMap.remove(siebter)
+        siegeMannschaftenMap.remove(neunter)
+        if (siegeMannschaftenMap.size != 1) {
+            log.error("Es gibt mehr als eine Mannschaft die achter werden könnte es sind noch ${siegeMannschaftenMap.size} Mannschaften vorhanden")
+            throw IllegalStateException("Es gibt mehr als einen achten!")
+        }
+        val achter = siegeMannschaftenMap.keys.toList()[0].copy(tabellenPlatz = 8)
+        val siebterUpdate = siebter.copy(tabellenPlatz = 7)
+        val neunterUpdate = neunter.copy(tabellenPlatz = 9)
+        mannschaftRepository.saveAll(listOf(siebterUpdate, neunterUpdate, achter))
+    }
+
+    private fun handleDreiSpielePlatzFuenf(spiel: Spiel) {
+        val jugend = spiel.heimMannschaft.jugend
+        val erstesSpiel = spielRepository.findAllBySpielTypAndJugend(SpielTyp.ERSTES_SPIEL_UM_PLATZ_5, jugend)[0]
+        val zweitesSpiel = spielRepository.findAllBySpielTypAndJugend(SpielTyp.ZWEITES_SPIEL_UM_PLATZ_5, jugend)[0]
+        val spiele = listOf(erstesSpiel, zweitesSpiel, spiel)
+        val mannschaften = spiele.flatMap { listOf(it.heimMannschaft, it.gastMannschaft) }.distinctBy { it.id }
+        val siegeMannschaftenMap = mutableMapOf<Mannschaft, Int>()
+        mannschaften.forEach {
+            siegeMannschaftenMap.put(it, 0)
+        }
+        spiele.forEach {
+            // Muss da sein, da wir alle Mannschaften der Spiele in die Map eingetragen haben!
+            siegeMannschaftenMap[it.sieger()] = siegeMannschaftenMap[it.sieger()]!! + 1
+        }
+        val fuenfter = siegeMannschaftenMap.maxBy { it.value }?.key
+        val siebter = siegeMannschaftenMap.minBy { it.value }?.key
+        if (fuenfter == null || siebter == null) {
+            log.error("Es wurde kein fuenfter '$fuenfter' oder siebter platz '$siebter' gefunden!")
+            throw IllegalStateException("Es muss einen fünften und einen siebten platz geben!")
+        }
+        siegeMannschaftenMap.remove(fuenfter)
+        siegeMannschaftenMap.remove(siebter)
+        if (siegeMannschaftenMap.size != 1) {
+            log.error("Es gibt mehr als eine Mannschaft die sechster werden könnte es sind noch ${siegeMannschaftenMap.size} Mannschaften vorhanden")
+            throw IllegalStateException("Es gibt mehr als einen sechsten!")
+        }
+        val sechster = siegeMannschaftenMap.keys.toList()[0].copy(tabellenPlatz = 6)
+        val fuenfterUpdate = fuenfter.copy(tabellenPlatz = 5)
+        val siebterUpdate = siebter.copy(tabellenPlatz = 7)
+        mannschaftRepository.saveAll(listOf(fuenfterUpdate, sechster, siebterUpdate))
     }
 
     private fun handleFinale(spiel: Spiel) {
@@ -106,12 +268,11 @@ class TabelleService(@Autowired val mannschaftRepository: MannschaftRepository,
 
 
     private fun calculateNewTabellenPlatzGruppenphase(spiel: Spiel) {
-        val mannschaften = mannschaftRepository.findAllByJugend(spiel.heimMannschaft.jugend)
+        val mannschaften = mannschaftRepository.findAllByJugendAndGruppe(spiel.heimMannschaft.jugend, spiel.heimMannschaft.gruppe)
         val sortedByTabellenPlatz = sortMannschaftenByTabellenPlatz(mannschaften)
         sortedByTabellenPlatz.forEachIndexed { index, mannschaft ->
             mannschaftRepository.save(mannschaft.copy(tabellenPlatz = index + 1))
         }
-
     }
 
     private fun sortMannschaftenByTabellenPlatz(mannschaften: List<Mannschaft>): List<Mannschaft> {
