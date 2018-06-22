@@ -92,4 +92,9 @@ class MannschaftController(
             mannschaftRepository.deleteById(id)
         }
     }
+
+    @PostMapping("all/jugend")
+    fun getAllMannschaftenToJugend(@RequestBody jugend: Jugend): List<Mannschaft> {
+        return mannschaftRepository.findAllByJugend(jugend).sortedBy { it.tabellenPlatz }
+    }
 }
