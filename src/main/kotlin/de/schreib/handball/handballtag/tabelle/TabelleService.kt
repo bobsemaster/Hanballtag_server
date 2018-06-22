@@ -275,12 +275,12 @@ class TabelleService(@Autowired val mannschaftRepository: MannschaftRepository,
         }
     }
 
-    private fun sortMannschaftenByTabellenPlatz(mannschaften: List<Mannschaft>): List<Mannschaft> {
+    fun sortMannschaftenByTabellenPlatz(mannschaften: List<Mannschaft>): List<Mannschaft> {
         return mannschaften.sortedWith(Comparator { o1, o2 ->
             // Nur die punkte die die mannschaft hat interresiert hier, nicht die punkte die die mannschaft an andere vergeben hat
             when {
-                o1.punkteverhaeltnis.first > o2.punkteverhaeltnis.first -> 1
-                o1.punkteverhaeltnis.first < o2.punkteverhaeltnis.first -> -1
+                o1.punkteverhaeltnis.first < o2.punkteverhaeltnis.first -> 1
+                o1.punkteverhaeltnis.first > o2.punkteverhaeltnis.first -> -1
                 else -> direkterVergleich(o1, o2)
             }
 
