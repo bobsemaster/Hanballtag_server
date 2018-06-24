@@ -276,15 +276,25 @@ class TabelleService(@Autowired val mannschaftRepository: MannschaftRepository,
     }
 
     fun sortMannschaftenByTabellenPlatz(mannschaften: List<Mannschaft>): List<Mannschaft> {
+        // Muss reversed zurückgeben, da sonst die schlechtesten = kleinsten mannschaften an erster stelle in der liste stehen!
+        // Beispiel
+        // listOf<Int>(12, 3421, -2, 23, -213, 213, 12, -11, 1).sortedWith(Comparator { o1, o2 ->
+        //    when {
+        //        o1 > o2 -> 1
+        //        o1 < o2 -> -1
+        //        else -> 0
+        //    }
+        // })
+        // gibt [-213, -11, -2, 1, 12, 12, 23, 213, 3421] zurück
         return mannschaften.sortedWith(Comparator { o1, o2 ->
             // Nur die punkte die die mannschaft hat interresiert hier, nicht die punkte die die mannschaft an andere vergeben hat
             when {
-                o1.punkteverhaeltnis.first < o2.punkteverhaeltnis.first -> 1
-                o1.punkteverhaeltnis.first > o2.punkteverhaeltnis.first -> -1
+                o1.punkteverhaeltnis.first > o2.punkteverhaeltnis.first -> 1
+                o1.punkteverhaeltnis.first < o2.punkteverhaeltnis.first -> -1
                 else -> direkterVergleich(o1, o2)
             }
 
-        })
+        }).reversed()
     }
 
     private fun direkterVergleich(o1: Mannschaft, o2: Mannschaft): Int {
