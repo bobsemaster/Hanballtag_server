@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service
 import java.time.Duration
 import java.time.LocalDateTime
 import java.util.*
+import javax.transaction.Transactional
 
 const val PLATZHALTER_VEREIN_NAME = "placeholder"
 
@@ -51,6 +52,7 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
 
 
     // sechsMannschaftenGruppe entscheidung ob man den spielplasn mit gruppen erstellt oder nicht
+    @Transactional
     fun createSpielplan(jugend: Jugend, spielDuration: Duration, pauseDuration: Duration, turnierBeginn: LocalDateTime, spielplatz: Int, sechsMannschaftenGruppe: Boolean = false) {
         allJugendMannschaft = mannschaftRepository.findAllByJugend(jugend)
         // Alte Spiele löschen damit neuer Spielplan erzteugt werden kann

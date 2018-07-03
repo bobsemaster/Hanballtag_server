@@ -7,6 +7,7 @@ import de.schreib.handball.handballtag.repositories.MannschaftRepository
 import de.schreib.handball.handballtag.repositories.SpielRepository
 import de.schreib.handball.handballtag.spielplan.creator.SpielplanCreatorService
 import de.schreib.handball.handballtag.tabelle.TabelleService
+import kotlinx.coroutines.experimental.launch
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.AuthorizationServiceException
 import org.springframework.security.access.annotation.Secured
@@ -95,10 +96,25 @@ class SpielController(
 
     @Transactional
     @Secured(ROLE_KAMPFGERICHT)
-    @PostMapping("createspielplan")
+    @PostMapping("createspielplan/one")
     fun createSpielplanForJugend(@RequestBody spielCreatorInfo: SpielCreatorInfo) {
-        spielplanCreatorService.createSpielplan(spielCreatorInfo.jugend, Duration.ofMinutes(spielCreatorInfo.spielDuration),
-                Duration.ofMinutes(spielCreatorInfo.pauseDuration), spielCreatorInfo.turnierBeginn, spielCreatorInfo.spielPlatz, spielCreatorInfo.sechsMannschaftenGruppe)
+        launch {
+            spielplanCreatorService.createSpielplan(spielCreatorInfo.jugend, Duration.ofMinutes(spielCreatorInfo.spielDuration),
+                    Duration.ofMinutes(spielCreatorInfo.pauseDuration), spielCreatorInfo.turnierBeginn, spielCreatorInfo.spielPlatz, spielCreatorInfo.sechsMannschaftenGruppe)
+        }
+    }
+
+
+    @Secured(ROLE_KAMPFGERICHT)
+    @PostMapping("createspielplan/multiple")
+    fun createMultipleSpielplan(@RequestBody allSpielCreatorInfo: List<SpielCreatorInfo>) {
+        launch {
+            allSpielCreatorInfo.forEach {
+                spielplanCreatorService.createSpielplan(it.jugend, Duration.ofMinutes(it.spielDuration), Duration.ofMinutes(it.pauseDuration),
+                        it.turnierBeginn, it.spielPlatz, it.sechsMannschaftenGruppe)
+
+            }
+        }
     }
 
 }

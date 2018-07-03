@@ -74,6 +74,9 @@ dependencies {
     // Mail
     //compile('org.springframework.boot:spring-boot-starter-mail')
 
+    // Kotlin coroutine hilfsmethoden
+    compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.23.4'
+
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile('org.springframework.security:spring-security-test')
@@ -83,6 +86,13 @@ dependencies {
     testCompile "com.opentable.components:otj-pg-embedded:$pgEmbeddedVersion"
 
 }
+
+kotlin {
+    experimental {
+        coroutines 'enable'
+    }
+}
+
 task dockerRest(type: Copy) {
     from 'build/libs'
     include "handballtag-${version}.jar"
@@ -104,11 +114,11 @@ def DEV_GROUP = 'Dev Environment'
 
 
 task databaseUp(type: Exec) {
-    group=DEV_GROUP
+    group = DEV_GROUP
     commandLine './start-dev.sh'
 }
 
 task databaseDown(type: Exec) {
-    group=DEV_GROUP
+    group = DEV_GROUP
     commandLine './stop-dev.sh'
 }
