@@ -40,24 +40,25 @@ class TabelleService(@Autowired val mannschaftRepository: MannschaftRepository,
 
         checkIfGruppenphaseOver(spiel.gastMannschaft.jugend)
 
-        TODO("Nach gruppenphase platzhalter spiele ersetzen")
-        TODO("K.O phase plätze berechnen")
+        //TODO("Nach gruppenphase platzhalter spiele ersetzen")
+        //TODO("K.O phase plätze berechnen")
     }
 
     private fun checkIfGruppenphaseOver(jugend: Jugend) {
         val gruppenSpiele = spielRepository.findAllBySpielTypAndJugend(SpielTyp.GRUPPENSPIEL, jugend)
 
+
         // kein spiel mehr das 0:0 als ergebnis hat -> alle spiele gespielt!
-        if (gruppenSpiele.filter { it.heimTore == 0 && it.gastTore == 0 }.count() == 0) {
+        if (gruppenSpiele.filter { it.heimTore == 0 && it.gastTore == 0 }.count() == 0 ) {
             updateKOSpiele(jugend)
         }
     }
 
     private fun updateKOSpiele(jugend: Jugend) {
         // Mannschaften in Reihenfolge erster hat index 0 letzter hat letzten index
-        val mannschaften = mannschaftRepository.findAllByJugend(jugend).sortedBy { it.tabellenPlatz }
+        val mannschaften = mannschaftRepository.findAllByJugend(jugend).filter { it.verein.name != "placeholder" }.sortedBy { it.tabellenPlatz }
         val spieleKORunde = spielRepository.findAllByJugend(jugend).filter { it.spielTyp != SpielTyp.GRUPPENSPIEL }
-        if (spieleKORunde.size == 0) {
+        if (spieleKORunde.isEmpty()) {
             log.info("Die jugend $jugend hat keine K.O phase!")
             return
         }
@@ -65,6 +66,10 @@ class TabelleService(@Autowired val mannschaftRepository: MannschaftRepository,
         val allSpielUpdateList = mutableListOf<Spiel>()
         // halbfinals updaten da jeder mit ko runde diese hat!
         val erstesHalbfinale = spieleKORunde.find { it.spielTyp == SpielTyp.ERSTES_HALBFINALE }!!
+        if(erstesHalbfinale.heimMannschaft.verein.name != "placeholder"){
+            log.info("K.O Runden Spiele wurden Bereits erstellt kein update!")
+            return
+        }
         val zweitesHalbfinale = spieleKORunde.find { it.spielTyp == SpielTyp.ZWEITES_HALBFINALE }!!
         val erstesHalbfinaleUpdate = erstesHalbfinale.copy(heimMannschaft = mannschaften.findMannschaft(1, Gruppe.A),
                 gastMannschaft = mannschaften.findMannschaft(2, Gruppe.B))
