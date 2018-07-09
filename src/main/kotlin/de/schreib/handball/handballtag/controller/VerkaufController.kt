@@ -50,10 +50,27 @@ class VerkaufController(
     fun getVerkaufObject(): Verkauf = verkauf
 
     @Secured(ROLE_SPIELLEITER)
-    @PostMapping("artikel")
-    fun setArtikelList(@RequestBody allVerkaufArtikel: List<VerkaufArtikel>) {
+    @PostMapping("artikel/all")
+    fun addArtikelList(@RequestBody allVerkaufArtikel: List<VerkaufArtikel>) {
         verkaufArtikelRepository.saveAll(allVerkaufArtikel)
-        verkauf = verkauf.copy(verkaufArtikel = allVerkaufArtikel)
+        verkauf = verkauf.copy(verkaufArtikel = verkauf.verkaufArtikel.plus(allVerkaufArtikel))
+        verkaufRepository.save(verkauf)
+    }
+
+    @Secured(ROLE_SPIELLEITER)
+    @PostMapping("artikel")
+    fun addOrUpdateArtikel(@RequestBody verkaufArtikel: VerkaufArtikel) {
+        var new = false
+        if (verkauf.verkaufArtikel.find { it.id == verkaufArtikel.id } == null) {
+            new = true
+        }
+        verkaufArtikelRepository.save(verkaufArtikel)
+        verkauf = if (!new) {
+            verkauf.copy(verkaufArtikel = verkauf.verkaufArtikel.plus(verkaufArtikel))
+        } else {
+            verkauf.copy(verkaufArtikel = verkauf.verkaufArtikel
+                    .filter { it.id != verkaufArtikel.id }.plus(verkaufArtikel))
+        }
         verkaufRepository.save(verkauf)
     }
 
