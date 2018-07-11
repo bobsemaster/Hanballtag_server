@@ -36,13 +36,13 @@ class VerkaufController(
     @Secured(ROLE_SPIELLEITER)
     @DeleteMapping("artikel/{id}")
     fun deleteArtikel(@PathVariable id: Long) {
-        verkaufArtikelRepository.deleteById(id)
+        val verkauf = verkaufRepository.findAll()[0]
+        verkaufRepository.save(verkauf.copy(verkaufArtikel = verkauf.verkaufArtikel.filter { it.id != id }))
     }
 
     @Secured(ROLE_SPIELLEITER)
     @PostMapping("artikel/all")
     fun addArtikelList(@RequestBody allNewVerkaufArtikel: List<VerkaufArtikel>) {
-        verkaufArtikelRepository.saveAll(allNewVerkaufArtikel)
         val verkauf = verkaufRepository.findAll()[0]
         val allVerkaufArtikel = allNewVerkaufArtikel.plus(verkauf.verkaufArtikel).distinctBy { it.id }
         verkaufRepository.save(verkauf.copy(verkaufArtikel = allVerkaufArtikel))
@@ -50,12 +50,13 @@ class VerkaufController(
 
     @Secured(ROLE_SPIELLEITER)
     @PostMapping("artikel")
-    fun addOrUpdateArtikel(@RequestBody verkaufArtikel: VerkaufArtikel) {
+    fun addOrUpdateArtikel(@RequestBody verkaufArtikel: VerkaufArtikel): VerkaufArtikel {
         verkaufArtikelRepository.save(verkaufArtikel)
         val verkauf = verkaufRepository.findAll()[0]
         if(verkauf.verkaufArtikel.find { it.id == verkaufArtikel.id } == null){
             verkaufRepository.save(verkauf.copy(verkaufArtikel = verkauf.verkaufArtikel.plus(verkaufArtikel)))
         }
+        return verkaufArtikel
     }
 
     @GetMapping("tombola")
