@@ -1,5 +1,7 @@
 package de.schreib.handball.handballtag.entities
 
+import org.hibernate.annotations.Cascade
+import org.hibernate.annotations.CascadeType
 import javax.persistence.Entity
 import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
@@ -14,6 +16,7 @@ data class Verkauf(
         @OneToMany(
                 fetch = FetchType.EAGER
         )
+        @Cascade(CascadeType.ALL)
         val verkaufArtikel: List<VerkaufArtikel> = listOf(),
         val isLosverkaufGestartet: Boolean = false,
         val isPreisvergabeGestartet: Boolean = false,
