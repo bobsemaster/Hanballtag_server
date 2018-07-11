@@ -53,7 +53,7 @@ class VerkaufController(
     fun addOrUpdateArtikel(@RequestBody verkaufArtikel: VerkaufArtikel) {
         verkaufArtikelRepository.save(verkaufArtikel)
         val verkauf = verkaufRepository.findAll()[0]
-        if(!verkauf.verkaufArtikel.contains(verkaufArtikel)){
+        if(verkauf.verkaufArtikel.find { it.id == verkaufArtikel.id } == null){
             verkaufRepository.save(verkauf.copy(verkaufArtikel = verkauf.verkaufArtikel.plus(verkaufArtikel)))
         }
     }
