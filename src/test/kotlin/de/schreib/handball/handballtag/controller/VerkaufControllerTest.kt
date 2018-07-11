@@ -6,6 +6,7 @@ import de.schreib.handball.handballtag.repositories.VerkaufRepository
 import de.schreib.handball.handballtag.security.SPIELLEITER
 import org.hamcrest.CoreMatchers.`is`
 import org.junit.Assert.assertThat
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -32,11 +33,15 @@ class VerkaufControllerTest {
     @Autowired
     lateinit var verkaufController: VerkaufController
 
+    @Before
+    fun setUp() {
+        verkaufController.verkauf =  verkaufController.verkauf.copy(verkaufArtikel = listOf())
+    }
 
     @Test
     @Transactional
     fun `teste ob alle artikel mitgeliefert werde in findAll und setArtikelList funktioniert`() {
-        verkaufController.setArtikelList(listOf(VerkaufArtikel(artikelName = "Kuchen", artikelPreis = 1.00, verkaufsplatz = "Kuchenstand")))
+        verkaufController.addArtikelList(listOf(VerkaufArtikel(artikelName = "Kuchen", artikelPreis = 1.00, verkaufsplatz = "Kuchenstand")))
 
         val verkauf = verkaufController.getVerkaufObject()
         val expected = verkaufRepository.findAll()[0].verkaufArtikel
@@ -48,7 +53,7 @@ class VerkaufControllerTest {
     @Test
     fun `teste Ob set artikel list funktioniert`(){
         val artikel = VerkaufArtikel(artikelName = "Kuchen", artikelPreis = 1.00, verkaufsplatz = "Kuchenstand")
-        verkaufController.setArtikelList(listOf(artikel))
+        verkaufController.addArtikelList(listOf(artikel))
         assertThat(verkaufArtikelRepository.findById(artikel.id).get(), `is`(artikel))
     }
 
