@@ -68,17 +68,9 @@ class VerkaufController(
     @Secured(ROLE_SPIELLEITER)
     @PostMapping("artikel")
     fun addOrUpdateArtikel(@RequestBody verkaufArtikel: VerkaufArtikel) {
-        var new = false
-        if (verkauf.verkaufArtikel.find { it.id == verkaufArtikel.id } == null) {
-            new = true
-        }
         verkaufArtikelRepository.save(verkaufArtikel)
-        verkauf = if (!new) {
-            verkauf.copy(verkaufArtikel = verkauf.verkaufArtikel.plus(verkaufArtikel))
-        } else {
             verkauf.copy(verkaufArtikel = verkauf.verkaufArtikel
                     .filter { it.id != verkaufArtikel.id }.plus(verkaufArtikel))
-        }
         verkaufRepository.save(verkauf)
     }
 
