@@ -6,6 +6,7 @@ import de.schreib.handball.handballtag.repositories.VerkaufArtikelRepository
 import de.schreib.handball.handballtag.repositories.VerkaufRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.annotation.Secured
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -48,6 +49,13 @@ class VerkaufController(
 
     @GetMapping("all")
     fun getVerkaufObject(): Verkauf = verkauf
+
+    @Secured(ROLE_SPIELLEITER)
+    @DeleteMapping("artikel/{id}")
+    fun deleteArtikel(@PathVariable id: Long) {
+        verkauf = verkauf.copy(verkaufArtikel = verkauf.verkaufArtikel.filter { it.id != id })
+        verkaufArtikelRepository.deleteById(id)
+    }
 
     @Secured(ROLE_SPIELLEITER)
     @PostMapping("artikel/all")
