@@ -24,7 +24,7 @@ class VerkaufController(
 
     @PostConstruct
     fun initVerkauf() {
-        if(verkaufRepository.findAll().isEmpty()){
+        if (verkaufRepository.findAll().isEmpty()) {
             val verkauf = Verkauf()
             verkaufRepository.save(verkauf)
         }
@@ -41,14 +41,21 @@ class VerkaufController(
 
     @Secured(ROLE_SPIELLEITER)
     @PostMapping("artikel/all")
-    fun addArtikelList(@RequestBody allVerkaufArtikel: List<VerkaufArtikel>) {
-        verkaufArtikelRepository.saveAll(allVerkaufArtikel)
+    fun addArtikelList(@RequestBody allNewVerkaufArtikel: List<VerkaufArtikel>) {
+        verkaufArtikelRepository.saveAll(allNewVerkaufArtikel)
+        val verkauf = verkaufRepository.findAll()[0]
+        val allVerkaufArtikel = allNewVerkaufArtikel.plus(verkauf.verkaufArtikel).distinctBy { it.id }
+        verkaufRepository.save(verkauf.copy(verkaufArtikel = allVerkaufArtikel))
     }
 
     @Secured(ROLE_SPIELLEITER)
     @PostMapping("artikel")
     fun addOrUpdateArtikel(@RequestBody verkaufArtikel: VerkaufArtikel) {
         verkaufArtikelRepository.save(verkaufArtikel)
+        val verkauf = verkaufRepository.findAll()[0]
+        if(!verkauf.verkaufArtikel.contains(verkaufArtikel)){
+            verkaufRepository.save(verkauf.copy(verkaufArtikel = verkauf.verkaufArtikel.plus(verkaufArtikel)))
+        }
     }
 
     @GetMapping("tombola")
