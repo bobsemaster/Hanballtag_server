@@ -14,7 +14,7 @@ data class Verkauf(
         @OneToMany(
                 fetch = FetchType.EAGER
         )
-        val verkaufArtikel: List<VerkaufArtikel>,
+        val verkaufArtikel: List<VerkaufArtikel> = listOf(),
         val isLosverkaufGestartet: Boolean = false,
         val isPreisvergabeGestartet: Boolean = false,
         val isGrillAn: Boolean = false

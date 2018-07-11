@@ -6,7 +6,6 @@ import de.schreib.handball.handballtag.repositories.VerkaufRepository
 import de.schreib.handball.handballtag.security.SPIELLEITER
 import org.hamcrest.CoreMatchers.`is`
 import org.junit.Assert.assertThat
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -33,10 +32,7 @@ class VerkaufControllerTest {
     @Autowired
     lateinit var verkaufController: VerkaufController
 
-    @Before
-    fun setUp() {
-        verkaufController.verkauf =  verkaufController.verkauf.copy(verkaufArtikel = listOf())
-    }
+
 
     @Test
     @Transactional
