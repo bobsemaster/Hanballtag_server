@@ -63,6 +63,7 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
         })
         // Alte Spiele löschen damit neuer Spielplan erzteugt werden kann
         spielRepository.deleteAllByHeimMannschaftInOrGastMannschaftIn(allJugendMannschaft, allJugendMannschaft)
+        resetMannschaften()
         // NICHT deleteAllByVerein benutzen, da wir nur die Mannschaften löschen wollen, die in der Jugend spielen für
         // die wir einen Spielplan erstellen
         mannschaftRepository.deleteAll(allJugendMannschaft.filter { it.verein.name == platzhalterVerein.name })
@@ -97,6 +98,12 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
         // TODO validierung dass der Platz auf dem die Spiele stattfinden zu jedem Zeitpunkt frei ist
         spielRepository.saveAll(spielplanList)
         spielplanList.clear()
+    }
+
+    private fun resetMannschaften() {
+        allJugendMannschaft.forEach {
+            mannschaftRepository.save(it.copy(torverhaeltnis = Pair(0, 0), punkteverhaeltnis = Pair(0, 0), tabellenPlatz = 0))
+        }
     }
 
     // Aus vorläufigem spielplan 2018
