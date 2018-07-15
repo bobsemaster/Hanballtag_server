@@ -109,4 +109,14 @@ class MannschaftController(
     fun getAllMannschaftenToJugend(@RequestBody jugend: Jugend): List<Mannschaft> {
         return mannschaftRepository.findAllByJugend(jugend).sortedBy { it.tabellenPlatz }
     }
+
+    @Secured(ROLE_SPIELLEITER)
+    @GetMapping("{id}/spielplan/{index}")
+    fun setSpielplanIndex(@PathVariable id:Long, @PathVariable index:Int){
+        val mannschaftOptional = mannschaftRepository.findById(id)
+        if (!mannschaftOptional.isPresent) {
+            throw MannschaftNotFoundException("Mannschaft mit der id $id konnte nicht gefunden werden!")
+        }
+        mannschaftRepository.save(mannschaftOptional.get().copy(spielplanIndex = index))
+    }
 }
