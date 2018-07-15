@@ -39,7 +39,8 @@ data class Mannschaft(
         val hasFoto: Boolean = false,
         val tabellenPlatz: Int = 0,
         @Enumerated(EnumType.STRING)
-        val gruppe: Gruppe = Gruppe.A
+        val gruppe: Gruppe = Gruppe.A,
+        val spielplanIndex:Int = Int.MAX_VALUE
 ) {
 
     @Component

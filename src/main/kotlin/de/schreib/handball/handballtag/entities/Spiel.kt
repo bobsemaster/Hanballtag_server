@@ -44,7 +44,8 @@ data class Spiel(
         @Enumerated(EnumType.STRING)
         val spielTyp: SpielTyp = SpielTyp.NONE,
         @Enumerated(EnumType.STRING)
-        val gruppe: Gruppe = Gruppe.A
+        val gruppe: Gruppe = Gruppe.A,
+        val hasErgebnis:Boolean = false
 )
 
 enum class Gruppe {
