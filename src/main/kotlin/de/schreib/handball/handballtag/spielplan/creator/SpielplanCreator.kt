@@ -109,8 +109,8 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
             jugend.jahrgang == JugendEnum.MINIS && jugend.typ == JugendGender.GEMISCHT -> 4
             jugend.jahrgang == JugendEnum.BJUGEND && jugend.typ == JugendGender.MAENNLICH -> 1
             jugend.jahrgang == JugendEnum.BJUGEND && jugend.typ == JugendGender.WEIBLICH -> 2
-            jugend.jahrgang == JugendEnum.CJUGEND && jugend.typ == JugendGender.WEIBLICH -> 3
-            jugend.jahrgang == JugendEnum.CJUGEND && jugend.typ == JugendGender.MAENNLICH -> 4
+            jugend.jahrgang == JugendEnum.CJUGEND && jugend.typ == JugendGender.WEIBLICH -> 4
+            jugend.jahrgang == JugendEnum.CJUGEND && jugend.typ == JugendGender.MAENNLICH -> 5
             else -> 0
         }
     }

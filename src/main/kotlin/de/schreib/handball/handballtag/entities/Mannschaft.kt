@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
+import java.util.*
 import javax.annotation.PostConstruct
 import javax.persistence.Entity
 import javax.persistence.EnumType
@@ -40,7 +41,8 @@ data class Mannschaft(
         val tabellenPlatz: Int = 0,
         @Enumerated(EnumType.STRING)
         val gruppe: Gruppe = Gruppe.A,
-        val spielplanIndex:Int = Int.MAX_VALUE
+        // Nummer sollte einzigartig sein damit nicht zweimal die gleiche nummer existiert und die reihen folge dadurch zufällig ist
+        val spielplanIndex:Int = Random().nextInt(Int.MAX_VALUE)
 ) {
 
     @Component
