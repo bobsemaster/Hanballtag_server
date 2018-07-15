@@ -1,6 +1,7 @@
 package de.schreib.handball.handballtag.controller
 
 import de.schreib.handball.handballtag.entities.Mannschaft
+import de.schreib.handball.handballtag.entities.Spiel
 import de.schreib.handball.handballtag.entities.Verein
 import de.schreib.handball.handballtag.exceptions.VereinAlreadyExistException
 import de.schreib.handball.handballtag.exceptions.VereinNotFoundException
@@ -75,6 +76,16 @@ class VereinController(
         mannschaftRepository.deleteAllByVerein(verein)
         mannschaftRepository.flush()
         vereinRepository.deleteById(id)
+    }
+
+    @GetMapping("{id}/spiel")
+    fun getAllSpielToVerein(@PathVariable id:Long):List<Spiel>{
+        val vereinOptional = vereinRepository.findById(id)
+        if(!vereinOptional.isPresent){
+            throw VereinNotFoundException("Verein mit der id $id konnte nicht gefunden werden!")
+        }
+        return vereinOptional.get().getAllVereinSpiel()
+
     }
 
 }

@@ -36,6 +36,11 @@ data class Verein(
     fun getAllMannschaft(): List<Mannschaft> {
         return mannschaftRepository.findAllByVerein(this)
     }
+
+    @JsonIgnore
+    fun getAllVereinSpiel(): List<Spiel> {
+        return getAllMannschaft().flatMap { it.getAllSpiel() }
+    }
 }
 
 

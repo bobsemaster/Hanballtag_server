@@ -54,7 +54,7 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
     // sechsMannschaftenGruppe entscheidung ob man den spielplasn mit gruppen erstellt oder nicht
     @Transactional
     fun createSpielplan(jugend: Jugend, spielDuration: Duration, pauseDuration: Duration, turnierBeginn: LocalDateTime, spielplatz: Int, sechsMannschaftenGruppe: Boolean = false) {
-        allJugendMannschaft = mannschaftRepository.findAllByJugend(jugend)
+        allJugendMannschaft = mannschaftRepository.findAllByJugend(jugend).sortedBy { it.gruppe }
         // Alte Spiele löschen damit neuer Spielplan erzteugt werden kann
         spielRepository.deleteAllByHeimMannschaftInOrGastMannschaftIn(allJugendMannschaft, allJugendMannschaft)
         // NICHT deleteAllByVerein benutzen, da wir nur die Mannschaften löschen wollen, die in der Jugend spielen für

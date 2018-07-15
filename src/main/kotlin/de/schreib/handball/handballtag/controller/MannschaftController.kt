@@ -1,5 +1,6 @@
 package de.schreib.handball.handballtag.controller
 
+import de.schreib.handball.handballtag.entities.Gruppe
 import de.schreib.handball.handballtag.entities.Jugend
 import de.schreib.handball.handballtag.entities.Mannschaft
 import de.schreib.handball.handballtag.entities.Spiel
@@ -41,6 +42,17 @@ class MannschaftController(
         } else {
             return emptyList()
         }
+    }
+
+    @Secured(ROLE_SPIELLEITER)
+    @GetMapping("/{id}/gruppe/{neueGruppe}")
+    fun updateGruppe(@PathVariable id: Long, @PathVariable neueGruppe: Gruppe) {
+        val mannschaftOptional = mannschaftRepository.findById(id)
+        if(!mannschaftOptional.isPresent){
+            throw MannschaftNotFoundException("Mannschaft mit id $id existiert nicht!")
+        }
+        val mannschaft = mannschaftOptional.get()
+        mannschaftRepository.save(mannschaft.copy(gruppe = neueGruppe))
     }
 
     @GetMapping("{id}")
