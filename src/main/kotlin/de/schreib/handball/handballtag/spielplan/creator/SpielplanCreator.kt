@@ -248,14 +248,13 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
         spiel(Kuerzel.G, Kuerzel.H)
         spiel(Kuerzel.B, Kuerzel.C)
         spiel(Kuerzel.F, Kuerzel.G)
-        spiel(Kuerzel.A, Kuerzel.C)
-        spiel(Kuerzel.E, Kuerzel.G)
         spiel(Kuerzel.D, Kuerzel.A)
         spiel(Kuerzel.H, Kuerzel.E)
-        spiel(Kuerzel.B, Kuerzel.D)
-        spiel(Kuerzel.F, Kuerzel.H)
+        spiel(Kuerzel.C, Kuerzel.A)
+        spiel(Kuerzel.G, Kuerzel.E)
+        spiel(Kuerzel.D, Kuerzel.B)
+        spiel(Kuerzel.H, Kuerzel.F)
         alternateGroup = false
-
         //K.O phase
         planSpiel(ersterGruppeA, zweiterGruppeB, SpielTyp.ERSTES_HALBFINALE)
         planSpiel(ersterGruppeB, zweiterGruppeA, SpielTyp.ZWEITES_HALBFINALE)
