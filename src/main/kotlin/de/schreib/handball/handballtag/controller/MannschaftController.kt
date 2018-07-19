@@ -48,7 +48,7 @@ class MannschaftController(
     @GetMapping("/{id}/gruppe/{neueGruppe}")
     fun updateGruppe(@PathVariable id: Long, @PathVariable neueGruppe: Gruppe) {
         val mannschaftOptional = mannschaftRepository.findById(id)
-        if(!mannschaftOptional.isPresent){
+        if (!mannschaftOptional.isPresent) {
             throw MannschaftNotFoundException("Mannschaft mit id $id existiert nicht!")
         }
         val mannschaft = mannschaftOptional.get()
@@ -112,11 +112,21 @@ class MannschaftController(
 
     @Secured(ROLE_SPIELLEITER)
     @GetMapping("{id}/spielplan/{index}")
-    fun setSpielplanIndex(@PathVariable id:Long, @PathVariable index:Int){
+    fun setSpielplanIndex(@PathVariable id: Long, @PathVariable index: Int) {
         val mannschaftOptional = mannschaftRepository.findById(id)
         if (!mannschaftOptional.isPresent) {
             throw MannschaftNotFoundException("Mannschaft mit der id $id konnte nicht gefunden werden!")
         }
         mannschaftRepository.save(mannschaftOptional.get().copy(spielplanIndex = index))
+    }
+
+    @Secured(ROLE_SPIELLEITER)
+    @GetMapping("{id}/tabellenplatz/neu/{neuerTabellenPlatz}")
+    fun changeTabellenplatz(@PathVariable id: Long, @PathVariable neuerTabellenPlatz: Int) {
+        val mannschaftOptional = mannschaftRepository.findById(id)
+        if (!mannschaftOptional.isPresent) {
+            throw MannschaftNotFoundException("Mannschaft mit der id $id konnte nicht gefunden werden!")
+        }
+        mannschaftRepository.save(mannschaftOptional.get().copy(tabellenPlatz = neuerTabellenPlatz))
     }
 }

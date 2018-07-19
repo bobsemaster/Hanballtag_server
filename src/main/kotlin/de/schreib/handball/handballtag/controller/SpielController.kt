@@ -134,6 +134,12 @@ class SpielController(
                 Duration.ofMinutes(platzVerschiebenHelper.pauseDuration))
     }
 
+    @Secured(ROLE_SPIELLEITER)
+    @PostMapping("spielplan/kospiele/reload")
+    fun reloadKoSpiele(@RequestBody jugend: Jugend){
+        tabelleService.updateKOSpiele(jugend)
+    }
+
 
 }
 

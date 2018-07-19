@@ -54,7 +54,7 @@ class TabelleService(@Autowired val mannschaftRepository: MannschaftRepository,
         }
     }
 
-    private fun updateKOSpiele(jugend: Jugend) {
+    fun updateKOSpiele(jugend: Jugend) {
         // Mannschaften in Reihenfolge erster hat index 0 letzter hat letzten index
         val mannschaften = mannschaftRepository.findAllByJugend(jugend).filter { it.verein.name != "placeholder" }.sortedBy { it.tabellenPlatz }
         val spieleKORunde = spielRepository.findAllByJugend(jugend).filter { it.spielTyp != SpielTyp.GRUPPENSPIEL }
