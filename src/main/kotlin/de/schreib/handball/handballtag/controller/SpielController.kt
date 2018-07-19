@@ -76,19 +76,21 @@ class SpielController(
     @PostMapping("{id}/ergebnis")
     fun setSpielErgebnisKampfgericht(@RequestBody ergebnis: SpielErgebnis, @PathVariable id: Long) {
         val spiel = getSpielById(id)
+        val oldSpiel = spiel.copy()
         if (spiel.gastTore != 0 || spiel.heimTore != 0) {
             throw AuthorizationServiceException("Kampfgericht ist nicht autorisert das spielergebnis nachträglich zu ändern")
         }
         val updatedSpiel = spielRepository.save(spiel.copy(heimTore = ergebnis.toreHeim, gastTore = ergebnis.toreGast, hasErgebnis = true))
-        tabelleService.processSpielergebnis(updatedSpiel)
+        tabelleService.processSpielergebnis(updatedSpiel, oldSpiel)
     }
 
     @Secured(ROLE_SPIELLEITER)
     @PostMapping("{id}/spielstand")
     fun setSpielstandSpielleiter(@RequestBody ergebnis: SpielErgebnis, @PathVariable id: Long) {
         val spiel = getSpielById(id)
+        val oldSpiel = spiel.copy()
         val updatedSpiel = spielRepository.save(spiel.copy(heimTore = ergebnis.toreHeim, gastTore = ergebnis.toreGast, hasErgebnis = true))
-        tabelleService.processSpielergebnis(updatedSpiel)
+        tabelleService.processSpielergebnis(updatedSpiel, oldSpiel)
     }
 
     @Transactional
@@ -131,6 +133,7 @@ class SpielController(
         spielplanService.changePlatzOfSpiel(spiel, platzVerschiebenHelper.newPlatz,
                 Duration.ofMinutes(platzVerschiebenHelper.pauseDuration))
     }
+
 
 }
 

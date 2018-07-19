@@ -17,8 +17,8 @@ class TabelleService(@Autowired val mannschaftRepository: MannschaftRepository,
 
     val log = LoggerFactory.getLogger(this::class.java)
 
-    fun processSpielergebnis(spiel: Spiel) {
-        updateMannschaften(spiel)
+    fun processSpielergebnis(spiel: Spiel, oldSpiel: Spiel? = null) {
+        updateMannschaften(spiel, oldSpiel)
         when (spiel.spielTyp) {
             SpielTyp.GRUPPENSPIEL -> calculateNewTabellenPlatzGruppenphase(spiel)
             SpielTyp.ERSTES_HALBFINALE -> handleHalbfinale(spiel, SpielTyp.ERSTES_HALBFINALE)
@@ -48,8 +48,8 @@ class TabelleService(@Autowired val mannschaftRepository: MannschaftRepository,
         val gruppenSpiele = spielRepository.findAllBySpielTypAndJugend(SpielTyp.GRUPPENSPIEL, jugend)
 
 
-        // kein spiel mehr das 0:0 als ergebnis hat -> alle spiele gespielt!
-        if (gruppenSpiele.filter { it.heimTore == 0 && it.gastTore == 0 }.count() == 0 ) {
+        // kein spiel mehr dem kein ergebnis zugewiesen wurde-> alle spiele gespielt!
+        if (gruppenSpiele.filter { !it.hasErgebnis }.count() == 0 ) {
             updateKOSpiele(jugend)
         }
     }
@@ -349,8 +349,12 @@ class TabelleService(@Autowired val mannschaftRepository: MannschaftRepository,
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    private fun updateMannschaften(spiel: Spiel) {
+    private fun updateMannschaften(spiel: Spiel, oldSpiel: Spiel? = null) {
+        if(oldSpiel != null && oldSpiel.hasErgebnis){
+            removeOldSpielErgebnis(oldSpiel)
+        }
         val punkteVerhaeltnisSpiel = getPunkteVerhaeltnis(spiel)
+
         val newHeimPunkteVerhaeltnis = punkteVerhaeltnisSpiel + spiel.heimMannschaft.punkteverhaeltnis
 
         val newGastPunkteVerhaeltnis = punkteVerhaeltnisSpiel.flip() + spiel.gastMannschaft.punkteverhaeltnis
@@ -359,6 +363,24 @@ class TabelleService(@Autowired val mannschaftRepository: MannschaftRepository,
 
         val newGastTorVerhaeltnis = Pair(spiel.gastTore, spiel.heimTore) + spiel.gastMannschaft.torverhaeltnis
 
+
+        val heimUpdate = spiel.heimMannschaft.copy(punkteverhaeltnis = newHeimPunkteVerhaeltnis, torverhaeltnis = newHeimTorVerhaeltnis)
+        val gastUpdate = spiel.gastMannschaft.copy(punkteverhaeltnis = newGastPunkteVerhaeltnis, torverhaeltnis = newGastTorVerhaeltnis)
+
+        mannschaftRepository.save(heimUpdate)
+        mannschaftRepository.save(gastUpdate)
+    }
+
+    private fun removeOldSpielErgebnis(spiel: Spiel) {
+        val punkteVerhaeltnisSpiel = getPunkteVerhaeltnis(spiel)
+
+        val newHeimPunkteVerhaeltnis = punkteVerhaeltnisSpiel - spiel.heimMannschaft.punkteverhaeltnis
+
+        val newGastPunkteVerhaeltnis = punkteVerhaeltnisSpiel.flip() - spiel.gastMannschaft.punkteverhaeltnis
+
+        val newHeimTorVerhaeltnis = Pair(spiel.heimTore, spiel.gastTore) - spiel.heimMannschaft.torverhaeltnis
+
+        val newGastTorVerhaeltnis = Pair(spiel.gastTore, spiel.heimTore) - spiel.gastMannschaft.torverhaeltnis
 
         val heimUpdate = spiel.heimMannschaft.copy(punkteverhaeltnis = newHeimPunkteVerhaeltnis, torverhaeltnis = newHeimTorVerhaeltnis)
         val gastUpdate = spiel.gastMannschaft.copy(punkteverhaeltnis = newGastPunkteVerhaeltnis, torverhaeltnis = newGastTorVerhaeltnis)
@@ -382,6 +404,10 @@ private fun <A, B> Pair<A, B>.flip(): Pair<B, A> {
 
 private operator fun Pair<Int, Int>.plus(other: Pair<Int, Int>): Pair<Int, Int> {
     return Pair(this.first + other.first, this.second + other.second)
+}
+
+private operator fun Pair<Int, Int>.minus(other: Pair<Int, Int>): Pair<Int, Int> {
+    return Pair(this.first - other.first, this.second - other.second)
 }
 
 /**
