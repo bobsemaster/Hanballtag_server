@@ -1,4 +1,4 @@
-package de.schreib.handball.handballtag.tabelle
+package de.schreib.handball.handballtag.Services
 
 import de.schreib.handball.handballtag.entities.Gruppe
 import de.schreib.handball.handballtag.entities.Jugend

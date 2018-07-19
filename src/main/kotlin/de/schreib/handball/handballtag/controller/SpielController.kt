@@ -1,22 +1,18 @@
 package de.schreib.handball.handballtag.controller
 
+import de.schreib.handball.handballtag.Services.SpielplanCreatorService
+import de.schreib.handball.handballtag.Services.SpielplanService
+import de.schreib.handball.handballtag.Services.TabelleService
 import de.schreib.handball.handballtag.entities.Jugend
 import de.schreib.handball.handballtag.entities.Spiel
 import de.schreib.handball.handballtag.exceptions.SpielNotFoundException
 import de.schreib.handball.handballtag.repositories.MannschaftRepository
 import de.schreib.handball.handballtag.repositories.SpielRepository
-import de.schreib.handball.handballtag.spielplan.creator.SpielplanCreatorService
-import de.schreib.handball.handballtag.tabelle.TabelleService
 import kotlinx.coroutines.experimental.launch
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.AuthorizationServiceException
 import org.springframework.security.access.annotation.Secured
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.time.Duration
 import java.time.LocalDateTime
 import javax.transaction.Transactional
@@ -27,7 +23,8 @@ class SpielController(
         @Autowired val mannschaftRepository: MannschaftRepository,
         @Autowired val spielRepository: SpielRepository,
         @Autowired val spielplanCreatorService: SpielplanCreatorService,
-        @Autowired val tabelleService: TabelleService
+        @Autowired val tabelleService: TabelleService,
+        @Autowired val spielplanService: SpielplanService
 ) {
     @GetMapping("all")
     fun getAllSpiel(): List<Spiel> = spielRepository.findAll().sortedBy { it.dateTime }
@@ -95,7 +92,7 @@ class SpielController(
     }
 
     @Transactional
-    @Secured(ROLE_KAMPFGERICHT)
+    @Secured(ROLE_SPIELLEITER)
     @PostMapping("createspielplan/one")
     fun createSpielplanForJugend(@RequestBody spielCreatorInfo: SpielCreatorInfo) {
         launch {
@@ -105,7 +102,7 @@ class SpielController(
     }
 
 
-    @Secured(ROLE_KAMPFGERICHT)
+    @Secured(ROLE_SPIELLEITER)
     @PostMapping("createspielplan/multiple")
     fun createMultipleSpielplan(@RequestBody allSpielCreatorInfo: List<SpielCreatorInfo>) {
         launch {
@@ -115,6 +112,19 @@ class SpielController(
 
             }
         }
+    }
+
+    @Secured(ROLE_SPIELLEITER)
+    @PostMapping("pause")
+    fun addPauseToSpiele(@RequestBody pauseViewHelper: PauseHelper) {
+        spielplanService.addPauseToJugenden(pauseViewHelper.allJugend, pauseViewHelper.pauseStartTime, pauseViewHelper.pauseDuration)
+    }
+
+    @Secured(ROLE_SPIELLEITER)
+    @PostMapping("platz/verschieben")
+    fun addPauseToSpiele(@RequestBody platzVerschiebenHelper: PlatzVerschiebenHelper) {
+        spielplanService.changePlatzOfSpiel(platzVerschiebenHelper.spiel, platzVerschiebenHelper.newPlatz,
+                platzVerschiebenHelper.pauseDuration)
     }
 
 }
@@ -129,3 +139,7 @@ data class SpielCreatorInfo(
 )
 
 data class SpielErgebnis(val toreHeim: Int, val toreGast: Int)
+
+data class PauseHelper(val allJugend: List<Jugend>, val pauseStartTime: LocalDateTime, val pauseDuration: Duration)
+
+data class PlatzVerschiebenHelper(val spiel: Spiel, val newPlatz: Int, val pauseDuration: Duration)
