@@ -29,6 +29,9 @@ class SpielplanService(@Autowired val spielRepository: SpielRepository) {
                 .sortedBy { it.dateTime }
         val lastSpielOnPlatz = allSpielOnNewPlatz.last()
         val newDateTime = lastSpielOnPlatz.dateTime.plus(lastSpielOnPlatz.halftimeDuration).plus(pauseDuration)
+        val allSpielOnOldPlatz = spielRepository.findAllBySpielPlatz(spiel.spielPlatz!!).filter { it.dateTime >= spiel.dateTime && it.dateTime.dayOfMonth == spiel.dateTime.dayOfMonth }
+        // Nachfolgende Spiele vorverlegen
+        spielRepository.saveAll(allSpielOnOldPlatz.map { it.copy(dateTime = it.dateTime.minus(spiel.halftimeDuration).minus(pauseDuration)) })
         spielRepository.save(spiel.copy(spielPlatz = newPlatz, dateTime = newDateTime))
     }
 }

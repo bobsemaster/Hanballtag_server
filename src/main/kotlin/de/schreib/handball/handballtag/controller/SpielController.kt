@@ -123,8 +123,13 @@ class SpielController(
     @Secured(ROLE_SPIELLEITER)
     @PostMapping("platz/verschieben")
     fun addPauseToSpiele(@RequestBody platzVerschiebenHelper: PlatzVerschiebenHelper) {
-        spielplanService.changePlatzOfSpiel(platzVerschiebenHelper.spiel, platzVerschiebenHelper.newPlatz,
-                platzVerschiebenHelper.pauseDuration)
+        val spielOptional = spielRepository.findById(platzVerschiebenHelper.spielId)
+        if (!spielOptional.isPresent) {
+            throw SpielNotFoundException("Spiel mit der id ${platzVerschiebenHelper.spielId} nicht gefunden")
+        }
+        val spiel = spielOptional.get()
+        spielplanService.changePlatzOfSpiel(spiel, platzVerschiebenHelper.newPlatz,
+                Duration.ofMinutes(platzVerschiebenHelper.pauseDuration))
     }
 
 }
@@ -142,4 +147,4 @@ data class SpielErgebnis(val toreHeim: Int, val toreGast: Int)
 
 data class PauseHelper(val allJugend: List<Jugend>, val pauseStartTime: LocalDateTime, val pauseDuration: Long)
 
-data class PlatzVerschiebenHelper(val spiel: Spiel, val newPlatz: Int, val pauseDuration: Duration)
+data class PlatzVerschiebenHelper(val spielId: Long, val newPlatz: Int, val pauseDuration: Long)
