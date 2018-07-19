@@ -117,7 +117,7 @@ class SpielController(
     @Secured(ROLE_SPIELLEITER)
     @PostMapping("pause")
     fun addPauseToSpiele(@RequestBody pauseViewHelper: PauseHelper) {
-        spielplanService.addPauseToJugenden(pauseViewHelper.allJugend, pauseViewHelper.pauseStartTime, pauseViewHelper.pauseDuration)
+        spielplanService.addPauseToJugenden(pauseViewHelper.allJugend, pauseViewHelper.pauseStartTime, Duration.ofMinutes(pauseViewHelper.pauseDuration))
     }
 
     @Secured(ROLE_SPIELLEITER)
@@ -140,6 +140,6 @@ data class SpielCreatorInfo(
 
 data class SpielErgebnis(val toreHeim: Int, val toreGast: Int)
 
-data class PauseHelper(val allJugend: List<Jugend>, val pauseStartTime: LocalDateTime, val pauseDuration: Duration)
+data class PauseHelper(val allJugend: List<Jugend>, val pauseStartTime: LocalDateTime, val pauseDuration: Long)
 
 data class PlatzVerschiebenHelper(val spiel: Spiel, val newPlatz: Int, val pauseDuration: Duration)
