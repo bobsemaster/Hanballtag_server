@@ -1,5 +1,6 @@
 package de.schreib.handball.handballtag.controller
 
+import de.schreib.handball.handballtag.Services.PLATZHALTER_VEREIN_NAME
 import de.schreib.handball.handballtag.entities.Gruppe
 import de.schreib.handball.handballtag.entities.Jugend
 import de.schreib.handball.handballtag.entities.Mannschaft
@@ -9,16 +10,9 @@ import de.schreib.handball.handballtag.exceptions.VereinNotFoundException
 import de.schreib.handball.handballtag.repositories.MannschaftRepository
 import de.schreib.handball.handballtag.repositories.SpielRepository
 import de.schreib.handball.handballtag.repositories.VereinRepository
-import de.schreib.handball.handballtag.Services.PLATZHALTER_VEREIN_NAME
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.annotation.Secured
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import javax.transaction.Transactional
 
 @RestController
@@ -120,13 +114,18 @@ class MannschaftController(
         mannschaftRepository.save(mannschaftOptional.get().copy(spielplanIndex = index))
     }
 
+
     @Secured(ROLE_SPIELLEITER)
-    @GetMapping("{id}/tabellenplatz/neu/{neuerTabellenPlatz}")
-    fun changeTabellenplatz(@PathVariable id: Long, @PathVariable neuerTabellenPlatz: Int) {
-        val mannschaftOptional = mannschaftRepository.findById(id)
-        if (!mannschaftOptional.isPresent) {
-            throw MannschaftNotFoundException("Mannschaft mit der id $id konnte nicht gefunden werden!")
+    @PostMapping("tabellenplatz/neu")
+    fun changeTabellenplatz(@RequestBody idPlatzPair: List<Pair<Long, Int>>) {
+        idPlatzPair.forEach {
+            val id = it.first
+            val neuerTabellenPlatz = it.second
+            val mannschaftOptional = mannschaftRepository.findById(id)
+            if (!mannschaftOptional.isPresent) {
+                throw MannschaftNotFoundException("Mannschaft mit der id $id konnte nicht gefunden werden!")
+            }
+            mannschaftRepository.save(mannschaftOptional.get().copy(tabellenPlatz = neuerTabellenPlatz))
         }
-        mannschaftRepository.save(mannschaftOptional.get().copy(tabellenPlatz = neuerTabellenPlatz))
     }
 }

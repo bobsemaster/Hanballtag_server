@@ -136,7 +136,7 @@ class SpielController(
 
     @Secured(ROLE_SPIELLEITER)
     @PostMapping("spielplan/kospiele/reload")
-    fun reloadKoSpiele(@RequestBody jugend: Jugend){
+    fun reloadKoSpiele(@RequestBody jugend: Jugend) {
         tabelleService.updateKOSpiele(jugend)
     }
 
