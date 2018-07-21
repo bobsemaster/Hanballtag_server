@@ -336,6 +336,7 @@ class TabelleService(@Autowired val mannschaftRepository: MannschaftRepository,
     }
 
     private fun mehrTore(o1: Mannschaft, o2: Mannschaft): Int {
+        TODO("Nur aus den Mannschaften die verglichen werden")
         return when {
             o1.torverhaeltnis.first > o2.torverhaeltnis.first -> 1
             o1.torverhaeltnis.first < o2.torverhaeltnis.first -> -1
@@ -374,13 +375,13 @@ class TabelleService(@Autowired val mannschaftRepository: MannschaftRepository,
     private fun removeOldSpielErgebnis(spiel: Spiel) {
         val punkteVerhaeltnisSpiel = getPunkteVerhaeltnis(spiel)
 
-        val newHeimPunkteVerhaeltnis = punkteVerhaeltnisSpiel - spiel.heimMannschaft.punkteverhaeltnis
+        val newHeimPunkteVerhaeltnis = spiel.heimMannschaft.punkteverhaeltnis - punkteVerhaeltnisSpiel
 
-        val newGastPunkteVerhaeltnis = punkteVerhaeltnisSpiel.flip() - spiel.gastMannschaft.punkteverhaeltnis
+        val newGastPunkteVerhaeltnis = spiel.gastMannschaft.punkteverhaeltnis - punkteVerhaeltnisSpiel.flip()
 
-        val newHeimTorVerhaeltnis = Pair(spiel.heimTore, spiel.gastTore) - spiel.heimMannschaft.torverhaeltnis
+        val newHeimTorVerhaeltnis = spiel.heimMannschaft.torverhaeltnis - Pair(spiel.heimTore, spiel.gastTore)
 
-        val newGastTorVerhaeltnis = Pair(spiel.gastTore, spiel.heimTore) - spiel.gastMannschaft.torverhaeltnis
+        val newGastTorVerhaeltnis = spiel.gastMannschaft.torverhaeltnis - Pair(spiel.gastTore, spiel.heimTore)
 
         val heimUpdate = spiel.heimMannschaft.copy(punkteverhaeltnis = newHeimPunkteVerhaeltnis, torverhaeltnis = newHeimTorVerhaeltnis)
         val gastUpdate = spiel.gastMannschaft.copy(punkteverhaeltnis = newGastPunkteVerhaeltnis, torverhaeltnis = newGastTorVerhaeltnis)
