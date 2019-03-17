@@ -6,7 +6,11 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 class SimpleUrlAuthenticationFailureHandler : AuthenticationFailureHandler {
-    override fun onAuthenticationFailure(request: HttpServletRequest?, response: HttpServletResponse?, exception: AuthenticationException?) {
+    override fun onAuthenticationFailure(
+        request: HttpServletRequest?,
+        response: HttpServletResponse?,
+        exception: AuthenticationException?
+    ) {
         val message = "Authentication failed ${exception?.message}"
         response?.sendError(HttpServletResponse.SC_UNAUTHORIZED, message)
     }

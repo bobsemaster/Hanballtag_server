@@ -18,8 +18,10 @@ import javax.annotation.PostConstruct
 @RestController
 @RequestMapping("/verkauf/")
 class VerkaufController(
-        @Autowired val verkaufRepository: VerkaufRepository,
-        @Autowired val verkaufArtikelRepository: VerkaufArtikelRepository
+    @Autowired
+    val verkaufRepository: VerkaufRepository,
+    @Autowired
+    val verkaufArtikelRepository: VerkaufArtikelRepository
 ) {
 
     @PostConstruct
@@ -35,14 +37,20 @@ class VerkaufController(
 
     @Secured(ROLE_SPIELLEITER)
     @DeleteMapping("artikel/{id}")
-    fun deleteArtikel(@PathVariable id: Long) {
+    fun deleteArtikel(
+        @PathVariable
+        id: Long
+    ) {
         val verkauf = verkaufRepository.findAll()[0]
         verkaufRepository.save(verkauf.copy(verkaufArtikel = verkauf.verkaufArtikel.filter { it.id != id }))
     }
 
     @Secured(ROLE_SPIELLEITER)
     @PostMapping("artikel/all")
-    fun addArtikelList(@RequestBody allNewVerkaufArtikel: List<VerkaufArtikel>) {
+    fun addArtikelList(
+        @RequestBody
+        allNewVerkaufArtikel: List<VerkaufArtikel>
+    ) {
         val verkauf = verkaufRepository.findAll()[0]
         val allVerkaufArtikel = allNewVerkaufArtikel.plus(verkauf.verkaufArtikel).distinctBy { it.id }
         verkaufRepository.save(verkauf.copy(verkaufArtikel = allVerkaufArtikel))
@@ -50,10 +58,13 @@ class VerkaufController(
 
     @Secured(ROLE_SPIELLEITER)
     @PostMapping("artikel")
-    fun addOrUpdateArtikel(@RequestBody verkaufArtikel: VerkaufArtikel): VerkaufArtikel {
+    fun addOrUpdateArtikel(
+        @RequestBody
+        verkaufArtikel: VerkaufArtikel
+    ): VerkaufArtikel {
         verkaufArtikelRepository.save(verkaufArtikel)
         val verkauf = verkaufRepository.findAll()[0]
-        if(verkauf.verkaufArtikel.find { it.id == verkaufArtikel.id } == null){
+        if (verkauf.verkaufArtikel.find { it.id == verkaufArtikel.id } == null) {
             verkaufRepository.save(verkauf.copy(verkaufArtikel = verkauf.verkaufArtikel.plus(verkaufArtikel)))
         }
         return verkaufArtikel
@@ -67,7 +78,10 @@ class VerkaufController(
 
     @Secured(ROLE_SPIELLEITER)
     @GetMapping("/tombola/verkauf/{newStatus}")
-    fun setTombolaVerkauf(@PathVariable newStatus: Boolean) {
+    fun setTombolaVerkauf(
+        @PathVariable
+        newStatus: Boolean
+    ) {
         var verkauf = verkaufRepository.findAll()[0]
         verkauf = verkauf.copy(isLosverkaufGestartet = newStatus)
         verkaufRepository.save(verkauf)
@@ -75,7 +89,10 @@ class VerkaufController(
 
     @Secured(ROLE_SPIELLEITER)
     @GetMapping("/tombola/preisvergabe/{newStatus}")
-    fun setTombolaPreisvergabe(@PathVariable newStatus: Boolean) {
+    fun setTombolaPreisvergabe(
+        @PathVariable
+        newStatus: Boolean
+    ) {
         var verkauf = verkaufRepository.findAll()[0]
         verkauf = verkauf.copy(isPreisvergabeGestartet = newStatus)
         verkaufRepository.save(verkauf)
@@ -86,7 +103,10 @@ class VerkaufController(
 
     @Secured(ROLE_SPIELLEITER)
     @GetMapping("grill/{newStatus}")
-    fun setGrillStatus(@PathVariable newStatus: Boolean) {
+    fun setGrillStatus(
+        @PathVariable
+        newStatus: Boolean
+    ) {
         var verkauf = verkaufRepository.findAll()[0]
         verkauf = verkauf.copy(isGrillAn = newStatus)
         verkaufRepository.save(verkauf)

@@ -17,7 +17,10 @@ interface SpielRepository : JpaRepository<Spiel, Long> {
     @Query(value = "SELECT s FROM Spiel s WHERE s.spielTyp= ?1 AND s.gastMannschaft.jugend = ?2")
     fun findAllBySpielTypAndJugend(spielTyp: SpielTyp, jugend: Jugend): List<Spiel>
 
-    fun deleteAllByHeimMannschaftInOrGastMannschaftIn(mannschaftHeim: Collection<Mannschaft>, mannschaftGast: Collection<Mannschaft>)
+    fun deleteAllByHeimMannschaftInOrGastMannschaftIn(
+        mannschaftHeim: Collection<Mannschaft>,
+        mannschaftGast: Collection<Mannschaft>
+    )
 
     fun findAllBySpielPlatz(platz: Int): List<Spiel>
 

@@ -23,33 +23,34 @@ import javax.persistence.ManyToOne
  */
 @Entity
 data class Spiel(
-        // Lass hibernate die Id generieren val damit user die id nicht verändern kann
-        @Id
-        @GeneratedValue
-        val id: Long = 0,
-        @ManyToOne
-        val heimMannschaft: Mannschaft,
-        @ManyToOne
-        val gastMannschaft: Mannschaft,
-        val heimTore: Int = 0,
-        val gastTore: Int = 0,
-        val hasHalfTime: Boolean = false,
-        val halftimeDuration: Duration,
-        val dateTime: LocalDateTime,
-        val isKampfgerichtAnwesend: Boolean = false,
-        val isSchiedsrichterAnwesend: Boolean = false,
-        val isHeimmannschaftAnwesend: Boolean = false,
-        val isGastMannschaftAnwesend: Boolean = false,
-        val spielPlatz: Int? = null,
-        @Enumerated(EnumType.STRING)
-        val spielTyp: SpielTyp = SpielTyp.NONE,
-        @Enumerated(EnumType.STRING)
-        val gruppe: Gruppe = Gruppe.A,
-        val hasErgebnis:Boolean = false
+    // Lass hibernate die Id generieren val damit user die id nicht verändern kann
+    @Id
+    @GeneratedValue
+    val id: Long = 0,
+    @ManyToOne
+    val heimMannschaft: Mannschaft,
+    @ManyToOne
+    val gastMannschaft: Mannschaft, val heimTore: Int = 0,
+    val gastTore: Int = 0,
+    val hasHalfTime: Boolean = false,
+    val halftimeDuration: Duration,
+    val dateTime: LocalDateTime,
+    val isKampfgerichtAnwesend: Boolean = false,
+    val isSchiedsrichterAnwesend: Boolean = false,
+    val isHeimmannschaftAnwesend: Boolean = false,
+    val isGastMannschaftAnwesend: Boolean = false,
+    val spielPlatz: Int? = null,
+    @Enumerated(EnumType.STRING)
+    val spielTyp: SpielTyp = SpielTyp.NONE,
+    @Enumerated(EnumType.STRING)
+    val gruppe: Gruppe = Gruppe.A,
+    val hasErgebnis: Boolean = false
 )
 
 enum class Gruppe {
-    A, B, C
+    A,
+    B,
+    C
 }
 
 enum class SpielTyp {

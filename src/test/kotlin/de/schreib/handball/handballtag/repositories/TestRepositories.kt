@@ -49,8 +49,8 @@ class TestRepositories {
         aJugend = Jugend(typ = JugendGender.MAENNLICH, jahrgang = JugendEnum.AJUGEND)
         cJugend = Jugend(typ = JugendGender.MAENNLICH, jahrgang = JugendEnum.CJUGEND)
 
-        vereinHeim = Verein(name="Heimverein")
-        vereinGast = Verein(name="Gastverein")
+        vereinHeim = Verein(name = "Heimverein")
+        vereinGast = Verein(name = "Gastverein")
 
 
         vereinRepository.saveAll(listOf(vereinHeim, vereinGast))
@@ -63,13 +63,30 @@ class TestRepositories {
         heimMannschaftCjugend = Mannschaft(name = "HeimMannschaftCJugend", verein = vereinGast, jugend = aJugend)
         gastMannschaftCjugend = Mannschaft(name = "GastMannschaftCJugend", verein = vereinGast, jugend = aJugend)
 
-        mannschaftRepository.saveAll(listOf(heimMannschaftAjugend, gastMannschaftAjugend, heimMannschaftCjugend, gastMannschaftCjugend))
+        mannschaftRepository.saveAll(
+            listOf(
+                heimMannschaftAjugend,
+                gastMannschaftAjugend,
+                heimMannschaftCjugend,
+                gastMannschaftCjugend
+            )
+        )
 
 
-        vereinRepository.saveAll(listOf(vereinGast,vereinHeim))
+        vereinRepository.saveAll(listOf(vereinGast, vereinHeim))
 
-        spielAJugend = Spiel(heimMannschaft = heimMannschaftAjugend, gastMannschaft = gastMannschaftAjugend, dateTime = LocalDateTime.now(), halftimeDuration = Duration.ofMinutes(14))
-        spielCJugend = Spiel(heimMannschaft = heimMannschaftCjugend, gastMannschaft = gastMannschaftCjugend, dateTime = LocalDateTime.now(), halftimeDuration = Duration.ofMinutes(14))
+        spielAJugend = Spiel(
+            heimMannschaft = heimMannschaftAjugend,
+            gastMannschaft = gastMannschaftAjugend,
+            dateTime = LocalDateTime.now(),
+            halftimeDuration = Duration.ofMinutes(14)
+        )
+        spielCJugend = Spiel(
+            heimMannschaft = heimMannschaftCjugend,
+            gastMannschaft = gastMannschaftCjugend,
+            dateTime = LocalDateTime.now(),
+            halftimeDuration = Duration.ofMinutes(14)
+        )
 
         spielRepository.saveAll(listOf(spielAJugend, spielCJugend))
     }
@@ -84,7 +101,7 @@ class TestRepositories {
     }
 
     @After
-    fun cleanDatabase(){
+    fun cleanDatabase() {
         spielRepository.deleteAll()
         mannschaftRepository.deleteAll()
         vereinRepository.deleteAll()

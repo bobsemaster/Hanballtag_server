@@ -18,12 +18,12 @@ import javax.persistence.Id
  */
 @Entity
 data class Verein(
-        // Lass hibernate die Id generieren val damit user die id nicht verändern kann
-        @Id
-        @GeneratedValue
-        val id: Long = 0,
-        @Column(unique = true)
-        val name: String
+    // Lass hibernate die Id generieren val damit user die id nicht verändern kann
+    @Id
+    @GeneratedValue
+    val id: Long = 0,
+    @Column(unique = true)
+    val name: String
 
 ) {
 

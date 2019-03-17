@@ -12,24 +12,35 @@ import de.schreib.handball.handballtag.repositories.SpielRepository
 import de.schreib.handball.handballtag.repositories.VereinRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.annotation.Secured
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 import javax.transaction.Transactional
 
 @RestController
 @RequestMapping("/mannschaft/")
 class MannschaftController(
-        @Autowired val mannschaftRepository: MannschaftRepository,
-        @Autowired val vereinRepository: VereinRepository,
-        @Autowired val spielRepository: SpielRepository
+    @Autowired
+    val mannschaftRepository: MannschaftRepository,
+    @Autowired
+    val vereinRepository: VereinRepository,
+    @Autowired
+    val spielRepository: SpielRepository
 ) {
 
     @GetMapping("all")
-    fun getAllMannschaft(): List<Mannschaft> = mannschaftRepository.findAll()
-            .filter { it.verein.name != PLATZHALTER_VEREIN_NAME }
-            .sortedBy { it.name }
+    fun getAllMannschaft(): List<Mannschaft> =
+        mannschaftRepository.findAll().filter { it.verein.name != PLATZHALTER_VEREIN_NAME }.sortedBy { it.name }
 
     @GetMapping("{id}/spiele")
-    fun getAllSpielToMannschaft(@PathVariable id: Long): List<Spiel> {
+    fun getAllSpielToMannschaft(
+        @PathVariable
+        id: Long
+    ): List<Spiel> {
         val mannschaftOptional = mannschaftRepository.findById(id)
         if (mannschaftOptional.isPresent) {
             return mannschaftOptional.get().getAllSpiel().sortedBy { it.dateTime }
@@ -40,7 +51,12 @@ class MannschaftController(
 
     @Secured(ROLE_SPIELLEITER)
     @GetMapping("/{id}/gruppe/{neueGruppe}")
-    fun updateGruppe(@PathVariable id: Long, @PathVariable neueGruppe: Gruppe) {
+    fun updateGruppe(
+        @PathVariable
+        id: Long,
+        @PathVariable
+        neueGruppe: Gruppe
+    ) {
         val mannschaftOptional = mannschaftRepository.findById(id)
         if (!mannschaftOptional.isPresent) {
             throw MannschaftNotFoundException("Mannschaft mit id $id existiert nicht!")
@@ -50,7 +66,10 @@ class MannschaftController(
     }
 
     @GetMapping("{id}")
-    fun findMannschaftById(@PathVariable id: Long): Mannschaft {
+    fun findMannschaftById(
+        @PathVariable
+        id: Long
+    ): Mannschaft {
         val mannschaftOptional = mannschaftRepository.findById(id)
         if (!mannschaftOptional.isPresent) {
             throw MannschaftNotFoundException("Mannschaft mit id $id konnte nicht gefunden werden!")
@@ -60,7 +79,10 @@ class MannschaftController(
 
     @Secured(ROLE_SPIELLEITER)
     @PostMapping("new")
-    fun createMannschaft(@RequestBody mannschaft: Mannschaft) {
+    fun createMannschaft(
+        @RequestBody
+        mannschaft: Mannschaft
+    ) {
         val vereinOptional = vereinRepository.findById(mannschaft.verein.id)
         if (!vereinOptional.isPresent) {
             throw VereinNotFoundException("Der Verein '${mannschaft.verein.name}' existiert nicht")
@@ -75,7 +97,12 @@ class MannschaftController(
 
     @GetMapping("{id}/{hasFoto}")
     @Secured(ROLE_KAMPFGERICHT)
-    fun setHasFoto(@PathVariable hasFoto: Boolean, @PathVariable id: Long): Mannschaft {
+    fun setHasFoto(
+        @PathVariable
+        hasFoto: Boolean,
+        @PathVariable
+        id: Long
+    ): Mannschaft {
         val mannschaftOptional = mannschaftRepository.findById(id)
         if (mannschaftOptional.isPresent) {
             val mannschaft = mannschaftOptional.get()
@@ -89,7 +116,10 @@ class MannschaftController(
     @Transactional
     @Secured(ROLE_SPIELLEITER)
     @DeleteMapping("{id}")
-    fun deleteMannschaftWithId(@PathVariable id: Long) {
+    fun deleteMannschaftWithId(
+        @PathVariable
+        id: Long
+    ) {
         val mannschaftOptional = mannschaftRepository.findById(id)
         if (mannschaftOptional.isPresent) {
             val mannschaft = mannschaftOptional.get()
@@ -100,13 +130,21 @@ class MannschaftController(
     }
 
     @PostMapping("all/jugend")
-    fun getAllMannschaftenToJugend(@RequestBody jugend: Jugend): List<Mannschaft> {
+    fun getAllMannschaftenToJugend(
+        @RequestBody
+        jugend: Jugend
+    ): List<Mannschaft> {
         return mannschaftRepository.findAllByJugend(jugend).sortedBy { it.tabellenPlatz }
     }
 
     @Secured(ROLE_SPIELLEITER)
     @GetMapping("{id}/spielplan/{index}")
-    fun setSpielplanIndex(@PathVariable id: Long, @PathVariable index: Int) {
+    fun setSpielplanIndex(
+        @PathVariable
+        id: Long,
+        @PathVariable
+        index: Int
+    ) {
         val mannschaftOptional = mannschaftRepository.findById(id)
         if (!mannschaftOptional.isPresent) {
             throw MannschaftNotFoundException("Mannschaft mit der id $id konnte nicht gefunden werden!")
@@ -117,7 +155,10 @@ class MannschaftController(
 
     @Secured(ROLE_SPIELLEITER)
     @PostMapping("tabellenplatz/neu")
-    fun changeTabellenplatz(@RequestBody idPlatzPair: List<Pair<Long, Int>>) {
+    fun changeTabellenplatz(
+        @RequestBody
+        idPlatzPair: List<Pair<Long, Int>>
+    ) {
         idPlatzPair.forEach {
             val id = it.first
             val neuerTabellenPlatz = it.second

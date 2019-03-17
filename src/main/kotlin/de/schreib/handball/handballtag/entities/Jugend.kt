@@ -12,8 +12,8 @@ import javax.persistence.Enumerated
  */
 @Embeddable
 data class Jugend(
-        @Enumerated(EnumType.STRING)
-        val typ: JugendGender,
-        @Enumerated(EnumType.STRING)
-        val jahrgang: JugendEnum
+    @Enumerated(EnumType.STRING)
+    val typ: JugendGender,
+    @Enumerated(EnumType.STRING)
+    val jahrgang: JugendEnum
 )

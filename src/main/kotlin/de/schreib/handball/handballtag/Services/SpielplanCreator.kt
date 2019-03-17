@@ -24,8 +24,14 @@ import javax.transaction.Transactional
 const val PLATZHALTER_VEREIN_NAME = "placeholder"
 
 @Service
-class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRepository, @Autowired val spielRepository: SpielRepository,
-                              @Autowired val vereinRepository: VereinRepository) {
+class SpielplanCreatorService(
+    @Autowired
+    val mannschaftRepository: MannschaftRepository,
+    @Autowired
+    val spielRepository: SpielRepository,
+    @Autowired
+    val vereinRepository: VereinRepository
+) {
     private val log: Logger = LoggerFactory.getLogger(this::class.java)
 
     private lateinit var spielDuration: Duration
@@ -53,7 +59,14 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
 
     // sechsMannschaftenGruppe entscheidung ob man den spielplasn mit gruppen erstellt oder nicht
     @Transactional
-    fun createSpielplan(jugend: Jugend, spielDuration: Duration, pauseDuration: Duration, turnierBeginn: LocalDateTime, spielplatz: Int, sechsMannschaftenGruppe: Boolean = false) {
+    fun createSpielplan(
+        jugend: Jugend,
+        spielDuration: Duration,
+        pauseDuration: Duration,
+        turnierBeginn: LocalDateTime,
+        spielplatz: Int,
+        sechsMannschaftenGruppe: Boolean = false
+    ) {
         allJugendMannschaft = mannschaftRepository.findAllByJugend(jugend).sortedWith(kotlin.Comparator { o1, o2 ->
             if (o1.gruppe.compareTo(o2.gruppe) != 0) {
                 o1.gruppe.compareTo(o2.gruppe)
@@ -79,19 +92,19 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
         this.spielplatz = getSpielplatzZuJugend(jugend)
 
         when (allJugendMannschaft.size) {
-            1 -> {
+            1    -> {
                 log.error("Es werden mindestens 2 Mannschaften für einen Spielplan gebraucht!")
                 throw NotEnoughMannschaftenException("Es sind mindestens 2 mannschaften nötig um einen Spielplan zu erstellen!")
             }
-            2 -> createSpielplan2Mannschaften(allJugendMannschaft)
-            3 -> createSpielplan3Mannschaften(allJugendMannschaft)
-            4 -> createSpielplan4Mannschaften(allJugendMannschaft)
-            5 -> createSpielplan5Mannschaften(allJugendMannschaft)
-            6 -> createSpielplan6Mannschaften(allJugendMannschaft, sechsMannschaftenGruppe)
-            7 -> createSpielplan7Mannschaften(allJugendMannschaft)
-            8 -> createSpielplan8Mannschaften(allJugendMannschaft)
-            9 -> createSpielplan9Mannschaften(allJugendMannschaft)
-            10 -> createSpielplan10Mannschaften(allJugendMannschaft)
+            2    -> createSpielplan2Mannschaften(allJugendMannschaft)
+            3    -> createSpielplan3Mannschaften(allJugendMannschaft)
+            4    -> createSpielplan4Mannschaften(allJugendMannschaft)
+            5    -> createSpielplan5Mannschaften(allJugendMannschaft)
+            6    -> createSpielplan6Mannschaften(allJugendMannschaft, sechsMannschaftenGruppe)
+            7    -> createSpielplan7Mannschaften(allJugendMannschaft)
+            8    -> createSpielplan8Mannschaften(allJugendMannschaft)
+            9    -> createSpielplan9Mannschaften(allJugendMannschaft)
+            10   -> createSpielplan10Mannschaften(allJugendMannschaft)
             else -> log.error("Es dürfen höchstens 10 Mannschaften für einen Spielplan übergeben werden!")
         }
 
@@ -102,23 +115,29 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
 
     private fun resetMannschaften() {
         allJugendMannschaft.forEach {
-            mannschaftRepository.save(it.copy(torverhaeltnis = Pair(0, 0), punkteverhaeltnis = Pair(0, 0), tabellenPlatz = 0))
+            mannschaftRepository.save(
+                it.copy(
+                    torverhaeltnis = Pair(0, 0),
+                    punkteverhaeltnis = Pair(0, 0),
+                    tabellenPlatz = 0
+                )
+            )
         }
     }
 
     // Aus vorläufigem spielplan 2018
     private fun getSpielplatzZuJugend(jugend: Jugend): Int {
         return when {
-            jugend.jahrgang == JugendEnum.DJUGEND && jugend.typ == JugendGender.WEIBLICH -> 1
+            jugend.jahrgang == JugendEnum.DJUGEND && jugend.typ == JugendGender.WEIBLICH  -> 1
             jugend.jahrgang == JugendEnum.DJUGEND && jugend.typ == JugendGender.MAENNLICH -> 2
-            jugend.jahrgang == JugendEnum.EJUGEND && jugend.typ == JugendGender.WEIBLICH -> 3
+            jugend.jahrgang == JugendEnum.EJUGEND && jugend.typ == JugendGender.WEIBLICH  -> 3
             jugend.jahrgang == JugendEnum.EJUGEND && jugend.typ == JugendGender.MAENNLICH -> 5
-            jugend.jahrgang == JugendEnum.MINIS && jugend.typ == JugendGender.GEMISCHT -> 4
+            jugend.jahrgang == JugendEnum.MINIS && jugend.typ == JugendGender.GEMISCHT    -> 4
             jugend.jahrgang == JugendEnum.BJUGEND && jugend.typ == JugendGender.MAENNLICH -> 1
-            jugend.jahrgang == JugendEnum.BJUGEND && jugend.typ == JugendGender.WEIBLICH -> 2
-            jugend.jahrgang == JugendEnum.CJUGEND && jugend.typ == JugendGender.WEIBLICH -> 4
+            jugend.jahrgang == JugendEnum.BJUGEND && jugend.typ == JugendGender.WEIBLICH  -> 2
+            jugend.jahrgang == JugendEnum.CJUGEND && jugend.typ == JugendGender.WEIBLICH  -> 4
             jugend.jahrgang == JugendEnum.CJUGEND && jugend.typ == JugendGender.MAENNLICH -> 5
-            else -> 0
+            else                                                                          -> 0
         }
     }
 
@@ -435,7 +454,16 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
      *
      */
     private fun spiel(heim: Kuerzel, gast: Kuerzel, spielTyp: SpielTyp = SpielTyp.GRUPPENSPIEL) {
-        spielplanList.add(allJugendMannschaft.createSpiel(heim, gast, spielDuration, turnierBeginn, spielTyp, currentGroup))
+        spielplanList.add(
+            allJugendMannschaft.createSpiel(
+                heim,
+                gast,
+                spielDuration,
+                turnierBeginn,
+                spielTyp,
+                currentGroup
+            )
+        )
         if (alternateGroup) {
             if (currentGroup == Gruppe.A) {
                 currentGroup = Gruppe.B
@@ -462,13 +490,29 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
         if (heim.name == gast.name) {
             throw IllegalArgumentException("Heim und gast müssen verschiedene Mannschaften sein!")
         }
-        spielplanList.add(Spiel(heimMannschaft = heim, gastMannschaft = gast, halftimeDuration = spielDuration,
-                dateTime = turnierBeginn, spielPlatz = spielplatz, spielTyp = spielTyp, gruppe = Gruppe.C))
+        spielplanList.add(
+            Spiel(
+                heimMannschaft = heim,
+                gastMannschaft = gast,
+                halftimeDuration = spielDuration,
+                dateTime = turnierBeginn,
+                spielPlatz = spielplatz,
+                spielTyp = spielTyp,
+                gruppe = Gruppe.C
+            )
+        )
 
         turnierBeginn = turnierBeginn.plus(spielDuration.plus(pauseDuration))
     }
 
-    private fun List<Mannschaft>.createSpiel(heim: Kuerzel, gast: Kuerzel, spielDuration: Duration, time: LocalDateTime, spielTyp: SpielTyp, gruppe: Gruppe): Spiel {
+    private fun List<Mannschaft>.createSpiel(
+        heim: Kuerzel,
+        gast: Kuerzel,
+        spielDuration: Duration,
+        time: LocalDateTime,
+        spielTyp: SpielTyp,
+        gruppe: Gruppe
+    ): Spiel {
         if (this[heim.index].id == this[gast.index].id) {
             throw IllegalArgumentException("Heim und gast können nicht die selbe mannschaft sein")
         }
@@ -481,14 +525,27 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
             mannschaftRepository.save(this[gast.index].copy(gruppe = currentGroup))
         }
 
-        return Spiel(heimMannschaft = this[heim.index], gastMannschaft = this[gast.index], halftimeDuration = spielDuration, dateTime = time, spielTyp = spielTyp, spielPlatz = spielplatz, gruppe = currentGroup)
+        return Spiel(
+            heimMannschaft = this[heim.index],
+            gastMannschaft = this[gast.index],
+            halftimeDuration = spielDuration,
+            dateTime = time,
+            spielTyp = spielTyp,
+            spielPlatz = spielplatz,
+            gruppe = currentGroup
+        )
     }
 
     /**
      * Hilfsfunkltion um platzhaltermannschagft zu erzeugen
      */
     private fun mannschaft(name: String): Mannschaft {
-        val mannschaft = Mannschaft(name = name, verein = platzhalterVerein, jugend = allJugendMannschaft[0].jugend, gruppe = Gruppe.C)
+        val mannschaft = Mannschaft(
+            name = name,
+            verein = platzhalterVerein,
+            jugend = allJugendMannschaft[0].jugend,
+            gruppe = Gruppe.C
+        )
         mannschaftRepository.save(mannschaft)
         return mannschaft
     }
@@ -496,7 +553,16 @@ class SpielplanCreatorService(@Autowired val mannschaftRepository: MannschaftRep
 }
 
 enum class Kuerzel(val index: Int) {
-    A(0), B(1), C(2), D(3), E(4), F(5), G(6), H(7), I(8), J(9)
+    A(0),
+    B(1),
+    C(2),
+    D(3),
+    E(4),
+    F(5),
+    G(6),
+    H(7),
+    I(8),
+    J(9)
 }
 
 
@@ -506,8 +572,7 @@ fun createUniquePairPermutations(dataSet: List<Kuerzel>): List<List<Kuerzel>> {
 
     for (i in dataSet.indices) {
         for (j in dataSet.indices) {
-            if (i == j)
-                continue
+            if (i == j) continue
             val tmp = ArrayList<Kuerzel>()
             tmp.add(dataSet[i])
             tmp.add(dataSet[j])

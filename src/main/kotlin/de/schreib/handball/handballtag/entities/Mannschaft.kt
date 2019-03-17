@@ -26,23 +26,22 @@ import javax.persistence.Transient
  */
 @Entity
 data class Mannschaft(
-        // Lass hibernate die Id generieren val damit user die id nicht verändern kann
-        @Id
-        @GeneratedValue
-        val id: Long = 0,
-        val name: String,
-        @ManyToOne
-        @JoinColumn(name = "verein_id")
-        val verein: Verein,
-        val torverhaeltnis: Pair<Int, Int> = Pair(0, 0),
-        val punkteverhaeltnis: Pair<Int, Int> = Pair(0, 0),
-        val jugend: Jugend,
-        val hasFoto: Boolean = false,
-        val tabellenPlatz: Int = 0,
-        @Enumerated(EnumType.STRING)
-        val gruppe: Gruppe = Gruppe.A,
-        // Nummer sollte einzigartig sein damit nicht zweimal die gleiche nummer existiert und die reihen folge dadurch zufällig ist
-        val spielplanIndex:Int = Random().nextInt(Int.MAX_VALUE)
+    // Lass hibernate die Id generieren val damit user die id nicht verändern kann
+    @Id
+    @GeneratedValue
+    val id: Long = 0, val name: String,
+    @ManyToOne
+    @JoinColumn(name = "verein_id")
+    val verein: Verein,
+    val torverhaeltnis: Pair<Int, Int> = Pair(0, 0),
+    val punkteverhaeltnis: Pair<Int, Int> = Pair(0, 0),
+    val jugend: Jugend,
+    val hasFoto: Boolean = false,
+    val tabellenPlatz: Int = 0,
+    @Enumerated(EnumType.STRING)
+    val gruppe: Gruppe = Gruppe.A,
+    // Nummer sollte einzigartig sein damit nicht zweimal die gleiche nummer existiert und die reihen folge dadurch zufällig ist
+    val spielplanIndex: Int = Random().nextInt(Int.MAX_VALUE)
 ) {
 
     @Component

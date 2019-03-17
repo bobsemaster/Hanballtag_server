@@ -52,7 +52,11 @@ class TabelleServiceTest {
     }
 
     fun mannschaft(name: String, gewonnen: Int, verloren: Int): Mannschaft {
-        return Mannschaft(name = name, punkteverhaeltnis = Pair(gewonnen, verloren),
-                jugend = Jugend(JugendGender.MAENNLICH, JugendEnum.CJUGEND), verein = Verein(name = "test"))
+        return Mannschaft(
+            name = name,
+            punkteverhaeltnis = Pair(gewonnen, verloren),
+            jugend = Jugend(JugendGender.MAENNLICH, JugendEnum.CJUGEND),
+            verein = Verein(name = "test")
+        )
     }
 }

@@ -34,11 +34,18 @@ class VerkaufControllerTest {
     lateinit var verkaufController: VerkaufController
 
 
-
     @Test
     @Transactional
     fun `teste ob alle artikel mitgeliefert werde in findAll und setArtikelList funktioniert`() {
-        verkaufController.addArtikelList(listOf(VerkaufArtikel(artikelName = "Kuchen", artikelPreis = 1.00, verkaufsplatz = "Kuchenstand")))
+        verkaufController.addArtikelList(
+            listOf(
+                VerkaufArtikel(
+                    artikelName = "Kuchen",
+                    artikelPreis = 1.00,
+                    verkaufsplatz = "Kuchenstand"
+                )
+            )
+        )
 
         val verkauf = verkaufController.getVerkaufObject()
         val expected = verkaufRepository.findAll()[0].verkaufArtikel
@@ -49,7 +56,7 @@ class VerkaufControllerTest {
 
     @Test
     @Ignore
-    fun `teste Ob set artikel list funktioniert`(){
+    fun `teste Ob set artikel list funktioniert`() {
         val artikel = VerkaufArtikel(artikelName = "Kuchen", artikelPreis = 1.00, verkaufsplatz = "Kuchenstand")
         verkaufController.addArtikelList(listOf(artikel))
         assertThat(verkaufArtikelRepository.findById(artikel.id).get(), `is`(artikel))

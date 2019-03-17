@@ -1,10 +1,11 @@
 buildscript {
     ext {
-        kotlinVersion = '1.2.50'
-        springBootVersion = '2.0.1.RELEASE'
+        kotlinVersion = '1.3.21'
+        springBootVersion = '2.1.3.RELEASE'
     }
     repositories {
         mavenCentral()
+        jcenter()
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
@@ -14,8 +15,8 @@ buildscript {
 }
 
 plugins {
-    id "org.jetbrains.kotlin.plugin.jpa" version "1.2.50"
-    id "io.gitlab.arturbosch.detekt" version "1.0.0.RC6"
+    id "org.jetbrains.kotlin.plugin.jpa" version "1.3.21"
+    id("io.gitlab.arturbosch.detekt").version("1.0.0-RC14")
 }
 
 apply plugin: 'idea'
@@ -48,6 +49,7 @@ repositories {
 
 
 dependencies {
+    detektPlugins "io.gitlab.arturbosch.detekt:detekt-formatting:1.0.0-RC14"
     // Production Monitoring
     runtime('org.springframework.boot:spring-boot-starter-actuator')
 
@@ -75,7 +77,7 @@ dependencies {
     //compile('org.springframework.boot:spring-boot-starter-mail')
 
     // Kotlin coroutine hilfsmethoden
-    compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.23.4'
+    compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.1'
 
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
@@ -102,12 +104,9 @@ task dockerRest(type: Copy) {
 }
 
 detekt {
-    version = "1.0.0.RC6"
-    profile("main") {
-        input = "$projectDir/src/main/kotlin"
-        config = "$projectDir/detekt.yml"
-        filters = ".*test.*,.*/resources/.*,.*/tmp/.*"
-    }
+    version = "1.0.0.RC14"
+    input = files("src/main/kotlin")
+    filters = ".*/resources/.*,.*/build/.*"
 }
 
 def DEV_GROUP = 'Dev Environment'

@@ -1,5 +1,6 @@
 package de.schreib.handball.handballtag.controller
 
+import de.schreib.handball.handballtag.Services.PLATZHALTER_VEREIN_NAME
 import de.schreib.handball.handballtag.entities.Mannschaft
 import de.schreib.handball.handballtag.entities.Spiel
 import de.schreib.handball.handballtag.entities.Verein
@@ -7,7 +8,6 @@ import de.schreib.handball.handballtag.exceptions.VereinAlreadyExistException
 import de.schreib.handball.handballtag.exceptions.VereinNotFoundException
 import de.schreib.handball.handballtag.repositories.MannschaftRepository
 import de.schreib.handball.handballtag.repositories.VereinRepository
-import de.schreib.handball.handballtag.Services.PLATZHALTER_VEREIN_NAME
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.annotation.Secured
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -28,17 +28,21 @@ const val ROLE_KAMPFGERICHT = "ROLE_KAMPFGERICHT"
 @RestController
 @RequestMapping("/verein/")
 class VereinController(
-        @Autowired val vereinRepository: VereinRepository,
-        @Autowired val mannschaftRepository: MannschaftRepository
+    @Autowired
+    val vereinRepository: VereinRepository,
+    @Autowired
+    val mannschaftRepository: MannschaftRepository
 ) {
 
     @GetMapping("all")
-    fun getAllVerein(): List<Verein> = vereinRepository.findAll()
-            .filter { it.name != PLATZHALTER_VEREIN_NAME }
-            .sortedBy { it.name }
+    fun getAllVerein(): List<Verein> =
+        vereinRepository.findAll().filter { it.name != PLATZHALTER_VEREIN_NAME }.sortedBy { it.name }
 
     @GetMapping("{id}/mannschaften")
-    fun getAllVereinMannschaften(@PathVariable id: Long): List<Mannschaft> {
+    fun getAllVereinMannschaften(
+        @PathVariable
+        id: Long
+    ): List<Mannschaft> {
         val vereinOptional = vereinRepository.findById(id)
         return if (vereinOptional.isPresent) {
             vereinOptional.get().getAllMannschaft().sortedBy { it.jugend.jahrgang }
@@ -49,7 +53,10 @@ class VereinController(
 
     @GetMapping("{id}")
     @Throws(VereinNotFoundException::class)
-    fun findVereinById(@PathVariable id: Long): Verein {
+    fun findVereinById(
+        @PathVariable
+        id: Long
+    ): Verein {
         val verein = vereinRepository.findById(id)
         if (verein.isPresent) {
             return verein.get()
@@ -60,7 +67,10 @@ class VereinController(
     @Secured(ROLE_SPIELLEITER)
     @PostMapping("new")
     @Throws(VereinAlreadyExistException::class, IllegalArgumentException::class)
-    fun createNewVerein(@RequestBody verein: Verein) {
+    fun createNewVerein(
+        @RequestBody
+        verein: Verein
+    ) {
         if (vereinRepository.findByName(verein.name) != null) {
             throw VereinAlreadyExistException("Der Verein mit dem namen ${verein.name} existiert bereits")
         }
@@ -70,7 +80,10 @@ class VereinController(
     @Secured(ROLE_SPIELLEITER)
     @DeleteMapping("delete/{id}")
     @Transactional
-    fun deleteVerein(@PathVariable id: Long) {
+    fun deleteVerein(
+        @PathVariable
+        id: Long
+    ) {
         val verein = findVereinById(id)
 
         mannschaftRepository.deleteAllByVerein(verein)
@@ -79,9 +92,12 @@ class VereinController(
     }
 
     @GetMapping("{id}/spiel")
-    fun getAllSpielToVerein(@PathVariable id:Long):List<Spiel>{
+    fun getAllSpielToVerein(
+        @PathVariable
+        id: Long
+    ): List<Spiel> {
         val vereinOptional = vereinRepository.findById(id)
-        if(!vereinOptional.isPresent){
+        if (!vereinOptional.isPresent) {
             throw VereinNotFoundException("Verein mit der id $id konnte nicht gefunden werden!")
         }
         return vereinOptional.get().getAllVereinSpiel()

@@ -1,7 +1,7 @@
 package de.schreib.handball.handballtag.enums
 
 
-enum class JugendEnum(val stringValue:String) {
+enum class JugendEnum(val stringValue: String) {
     MINIS("Minis"),
     EJUGEND("E-Jugend"),
     DJUGEND("D-Jugend"),

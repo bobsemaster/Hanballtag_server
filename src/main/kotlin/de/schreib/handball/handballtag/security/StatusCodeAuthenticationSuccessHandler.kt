@@ -5,8 +5,12 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-class StatusCodeAuthenticationSuccessHandler:AuthenticationSuccessHandler {
-    override fun onAuthenticationSuccess(request: HttpServletRequest?, response: HttpServletResponse?, authentication: Authentication?) {
+class StatusCodeAuthenticationSuccessHandler : AuthenticationSuccessHandler {
+    override fun onAuthenticationSuccess(
+        request: HttpServletRequest?,
+        response: HttpServletResponse?,
+        authentication: Authentication?
+    ) {
         response?.status = 200
     }
 }

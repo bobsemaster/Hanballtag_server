@@ -63,6 +63,7 @@ docker-container:
 
 deploy-dev:
   stage: deploy
+  when: manual
   only:
     - master
   script:

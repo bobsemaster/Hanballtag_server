@@ -12,29 +12,33 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
-class TabelleService(@Autowired val mannschaftRepository: MannschaftRepository,
-                     @Autowired val spielRepository: SpielRepository) {
+class TabelleService(
+    @Autowired
+    val mannschaftRepository: MannschaftRepository,
+    @Autowired
+    val spielRepository: SpielRepository
+) {
 
     val log = LoggerFactory.getLogger(this::class.java)
 
     fun processSpielergebnis(spiel: Spiel, oldSpiel: Spiel? = null) {
         updateMannschaften(spiel, oldSpiel)
         when (spiel.spielTyp) {
-            SpielTyp.GRUPPENSPIEL -> calculateNewTabellenPlatzGruppenphase(spiel)
-            SpielTyp.ERSTES_HALBFINALE -> handleHalbfinale(spiel, SpielTyp.ERSTES_HALBFINALE)
-            SpielTyp.ZWEITES_HALBFINALE -> handleHalbfinale(spiel, SpielTyp.ZWEITES_HALBFINALE)
-            SpielTyp.SPIEL_UM_PLATZ_3 -> handleSpielUmPlatzDrei(spiel)
-            SpielTyp.SPIEL_UM_PLATZ_5 -> handleSpielUmPlatzFuenf(spiel)
+            SpielTyp.GRUPPENSPIEL             -> calculateNewTabellenPlatzGruppenphase(spiel)
+            SpielTyp.ERSTES_HALBFINALE        -> handleHalbfinale(spiel, SpielTyp.ERSTES_HALBFINALE)
+            SpielTyp.ZWEITES_HALBFINALE       -> handleHalbfinale(spiel, SpielTyp.ZWEITES_HALBFINALE)
+            SpielTyp.SPIEL_UM_PLATZ_3         -> handleSpielUmPlatzDrei(spiel)
+            SpielTyp.SPIEL_UM_PLATZ_5         -> handleSpielUmPlatzFuenf(spiel)
             SpielTyp.DRITTES_SPIEL_UM_PLATZ_5 -> handleDreiSpielePlatzFuenf(spiel)
-            SpielTyp.SPIEL_UM_PLATZ_7 -> handleSpielUmPlatzSieben(spiel)
+            SpielTyp.SPIEL_UM_PLATZ_7         -> handleSpielUmPlatzSieben(spiel)
             SpielTyp.DRITTES_SPIEL_UM_PLATZ_7 -> handleDreiSpielePlatzSieben(spiel)
-            SpielTyp.SPIEL_UM_PLATZ_9 -> handleSpielUmPlatzNeun(spiel)
-            SpielTyp.FINALE -> handleFinale(spiel)
-            SpielTyp.NONE -> return
+            SpielTyp.SPIEL_UM_PLATZ_9         -> handleSpielUmPlatzNeun(spiel)
+            SpielTyp.FINALE                   -> handleFinale(spiel)
+            SpielTyp.NONE                     -> return
 
-            SpielTyp.ERSTES_SPIEL_UM_PLATZ_5 -> return
+            SpielTyp.ERSTES_SPIEL_UM_PLATZ_5  -> return
             SpielTyp.ZWEITES_SPIEL_UM_PLATZ_5 -> return
-            SpielTyp.ERSTES_SPIEL_UM_PLATZ_7 -> return
+            SpielTyp.ERSTES_SPIEL_UM_PLATZ_7  -> return
             SpielTyp.ZWEITES_SPIEL_UM_PLATZ_7 -> return
         }
 
@@ -49,14 +53,15 @@ class TabelleService(@Autowired val mannschaftRepository: MannschaftRepository,
 
 
         // kein spiel mehr dem kein ergebnis zugewiesen wurde-> alle spiele gespielt!
-        if (gruppenSpiele.filter { !it.hasErgebnis }.count() == 0 ) {
+        if (gruppenSpiele.filter { !it.hasErgebnis }.count() == 0) {
             updateKOSpiele(jugend)
         }
     }
 
     fun updateKOSpiele(jugend: Jugend) {
         // Mannschaften in Reihenfolge erster hat index 0 letzter hat letzten index
-        val mannschaften = mannschaftRepository.findAllByJugend(jugend).filter { it.verein.name != "placeholder" }.sortedBy { it.tabellenPlatz }
+        val mannschaften = mannschaftRepository.findAllByJugend(jugend).filter { it.verein.name != "placeholder" }
+            .sortedBy { it.tabellenPlatz }
         val spieleKORunde = spielRepository.findAllByJugend(jugend).filter { it.spielTyp != SpielTyp.GRUPPENSPIEL }
         if (spieleKORunde.isEmpty()) {
             log.info("Die jugend $jugend hat keine K.O phase!")
@@ -66,68 +71,122 @@ class TabelleService(@Autowired val mannschaftRepository: MannschaftRepository,
         val allSpielUpdateList = mutableListOf<Spiel>()
         // halbfinals updaten da jeder mit ko runde diese hat!
         val erstesHalbfinale = spieleKORunde.find { it.spielTyp == SpielTyp.ERSTES_HALBFINALE }!!
-        if(erstesHalbfinale.heimMannschaft.verein.name != "placeholder"){
+        if (erstesHalbfinale.heimMannschaft.verein.name != "placeholder") {
             log.info("K.O Runden Spiele wurden Bereits erstellt kein update!")
             return
         }
         val zweitesHalbfinale = spieleKORunde.find { it.spielTyp == SpielTyp.ZWEITES_HALBFINALE }!!
-        val erstesHalbfinaleUpdate = erstesHalbfinale.copy(heimMannschaft = mannschaften.findMannschaft(1, Gruppe.A),
-                gastMannschaft = mannschaften.findMannschaft(2, Gruppe.B))
-        val zweitesHalbfinaleUpdate = zweitesHalbfinale.copy(heimMannschaft = mannschaften.findMannschaft(1, Gruppe.B),
-                gastMannschaft = mannschaften.findMannschaft(2, Gruppe.A))
+        val erstesHalbfinaleUpdate = erstesHalbfinale.copy(
+            heimMannschaft = mannschaften.findMannschaft(1, Gruppe.A),
+            gastMannschaft = mannschaften.findMannschaft(2, Gruppe.B)
+        )
+        val zweitesHalbfinaleUpdate = zweitesHalbfinale.copy(
+            heimMannschaft = mannschaften.findMannschaft(1, Gruppe.B),
+            gastMannschaft = mannschaften.findMannschaft(2, Gruppe.A)
+        )
         allSpielUpdateList.addAll(listOf(erstesHalbfinaleUpdate, zweitesHalbfinaleUpdate))
         when (mannschaften.size) {
-            6 -> {
+            6  -> {
                 val spielUmPlatzFuenf = spieleKORunde.find { it.spielTyp == SpielTyp.SPIEL_UM_PLATZ_5 }!!
-                allSpielUpdateList.add(spielUmPlatzFuenf.copy(heimMannschaft = mannschaften.findMannschaft(3, Gruppe.A),
-                        gastMannschaft = mannschaften.findMannschaft(3, Gruppe.B)))
+                allSpielUpdateList.add(
+                    spielUmPlatzFuenf.copy(
+                        heimMannschaft = mannschaften.findMannschaft(3, Gruppe.A),
+                        gastMannschaft = mannschaften.findMannschaft(3, Gruppe.B)
+                    )
+                )
             }
-            7 -> {
+            7  -> {
                 val erstesSpielUmPlatzFuenf = spieleKORunde.find { it.spielTyp == SpielTyp.ERSTES_SPIEL_UM_PLATZ_5 }!!
                 val zweitesSpielUmPlatzFuenf = spieleKORunde.find { it.spielTyp == SpielTyp.ZWEITES_SPIEL_UM_PLATZ_5 }!!
                 val drittesSpielUmPlatzFuenf = spieleKORunde.find { it.spielTyp == SpielTyp.DRITTES_SPIEL_UM_PLATZ_5 }!!
-                allSpielUpdateList.add(erstesSpielUmPlatzFuenf.copy(heimMannschaft = mannschaften.findMannschaft(4, Gruppe.A),
-                        gastMannschaft = mannschaften.findMannschaft(3, Gruppe.B)))
+                allSpielUpdateList.add(
+                    erstesSpielUmPlatzFuenf.copy(
+                        heimMannschaft = mannschaften.findMannschaft(4, Gruppe.A),
+                        gastMannschaft = mannschaften.findMannschaft(3, Gruppe.B)
+                    )
+                )
 
-                allSpielUpdateList.add(zweitesSpielUmPlatzFuenf.copy(heimMannschaft = mannschaften.findMannschaft(3, Gruppe.B),
-                        gastMannschaft = mannschaften.findMannschaft(3, Gruppe.A)))
+                allSpielUpdateList.add(
+                    zweitesSpielUmPlatzFuenf.copy(
+                        heimMannschaft = mannschaften.findMannschaft(3, Gruppe.B),
+                        gastMannschaft = mannschaften.findMannschaft(3, Gruppe.A)
+                    )
+                )
 
-                allSpielUpdateList.add(drittesSpielUmPlatzFuenf.copy(heimMannschaft = mannschaften.findMannschaft(3, Gruppe.A),
-                        gastMannschaft = mannschaften.findMannschaft(4, Gruppe.A)))
+                allSpielUpdateList.add(
+                    drittesSpielUmPlatzFuenf.copy(
+                        heimMannschaft = mannschaften.findMannschaft(3, Gruppe.A),
+                        gastMannschaft = mannschaften.findMannschaft(4, Gruppe.A)
+                    )
+                )
             }
-            8 -> {
+            8  -> {
                 val spielUmPlatzFuenf = spieleKORunde.find { it.spielTyp == SpielTyp.SPIEL_UM_PLATZ_5 }!!
                 val spielUmPlatzSieben = spieleKORunde.find { it.spielTyp == SpielTyp.SPIEL_UM_PLATZ_7 }!!
 
-                allSpielUpdateList.add(spielUmPlatzFuenf.copy(heimMannschaft = mannschaften.findMannschaft(3, Gruppe.A),
-                        gastMannschaft = mannschaften.findMannschaft(3, Gruppe.B)))
-                allSpielUpdateList.add(spielUmPlatzSieben.copy(heimMannschaft = mannschaften.findMannschaft(4, Gruppe.A),
-                        gastMannschaft = mannschaften.findMannschaft(4, Gruppe.B)))
+                allSpielUpdateList.add(
+                    spielUmPlatzFuenf.copy(
+                        heimMannschaft = mannschaften.findMannschaft(3, Gruppe.A),
+                        gastMannschaft = mannschaften.findMannschaft(3, Gruppe.B)
+                    )
+                )
+                allSpielUpdateList.add(
+                    spielUmPlatzSieben.copy(
+                        heimMannschaft = mannschaften.findMannschaft(4, Gruppe.A),
+                        gastMannschaft = mannschaften.findMannschaft(4, Gruppe.B)
+                    )
+                )
             }
-            9 -> {
+            9  -> {
                 val erstesSpielUmPlatzSieben = spieleKORunde.find { it.spielTyp == SpielTyp.ERSTES_SPIEL_UM_PLATZ_7 }!!
-                val zweitesSpielUmPlatzSieben = spieleKORunde.find { it.spielTyp == SpielTyp.ZWEITES_SPIEL_UM_PLATZ_7 }!!
-                val drittesSpielUmPlatzSieben = spieleKORunde.find { it.spielTyp == SpielTyp.DRITTES_SPIEL_UM_PLATZ_7 }!!
-                allSpielUpdateList.add(erstesSpielUmPlatzSieben.copy(heimMannschaft = mannschaften.findMannschaft(5, Gruppe.A),
-                        gastMannschaft = mannschaften.findMannschaft(4, Gruppe.B)))
+                val zweitesSpielUmPlatzSieben =
+                    spieleKORunde.find { it.spielTyp == SpielTyp.ZWEITES_SPIEL_UM_PLATZ_7 }!!
+                val drittesSpielUmPlatzSieben =
+                    spieleKORunde.find { it.spielTyp == SpielTyp.DRITTES_SPIEL_UM_PLATZ_7 }!!
+                allSpielUpdateList.add(
+                    erstesSpielUmPlatzSieben.copy(
+                        heimMannschaft = mannschaften.findMannschaft(5, Gruppe.A),
+                        gastMannschaft = mannschaften.findMannschaft(4, Gruppe.B)
+                    )
+                )
 
-                allSpielUpdateList.add(zweitesSpielUmPlatzSieben.copy(heimMannschaft = mannschaften.findMannschaft(4, Gruppe.B),
-                        gastMannschaft = mannschaften.findMannschaft(4, Gruppe.A)))
+                allSpielUpdateList.add(
+                    zweitesSpielUmPlatzSieben.copy(
+                        heimMannschaft = mannschaften.findMannschaft(4, Gruppe.B),
+                        gastMannschaft = mannschaften.findMannschaft(4, Gruppe.A)
+                    )
+                )
 
-                allSpielUpdateList.add(drittesSpielUmPlatzSieben.copy(heimMannschaft = mannschaften.findMannschaft(4, Gruppe.A),
-                        gastMannschaft = mannschaften.findMannschaft(5, Gruppe.A)))
+                allSpielUpdateList.add(
+                    drittesSpielUmPlatzSieben.copy(
+                        heimMannschaft = mannschaften.findMannschaft(4, Gruppe.A),
+                        gastMannschaft = mannschaften.findMannschaft(5, Gruppe.A)
+                    )
+                )
             }
             10 -> {
                 val spielUmPlatzFuenf = spieleKORunde.find { it.spielTyp == SpielTyp.SPIEL_UM_PLATZ_5 }!!
                 val spielUmPlatzSieben = spieleKORunde.find { it.spielTyp == SpielTyp.SPIEL_UM_PLATZ_7 }!!
                 val spielUmPlatzNeun = spieleKORunde.find { it.spielTyp == SpielTyp.SPIEL_UM_PLATZ_9 }!!
 
-                allSpielUpdateList.add(spielUmPlatzFuenf.copy(heimMannschaft = mannschaften.findMannschaft(3, Gruppe.A),
-                        gastMannschaft = mannschaften.findMannschaft(3, Gruppe.B)))
-                allSpielUpdateList.add(spielUmPlatzSieben.copy(heimMannschaft = mannschaften.findMannschaft(4, Gruppe.A),
-                        gastMannschaft = mannschaften.findMannschaft(4, Gruppe.B)))
-                allSpielUpdateList.add(spielUmPlatzNeun.copy(heimMannschaft = mannschaften.findMannschaft(5, Gruppe.A),
-                        gastMannschaft = mannschaften.findMannschaft(5, Gruppe.B)))
+                allSpielUpdateList.add(
+                    spielUmPlatzFuenf.copy(
+                        heimMannschaft = mannschaften.findMannschaft(3, Gruppe.A),
+                        gastMannschaft = mannschaften.findMannschaft(3, Gruppe.B)
+                    )
+                )
+                allSpielUpdateList.add(
+                    spielUmPlatzSieben.copy(
+                        heimMannschaft = mannschaften.findMannschaft(4, Gruppe.A),
+                        gastMannschaft = mannschaften.findMannschaft(4, Gruppe.B)
+                    )
+                )
+                allSpielUpdateList.add(
+                    spielUmPlatzNeun.copy(
+                        heimMannschaft = mannschaften.findMannschaft(5, Gruppe.A),
+                        gastMannschaft = mannschaften.findMannschaft(5, Gruppe.B)
+                    )
+                )
             }
         }
         spielRepository.saveAll(allSpielUpdateList)
@@ -244,7 +303,8 @@ class TabelleService(@Autowired val mannschaftRepository: MannschaftRepository,
             throw IllegalStateException("Es wurde mehr als ein finalspiel gefunden!")
         }
         val finale = allFinale[0]
-        val allSpielUmPlatzDrei = spielRepository.findAllBySpielTypAndJugend(SpielTyp.SPIEL_UM_PLATZ_3, spiel.heimMannschaft.jugend)
+        val allSpielUmPlatzDrei =
+            spielRepository.findAllBySpielTypAndJugend(SpielTyp.SPIEL_UM_PLATZ_3, spiel.heimMannschaft.jugend)
         if (allSpielUmPlatzDrei.size > 1) {
             log.error("Es kann nur ein Spiel um platz Drei pro jugend geben, es wurden aber ${allSpielUmPlatzDrei.size} final spiele gefunden!")
             throw IllegalStateException("Es wurde mehr als ein finalspiel gefunden!")
@@ -252,7 +312,7 @@ class TabelleService(@Autowired val mannschaftRepository: MannschaftRepository,
         val spielUmPlatzDrei = allSpielUmPlatzDrei[0]
 
         when (halbfinalTyp) {
-            SpielTyp.ERSTES_HALBFINALE -> {
+            SpielTyp.ERSTES_HALBFINALE  -> {
                 // Es muss einen sieger geben, weshalb man hier ohne probleme spiel.sieger() aufrufen kann
                 val finaleUpdate = finale.copy(heimMannschaft = spiel.sieger())
                 val spielUmPlatzDreiUpdate = spielUmPlatzDrei.copy(heimMannschaft = spiel.verlierer())
@@ -264,7 +324,7 @@ class TabelleService(@Autowired val mannschaftRepository: MannschaftRepository,
                 val spielUmPlatzDreiUpdate = spielUmPlatzDrei.copy(gastMannschaft = spiel.verlierer())
                 spielRepository.saveAll(listOf(finaleUpdate, spielUmPlatzDreiUpdate))
             }
-            else -> {
+            else                        -> {
                 log.error("Es wurde der spielTyp $halbfinalTyp in die Methode handleHalbfinale übergeben!")
                 throw IllegalArgumentException("Ungültiger Spieltyp ${halbfinalTyp}")
             }
@@ -273,7 +333,8 @@ class TabelleService(@Autowired val mannschaftRepository: MannschaftRepository,
 
 
     private fun calculateNewTabellenPlatzGruppenphase(spiel: Spiel) {
-        val mannschaften = mannschaftRepository.findAllByJugendAndGruppe(spiel.heimMannschaft.jugend, spiel.heimMannschaft.gruppe)
+        val mannschaften =
+            mannschaftRepository.findAllByJugendAndGruppe(spiel.heimMannschaft.jugend, spiel.heimMannschaft.gruppe)
         val sortedByTabellenPlatz = sortMannschaftenByTabellenPlatz(mannschaften)
         sortedByTabellenPlatz.forEachIndexed { index, mannschaft ->
             mannschaftRepository.save(mannschaft.copy(tabellenPlatz = index + 1))
@@ -296,16 +357,15 @@ class TabelleService(@Autowired val mannschaftRepository: MannschaftRepository,
             when {
                 o1.punkteverhaeltnis.first > o2.punkteverhaeltnis.first -> 1
                 o1.punkteverhaeltnis.first < o2.punkteverhaeltnis.first -> -1
-                else -> direkterVergleich(o1, o2)
+                else                                                    -> direkterVergleich(o1, o2)
             }
 
         }).reversed()
     }
 
     private fun direkterVergleich(o1: Mannschaft, o2: Mannschaft): Int {
-        val allSpieleDirekterVergleichPunkte = o1.getAllSpiel()
-                .filter { it.gastMannschaft == o2 || it.heimMannschaft == o2 }
-                .map { spiel ->
+        val allSpieleDirekterVergleichPunkte =
+            o1.getAllSpiel().filter { it.gastMannschaft == o2 || it.heimMannschaft == o2 }.map { spiel ->
                     if (spiel.heimMannschaft == o2) {
                         // Flippen damit die summe am ende die puinkte von o1 an erster stelle hat
                         // und die punkte von o2 an zweiter
@@ -314,12 +374,12 @@ class TabelleService(@Autowired val mannschaftRepository: MannschaftRepository,
                         getPunkteVerhaeltnis(spiel)
                     }
                 }
-        val sumPunkte = Pair(allSpieleDirekterVergleichPunkte.sumBy { it.first }, allSpieleDirekterVergleichPunkte
-                .sumBy { it.second })
+        val sumPunkte = Pair(allSpieleDirekterVergleichPunkte.sumBy { it.first },
+                             allSpieleDirekterVergleichPunkte.sumBy { it.second })
         return when {
             sumPunkte.first > sumPunkte.second -> 1
             sumPunkte.first < sumPunkte.second -> -1
-            else -> torVerhaeltnis(o1, o2)
+            else                               -> torVerhaeltnis(o1, o2)
         }
 
 
@@ -331,7 +391,7 @@ class TabelleService(@Autowired val mannschaftRepository: MannschaftRepository,
         return when {
             o1TorDifferenz > o2TorDifferenz -> 1
             o1TorDifferenz < o2TorDifferenz -> -1
-            else -> mehrTore(o1, o2)
+            else                            -> mehrTore(o1, o2)
         }
     }
 
@@ -340,8 +400,8 @@ class TabelleService(@Autowired val mannschaftRepository: MannschaftRepository,
         return when {
             o1.torverhaeltnis.first > o2.torverhaeltnis.first -> 1
             o1.torverhaeltnis.first < o2.torverhaeltnis.first -> -1
-        // Es muss ein sieben meterwerfen stattfinden
-            else -> siebenMeterWerfen(o1, o2)
+            // Es muss ein sieben meterwerfen stattfinden
+            else                                              -> siebenMeterWerfen(o1, o2)
         }
     }
 
@@ -351,7 +411,7 @@ class TabelleService(@Autowired val mannschaftRepository: MannschaftRepository,
     }
 
     private fun updateMannschaften(spiel: Spiel, oldSpiel: Spiel? = null) {
-        if(oldSpiel != null && oldSpiel.hasErgebnis){
+        if (oldSpiel != null && oldSpiel.hasErgebnis) {
             removeOldSpielErgebnis(oldSpiel)
         }
         val punkteVerhaeltnisSpiel = getPunkteVerhaeltnis(spiel)
@@ -365,8 +425,14 @@ class TabelleService(@Autowired val mannschaftRepository: MannschaftRepository,
         val newGastTorVerhaeltnis = Pair(spiel.gastTore, spiel.heimTore) + spiel.gastMannschaft.torverhaeltnis
 
 
-        val heimUpdate = spiel.heimMannschaft.copy(punkteverhaeltnis = newHeimPunkteVerhaeltnis, torverhaeltnis = newHeimTorVerhaeltnis)
-        val gastUpdate = spiel.gastMannschaft.copy(punkteverhaeltnis = newGastPunkteVerhaeltnis, torverhaeltnis = newGastTorVerhaeltnis)
+        val heimUpdate = spiel.heimMannschaft.copy(
+            punkteverhaeltnis = newHeimPunkteVerhaeltnis,
+            torverhaeltnis = newHeimTorVerhaeltnis
+        )
+        val gastUpdate = spiel.gastMannschaft.copy(
+            punkteverhaeltnis = newGastPunkteVerhaeltnis,
+            torverhaeltnis = newGastTorVerhaeltnis
+        )
 
         mannschaftRepository.save(heimUpdate)
         mannschaftRepository.save(gastUpdate)
@@ -383,8 +449,14 @@ class TabelleService(@Autowired val mannschaftRepository: MannschaftRepository,
 
         val newGastTorVerhaeltnis = spiel.gastMannschaft.torverhaeltnis - Pair(spiel.gastTore, spiel.heimTore)
 
-        val heimUpdate = spiel.heimMannschaft.copy(punkteverhaeltnis = newHeimPunkteVerhaeltnis, torverhaeltnis = newHeimTorVerhaeltnis)
-        val gastUpdate = spiel.gastMannschaft.copy(punkteverhaeltnis = newGastPunkteVerhaeltnis, torverhaeltnis = newGastTorVerhaeltnis)
+        val heimUpdate = spiel.heimMannschaft.copy(
+            punkteverhaeltnis = newHeimPunkteVerhaeltnis,
+            torverhaeltnis = newHeimTorVerhaeltnis
+        )
+        val gastUpdate = spiel.gastMannschaft.copy(
+            punkteverhaeltnis = newGastPunkteVerhaeltnis,
+            torverhaeltnis = newGastTorVerhaeltnis
+        )
 
         mannschaftRepository.save(heimUpdate)
         mannschaftRepository.save(gastUpdate)
@@ -394,7 +466,7 @@ class TabelleService(@Autowired val mannschaftRepository: MannschaftRepository,
         return when {
             spiel.heimTore > spiel.gastTore -> Pair(2, 0)
             spiel.heimTore < spiel.gastTore -> Pair(0, 2)
-            else -> Pair(1, 1)
+            else                            -> Pair(1, 1)
         }
     }
 }

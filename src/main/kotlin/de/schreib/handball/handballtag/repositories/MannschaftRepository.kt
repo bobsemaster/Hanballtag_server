@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 interface MannschaftRepository : JpaRepository<Mannschaft, Long> {
     fun findAllByVerein(verein: Verein): List<Mannschaft>
-    fun findAllByJugend(jugend: Jugend):List<Mannschaft>
-    fun findAllByJugendAndGruppe(jugend: Jugend, gruppe: Gruppe):List<Mannschaft>
+    fun findAllByJugend(jugend: Jugend): List<Mannschaft>
+    fun findAllByJugendAndGruppe(jugend: Jugend, gruppe: Gruppe): List<Mannschaft>
     fun deleteAllByVerein(verein: Verein)
 }
