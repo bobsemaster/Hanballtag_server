@@ -1,6 +1,6 @@
 package de.schreib.handball.handballtag.controller
 
-import de.schreib.handball.handballtag.Services.PLATZHALTER_VEREIN_NAME
+import de.schreib.handball.handballtag.services.PLATZHALTER_VEREIN_NAME
 import de.schreib.handball.handballtag.entities.Mannschaft
 import de.schreib.handball.handballtag.entities.Spiel
 import de.schreib.handball.handballtag.entities.Verein

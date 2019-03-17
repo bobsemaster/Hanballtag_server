@@ -1,8 +1,8 @@
 package de.schreib.handball.handballtag.controller
 
-import de.schreib.handball.handballtag.Services.SpielplanCreatorService
-import de.schreib.handball.handballtag.Services.SpielplanService
-import de.schreib.handball.handballtag.Services.TabelleService
+import de.schreib.handball.handballtag.services.SpielplanCreatorService
+import de.schreib.handball.handballtag.services.SpielplanService
+import de.schreib.handball.handballtag.services.TabelleService
 import de.schreib.handball.handballtag.entities.Jugend
 import de.schreib.handball.handballtag.entities.Spiel
 import de.schreib.handball.handballtag.exceptions.SpielNotFoundException

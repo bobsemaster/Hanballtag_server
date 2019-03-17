@@ -1,6 +1,6 @@
 package de.schreib.handball.handballtag.tabelle
 
-import de.schreib.handball.handballtag.Services.TabelleService
+import de.schreib.handball.handballtag.services.TabelleService
 import de.schreib.handball.handballtag.entities.Jugend
 import de.schreib.handball.handballtag.entities.Mannschaft
 import de.schreib.handball.handballtag.entities.Verein
