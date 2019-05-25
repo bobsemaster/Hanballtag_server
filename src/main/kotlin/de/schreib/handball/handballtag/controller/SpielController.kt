@@ -218,7 +218,7 @@ class SpielController(
         @RequestBody
         jugend: Jugend
     ) {
-        tabelleService.updateKOSpiele(jugend)
+        tabelleService.createKOSpiele(jugend)
     }
 
 

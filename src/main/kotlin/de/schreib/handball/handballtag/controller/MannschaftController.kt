@@ -1,6 +1,5 @@
 package de.schreib.handball.handballtag.controller
 
-import de.schreib.handball.handballtag.services.PLATZHALTER_VEREIN_NAME
 import de.schreib.handball.handballtag.entities.Gruppe
 import de.schreib.handball.handballtag.entities.Jugend
 import de.schreib.handball.handballtag.entities.Mannschaft
@@ -10,6 +9,7 @@ import de.schreib.handball.handballtag.exceptions.VereinNotFoundException
 import de.schreib.handball.handballtag.repositories.MannschaftRepository
 import de.schreib.handball.handballtag.repositories.SpielRepository
 import de.schreib.handball.handballtag.repositories.VereinRepository
+import de.schreib.handball.handballtag.services.PLATZHALTER_VEREIN_NAME
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.annotation.Secured
 import org.springframework.web.bind.annotation.DeleteMapping

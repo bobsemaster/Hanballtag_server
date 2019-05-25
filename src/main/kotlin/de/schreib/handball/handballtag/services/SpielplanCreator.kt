@@ -323,7 +323,9 @@ class SpielplanCreatorService(
         planSpiel(siegerErstesHalbfinale, siegerZweitesHalbfinale, SpielTyp.FINALE)
     }
 
-    private fun createSpielplan6Mannschaften(allJugendMannschaft: List<Mannschaft>, sechsMannschaftenGruppe: Boolean) {
+    private fun createSpielplan6Mannschaften(
+        allJugendMannschaft: List<Mannschaft>, sechsMannschaftenGruppe: Boolean
+    ) {
         if (sechsMannschaftenGruppe) {
             createSpielplan6MannschaftenGruppe(allJugendMannschaft)
         } else {
@@ -456,12 +458,7 @@ class SpielplanCreatorService(
     private fun spiel(heim: Kuerzel, gast: Kuerzel, spielTyp: SpielTyp = SpielTyp.GRUPPENSPIEL) {
         spielplanList.add(
             allJugendMannschaft.createSpiel(
-                heim,
-                gast,
-                spielDuration,
-                turnierBeginn,
-                spielTyp,
-                currentGroup
+                heim, gast, spielDuration, turnierBeginn, spielTyp, currentGroup
             )
         )
         if (alternateGroup) {
@@ -506,12 +503,7 @@ class SpielplanCreatorService(
     }
 
     private fun List<Mannschaft>.createSpiel(
-        heim: Kuerzel,
-        gast: Kuerzel,
-        spielDuration: Duration,
-        time: LocalDateTime,
-        spielTyp: SpielTyp,
-        gruppe: Gruppe
+        heim: Kuerzel, gast: Kuerzel, spielDuration: Duration, time: LocalDateTime, spielTyp: SpielTyp, gruppe: Gruppe
     ): Spiel {
         if (this[heim.index].id == this[gast.index].id) {
             throw IllegalArgumentException("Heim und gast können nicht die selbe mannschaft sein")
@@ -541,10 +533,7 @@ class SpielplanCreatorService(
      */
     private fun mannschaft(name: String): Mannschaft {
         val mannschaft = Mannschaft(
-            name = name,
-            verein = platzhalterVerein,
-            jugend = allJugendMannschaft[0].jugend,
-            gruppe = Gruppe.C
+            name = name, verein = platzhalterVerein, jugend = allJugendMannschaft[0].jugend, gruppe = Gruppe.C
         )
         mannschaftRepository.save(mannschaft)
         return mannschaft

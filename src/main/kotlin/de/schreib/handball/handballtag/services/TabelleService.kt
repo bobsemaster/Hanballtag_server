@@ -5,10 +5,12 @@ import de.schreib.handball.handballtag.entities.Jugend
 import de.schreib.handball.handballtag.entities.Mannschaft
 import de.schreib.handball.handballtag.entities.Spiel
 import de.schreib.handball.handballtag.entities.SpielTyp
+import de.schreib.handball.handballtag.exceptions.MannschaftNotFoundException
 import de.schreib.handball.handballtag.repositories.MannschaftRepository
 import de.schreib.handball.handballtag.repositories.SpielRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 
 @Service
@@ -54,11 +56,11 @@ class TabelleService(
 
         // kein spiel mehr dem kein ergebnis zugewiesen wurde-> alle spiele gespielt!
         if (gruppenSpiele.filter { !it.hasErgebnis }.count() == 0) {
-            updateKOSpiele(jugend)
+            createKOSpiele(jugend)
         }
     }
 
-    fun updateKOSpiele(jugend: Jugend) {
+    fun createKOSpiele(jugend: Jugend) {
         // Mannschaften in Reihenfolge erster hat index 0 letzter hat letzten index
         val mannschaften = mannschaftRepository.findAllByJugend(jugend).filter { it.verein.name != "placeholder" }
             .sortedBy { it.tabellenPlatz }
@@ -266,33 +268,29 @@ class TabelleService(
     }
 
     private fun handleFinale(spiel: Spiel) {
-        val ersterPlatz = spiel.sieger().copy(tabellenPlatz = 1)
-        val zweiterPlatz = spiel.verlierer().copy(tabellenPlatz = 2)
-        mannschaftRepository.saveAll(listOf(ersterPlatz, zweiterPlatz))
+        handlePlatzierungsSpiel(spiel, 1)
+    }
+
+    private fun handlePlatzierungsSpiel(spiel: Spiel, platz: Int) {
+        val sieger = spiel.sieger().copy(tabellenPlatz = platz )
+        val verlierer = spiel.verlierer().copy(tabellenPlatz = platz + 1 )
+        mannschaftRepository.saveAll(listOf(sieger, verlierer))
     }
 
     private fun handleSpielUmPlatzNeun(spiel: Spiel) {
-        val neunterPlatz = spiel.sieger().copy(tabellenPlatz = 9)
-        val zehnterPlatz = spiel.sieger().copy(tabellenPlatz = 10)
-        mannschaftRepository.saveAll(listOf(neunterPlatz, zehnterPlatz))
+        handlePlatzierungsSpiel(spiel, 9)
     }
 
     private fun handleSpielUmPlatzSieben(spiel: Spiel) {
-        val siebterPlatz = spiel.sieger().copy(tabellenPlatz = 7)
-        val achterPlatz = spiel.sieger().copy(tabellenPlatz = 8)
-        mannschaftRepository.saveAll(listOf(siebterPlatz, achterPlatz))
+        handlePlatzierungsSpiel(spiel, 7)
     }
 
     private fun handleSpielUmPlatzFuenf(spiel: Spiel) {
-        val fuenfterPlatz = spiel.sieger().copy(tabellenPlatz = 5)
-        val sechsterPlatz = spiel.verlierer().copy(tabellenPlatz = 6)
-        mannschaftRepository.saveAll(listOf(fuenfterPlatz, sechsterPlatz))
+        handlePlatzierungsSpiel(spiel, 5)
     }
 
     private fun handleSpielUmPlatzDrei(spiel: Spiel) {
-        val dritterPlatz = spiel.sieger().copy(tabellenPlatz = 3)
-        val vierterPlatz = spiel.verlierer().copy(tabellenPlatz = 4)
-        mannschaftRepository.saveAll(listOf(dritterPlatz, vierterPlatz))
+        handlePlatzierungsSpiel(spiel, 3)
     }
 
     @Throws(IllegalArgumentException::class)
@@ -366,14 +364,14 @@ class TabelleService(
     private fun direkterVergleich(o1: Mannschaft, o2: Mannschaft): Int {
         val allSpieleDirekterVergleichPunkte =
             o1.getAllSpiel().filter { it.gastMannschaft == o2 || it.heimMannschaft == o2 }.map { spiel ->
-                    if (spiel.heimMannschaft == o2) {
-                        // Flippen damit die summe am ende die puinkte von o1 an erster stelle hat
-                        // und die punkte von o2 an zweiter
-                        getPunkteVerhaeltnis(spiel).flip()
-                    } else {
-                        getPunkteVerhaeltnis(spiel)
-                    }
+                if (spiel.heimMannschaft == o2) {
+                    // Flippen damit die summe am ende die puinkte von o1 an erster stelle hat
+                    // und die punkte von o2 an zweiter
+                    getPunkteVerhaeltnis(spiel).flip()
+                } else {
+                    getPunkteVerhaeltnis(spiel)
                 }
+            }
         val sumPunkte = Pair(allSpieleDirekterVergleichPunkte.sumBy { it.first },
                              allSpieleDirekterVergleichPunkte.sumBy { it.second })
         return when {
@@ -396,7 +394,7 @@ class TabelleService(
     }
 
     private fun mehrTore(o1: Mannschaft, o2: Mannschaft): Int {
-        TODO("Nur aus den Mannschaften die verglichen werden")
+        //TODO("Nur aus den Mannschaften die verglichen werden")
         return when {
             o1.torverhaeltnis.first > o2.torverhaeltnis.first -> 1
             o1.torverhaeltnis.first < o2.torverhaeltnis.first -> -1
@@ -410,7 +408,12 @@ class TabelleService(
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
+    // TODO durch methode zum Neukalkulieren des Spielergebnisses ersetzten
+    // Dabei wird die Komplette Tabelle zurückgesetzt und neu berechnet
     private fun updateMannschaften(spiel: Spiel, oldSpiel: Spiel? = null) {
+        // TODO vor allem dieser Teil hat hier nichts verloren
+        // Stattdessen diese Methode so schreiben dass es einfach möglich ist
+        // alle spiele einer Mannschaft neu zu berechnen
         if (oldSpiel != null && oldSpiel.hasErgebnis) {
             removeOldSpielErgebnis(oldSpiel)
         }
@@ -438,6 +441,8 @@ class TabelleService(
         mannschaftRepository.save(gastUpdate)
     }
 
+    // TODO durch methode zum Neukalkulieren des Spielergebnisses ersetzten
+    // Dabei wird die Komplette Tabelle zurückgesetzt und neu berechnet
     private fun removeOldSpielErgebnis(spiel: Spiel) {
         val punkteVerhaeltnisSpiel = getPunkteVerhaeltnis(spiel)
 
