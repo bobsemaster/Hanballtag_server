@@ -41,8 +41,13 @@ build:
 docker-container:
   image: docker:stable-dind
   stage: docker
+  # Services und variables um docker in docker nutzen zu können
+  services:
+    - docker:dind
   variables:
-    DOCKER_HOST: tcp://localhost:2375 # für docker in docker
+    DOCKER_DRIVER: overlay
+    DOCKER_HOST: tcp://localhost:2375
+
   script:
     # Tag with commit tag or latest if not aviable.
     - "[[ -z $CI_COMMIT_TAG ]] && CI_COMMIT_TAG=$CI_COMMIT_REF_SLUG"
