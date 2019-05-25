@@ -50,7 +50,6 @@ deploy-kube:
     - '[[ -z $CI_COMMIT_TAG ]] && CI_COMMIT_TAG=latest'
     - 'export CI_COMMIT_TAG'
     - initialize_tiller
-    - clone_chart
     - KUBE_NAMESPACE=$NAMESPACE
     - ensure_namespace
     - create_docker_secret
@@ -60,7 +59,7 @@ deploy-kube:
       --set server.image.tag=$CI_COMMIT_TAG
       --set pgAdmin.password=$PG_ADMIN_PASSWORD
       --set postgres.password=$POSTGRES_PASSWORD
-      --values values-server.yaml --namespace $NAMESPACE $RELEASE_NAME helm-charts/server
+      --values values-server.yaml --namespace $NAMESPACE $RELEASE_NAME helm/server
   environment:
     name: kube
     url: https://handballtag.$AUTO_DEVOPS_DOMAIN
