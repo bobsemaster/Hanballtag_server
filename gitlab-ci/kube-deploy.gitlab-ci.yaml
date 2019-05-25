@@ -34,8 +34,6 @@
 
 deploy-kube:
   image: emundo/ci-base
-  tags:
-    - rancher
   stage: deploy
   cache: # Wir brauchen hier kein Cache, dieser Job führt nur Skripte aus
     key: "none"
@@ -72,8 +70,6 @@ deploy-kube:
 # Review Apps template
 review:
   image: emundo/ci-base
-  tags:
-    - rancher
   stage: review
   before_script:
     - *auto_devops
@@ -113,8 +109,6 @@ review:
 
 stop_review:
   image: emundo/ci-base
-  tags:
-    - rancher
   stage: cleanup
   variables:
     GIT_STRATEGY: none
