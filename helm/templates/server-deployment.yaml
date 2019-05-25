@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: {{.Values.server.name}}
+    labels:
+        app: {{.Values.application.name}}
+        environment: {{.Values.application.environment}}
+spec:
+    selector:
+        matchLabels:
+            app: {{.Values.server.name}}
+    replicas: {{.Values.server.replicas}}
+    template:
+        metadata:
+            labels:
+                app: {{.Values.server.name}}
+        spec:
+            initContainers:
+                - name: {{.Values.application.name}}-postgres-ready
+                  image: {{.Values.postgres.image}}
+                  imagePullPolicy: IfNotPresent
+                  command: ['sh', '-c',
+                            'until pg_isready -h postgres -p 5432;
+                    do echo waiting for database; sleep 2; done;']
+            containers:
+                - name: {{.Values.server.name}}
+                  readinessProbe:
+                      httpGet:
+                          port: 8080
+                          path: {{.Values.server.probePath}}
+                      initialDelaySeconds: {{.Values.server.readinessProbeTimeoutSeconds}}
+                      failureThreshold: {{.Values.server.readinessProbeRetries}}
+                  livenessProbe:
+                      httpGet:
+                          port: 8080
+                          path: {{.Values.server.probePath}}
+                      initialDelaySeconds: {{.Values.server.readinessProbeTimeoutSeconds}}
+                  image: {{.Values.server.image.name}}:{{.Values.server.image.tag}}
+                  imagePullPolicy: Always
+                  ports:
+                      - containerPort: 8080
+                        name: "http-port"
+                  resources:
+                      requests:
+                          memory: 500Mi
+                      limits:
+                          memory: 4Gi
+            imagePullSecrets:
+                - name: {{.Values.dockerRegistrySecretName}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: {{.Values.server.hostname}}
+    labels:
+        app: {{.Values.application.name}}
+        environment: {{.Values.application.environment}}
+spec:
+    ports:
+        - port: 8080
+    selector:
+        app: {{.Values.server.name}}
+        environment: {{.Values.application.environment}}

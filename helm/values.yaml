@@ -1,0 +1,65 @@
+# Standart Werte für das payara Deployment
+
+application:
+## Wenn möglich das environment über die CI setzten
+  environment: review
+## Name der Applikation
+  name: handballtag-verwaltung
+
+
+## Dieser wert sollte über die CI gesetzt werden
+## Url unter der das Nginx Deployment verfügbar ist
+url: handballtag.kube.schreib.io
+
+ingress:
+  ## Einstellung um HTTPS mit Letsencrypt zu konfigurieren
+  tlsEnabled: true
+
+dockerRegistrySecretName: gitlab-registry
+
+## Falls man Zugriff auf die Postgres braucht muss pgAdmin aktiv sein,
+## da die Postgres nicht von aussen sichtbar ist.
+pgAdmin:
+  enabled: true
+  name: pg-admin
+  image: dpage/pgadmin4
+  tag: latest
+  mail: mail@e-mundo.de
+  ## Das passwort sollte per CI gesetzt werden
+  # password: password
+
+server:
+  image:
+    ## hier das benötigte Image eintragen
+    name: registry.schreib.io/tsv-forstenried/handballtag/server/server
+    ## tag das benutzt werden soll einfügen wenn möglich per CI
+    # tag: latest
+  ## Die Readines Probe sollte so angepasst werden dass der Server in dieser Zeit plus
+  ## der Anzahl an möglichen Retries * 10 sekunden gestartet wird.
+  ## Falls der Server in der Zeit nicht hochgefahren wurde, wird er neu gestartet.
+  readinessProbeTimeoutSeconds: 10
+  readinessProbeRetries: 6
+  ## Pfad der zum health check genutzt werden soll
+  # probePath: /api/rest/info/version
+  ## Name des Servers
+  name: server
+  ## Hostname muss mit dem Hostname in der Nginx Config übereinstimmen
+  hostname: server
+  ## Mögliche Werte
+  ## Always: Image immer pullen
+  ## IfNotPresent: Nur das image pullen wenn es noch nicht lokal verfügbar ist
+  ## Never: Image nie Pullen
+  pullPolicy: IfNotPresent
+  ## Anzahl an server Instanzen die erstellt werden sollen
+  replicas: 1
+
+postgres:
+  hostname: postgres
+  database: database
+  user: postgres
+  ## Das passwort sollte per CI gesetzt werden
+  # password: password
+  ## Das postgres image wird auch benutzt um zu schauen ob die Datenbank hochgefahren ist.
+  ## dazu muss pg_isready im Container verfügbar sein
+  image: postgres:11-alpine
+  volume-size: 1Gi

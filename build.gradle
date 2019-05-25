@@ -97,6 +97,7 @@ kotlin {
 
 task dockerRest(type: Copy) {
     from 'build/libs'
+    logger.warn("${version}")
     include "handballtag-${version}.jar"
 
     into "docker/rest/deploy/"
@@ -104,7 +105,6 @@ task dockerRest(type: Copy) {
 }
 
 detekt {
-    version = "1.0.0.RC14"
     input = files("src/main/kotlin")
     filters = ".*/resources/.*,.*/build/.*"
 }
