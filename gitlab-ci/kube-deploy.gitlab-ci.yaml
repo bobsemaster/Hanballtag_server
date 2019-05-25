@@ -10,8 +10,8 @@
   function initialize_tiller() {
     KUBECONFIG=`pwd`/.kubeconfig
     echo ${GKE_ACCOUNT_JSON} | base64 -d > gke-service-account.json
-    gcloud auth activate-service-account --key-file gke-service-account.json --project Kubernetes
-    gcloud container clusters get-credentials gitlab-cluster --zone europe-west3-a --project Kubernetes
+    gcloud auth activate-service-account --key-file gke-service-account.json --project kubernetes-241709
+    gcloud container clusters get-credentials gitlab-cluster --zone europe-west3-a --project kubernetes-241709
     helm init --service-account tiller --wait --upgrade
     rm gke-service-account.json
   }
