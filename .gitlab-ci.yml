@@ -34,7 +34,6 @@ build:
   script:
     - gradle clean assemble dockerRest
   artifacts:
-    untracked: true
     paths:
       - docker/rest/deploy/*
     expire_in: 1 hrs
