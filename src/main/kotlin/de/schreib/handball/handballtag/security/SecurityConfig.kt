@@ -33,7 +33,7 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
         if (http == null) {
             throw NullPointerException("Http was null")
         }
-        http.authorizeRequests().antMatchers("/ws/**").permitAll()
+        http.authorizeRequests().antMatchers("/ws/**", "/ping/**").permitAll()
             //Man muss für jeden Request authentifiziert sein
             .anyRequest().authenticated().and().formLogin().loginPage("/login")
             .failureHandler(SimpleUrlAuthenticationFailureHandler())
