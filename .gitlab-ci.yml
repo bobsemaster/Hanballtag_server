@@ -1,4 +1,6 @@
 image: emundo/docker-compose-openjdk-node-gradle:latest
+include:
+  local: gitlab-ci/kube-deploy.gitlab-ci.yaml
 
 variables:
   # Deaktiviere den Gradle Daemon: https://docs.gradle.org/current/userguide/gradle_daemon.html#sec:why_the_daemon
@@ -6,12 +8,12 @@ variables:
   JAVA_OPTS: "-Dorg.gradle.daemon=false"
 
 stages:
-  - lint
-  - test
-  - analysis
+  - test-and-build
+  - docker
   - build
+  - review
+  - cleanup
   - deploy
-
 cache:
   paths:
     - .gradle
@@ -20,57 +22,46 @@ before_script:
   # Wir legen die Gradle und die Java Libs in den Job-übergreifenden Cache
   - export GRADLE_USER_HOME=`pwd`/.gradle
 
-#formatted:
-#  stage: lint
-#  script:
-#    - gradle spotlessCheck
 
 unittest:
-  stage: test
+  stage: test-and-build
   script:
     # Test laufen lassen
     - gradle --parallel test
 
-#sonar-preview:
-#  stage: analysis
-#  except:
-#    - master
-#  script:
-#    - gradle -Dsonar.analysis.mode=preview -Dsonar.gitlab.project_id=$CI_PROJECT_PATH -Dsonar.gitlab.commit_sha=$CI_COMMIT_SHA -Dsonar.gitlab.ref_name=$CI_BUILD_REF_NAME sonarqube
-
-#sonarqube:
-#  stage: analysis
-#  only:
-#    - master
-#  script:
-#    - gradle sonarqube
+build:
+  stage: test-and-build
+  script:
+    - gradle clean assemble dockerRest
+  artifacts:
+    paths:
+      - docker/rest/deploy/*
+    expire_in: 1 hrs
 
 docker-container:
-  stage: build
-  only:
-    - master
-  script:
-    # Wir bauen die Anwendung
-    - gradle clean assemble dockerRest
+  image: docker:stable-dind
+  stage: docker
+  # Services und variables um docker in docker nutzen zu können
+  services:
+    - docker:dind
+  variables:
+    DOCKER_DRIVER: overlay
+    DOCKER_HOST: tcp://localhost:2375
 
-    # Docker Login, weil die Registry zugriffsbeschränkt ist.
+  script:
+    # Tag with commit tag or latest if not aviable.
+    - "[[ -z $CI_COMMIT_TAG ]] && CI_COMMIT_TAG=$CI_COMMIT_REF_SLUG"
+    - "[[ $CI_COMMIT_REF_NAME -eq 'master' ]] && CI_COMMIT_TAG=latest"
+    - "export CI_COMMIT_TAG"
+
+    # Führe Login durch, da ggf. Images aus unserer Registry benötigt werden
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
 
-    #Container bauen
-    - docker-compose build --pull
-    # Docker Container in registry pushen
-    - docker-compose push
+    # Baue einzelne Docker Images
+    - docker build --pull --tag "$CI_REGISTRY_IMAGE/server:$CI_COMMIT_TAG" docker/rest
 
-deploy-dev:
-  stage: deploy
-  when: manual
-  only:
-    - master
-  script:
-    - rancher-compose -f docker-compose.rancher.yml -r rancher-compose.yml -p handballtag pull
-    - rancher-compose -f docker-compose.rancher.yml -r rancher-compose.yml -p handballtag up -d --force-upgrade --pull --confirm-upgrade
-  environment:
-    # Das hier ist für die Anzeige in https://gitlab.schreib.io/salatkind/server/environments
-    # damit man alle Deploys auf die Umgebung sieht und per Click reployen kann
-    name: dev
-    url: https://handball-api.schreib.io/
+    # Führe nochmal ein Login durch, falls ein Build länger dauert
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+
+    # Pushe Images in Registry
+    - docker push "$CI_REGISTRY_IMAGE/server"

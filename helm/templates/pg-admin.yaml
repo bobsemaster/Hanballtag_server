@@ -1,0 +1,93 @@
+{{- if .Values.pgAdmin.enabled}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: {{ .Values.pgAdmin.name }}
+    labels:
+        app: {{.Values.application.name}}
+        environment: {{.Values.application.environment}}
+spec:
+    selector:
+        matchLabels:
+            app: {{.Values.pgAdmin.name}}
+            environment: {{.Values.application.environment}}
+    template:
+        metadata:
+            labels:
+                app: {{ .Values.pgAdmin.name }}
+                environment: {{.Values.application.environment}}
+        spec:
+            containers:
+                - name: {{ .Values.pgAdmin.name }}
+                  image: {{.Values.pgAdmin.image}}:{{.Values.pgAdmin.tag}}
+                  imagePullPolicy: IfNotPresent
+                  env:
+                      - name: PGADMIN_DEFAULT_PASSWORD
+                        valueFrom:
+                            secretKeyRef:
+                                key: password
+                                name: {{.Values.pgAdmin.name}}-password
+                      - name: PGADMIN_DEFAULT_EMAIL
+                        value: mail@e-mundo.de
+                  ports:
+                      - containerPort: 80
+---
+apiVersion: v1
+kind: Secret
+metadata:
+    name: {{.Values.pgAdmin.name}}-password
+    labels:
+        app: {{.Values.application.name}}
+        environment: {{.Values.application.environment}}
+type: Opaque
+stringData:
+    password: {{.Values.pgAdmin.password}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: {{ .Values.pgAdmin.name }}-service
+    labels:
+        app: {{.Values.application.name}}
+        environment: {{.Values.application.environment}}
+spec:
+    type: ClusterIP
+    ports:
+        - port: 80
+    selector:
+        app: {{ .Values.pgAdmin.name }}
+        environment: {{.Values.application.environment}}
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+    name: {{.Values.pgAdmin.name}}-ingress
+    labels:
+        app: {{.Values.application.name}}
+        environment: {{.Values.application.environment}}
+    annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /
+        kubernetes.io/ingress.class: "nginx"
+            {{- if eq .Values.ingress.tlsEnabled false}}
+        kubernetes.io/tls-acme: "false"
+        ingress.kubernetes.io/ssl-redirect: "false"
+            {{- end}}
+            {{- if .Values.ingress.tlsEnabled}}
+        kubernetes.io/tls-acme: "true"
+        {{- end}}
+spec:
+        {{- if .Values.ingress.tlsEnabled}}
+    tls:
+        - hosts:
+              - pg-admin-{{ .Values.application.url }}
+          secretName: {{.Values.application.name}}-pg-admin-tls-secret
+        {{- end}}
+    rules:
+        - host: pg-admin-{{ .Values.application.url }}
+          http:
+              paths:
+                  - backend:
+                        serviceName: {{ .Values.pgAdmin.name }}-service
+                        servicePort: 80
+
+        {{- end}}

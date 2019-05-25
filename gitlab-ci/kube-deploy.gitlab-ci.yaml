@@ -1,0 +1,136 @@
+
+.auto_devops: &auto_devops |
+  KUBE_NAMESPACE=handballtag-${CI_COMMIT_REF_SLUG}
+  export KUBECONFIG=`pwd`/.kubeconfig
+
+  function ensure_namespace() {
+    kubectl describe namespace "$KUBE_NAMESPACE" || kubectl create namespace "$KUBE_NAMESPACE"
+  }
+
+  function initialize_tiller() {
+    KUBECONFIG=`pwd`/.kubeconfig
+    echo ${GKE_ACCOUNT_JSON} | base64 -d > gke-service-account.json
+    gcloud auth activate-service-account --key-file gke-service-account.json --project Kubernetes
+    gcloud container clusters get-credentials gitlab-cluster --zone europe-west3-a --project Kubernetes
+    helm init --service-account tiller --wait --upgrade
+    rm gke-service-account.json
+  }
+
+  function create_docker_secret() {
+    echo "Create Docker secret..."
+
+    kubectl create secret -n "$KUBE_NAMESPACE" \
+      docker-registry gitlab-registry \
+      --docker-server="$CI_REGISTRY" \
+      --docker-username="robertschreib" \
+      --docker-password="$KUBE_REGISTRY_TOKEN" \
+      --docker-email="robert.schreib@gmx.de" \
+      -o yaml --dry-run | kubectl replace -n "$KUBE_NAMESPACE" --force -f -
+  }
+
+  function delete() {
+    helm delete --purge $CI_COMMIT_REF_SLUG
+  }
+
+deploy-kube:
+  image: emundo/ci-base
+  stage: deploy
+  cache: # Wir brauchen hier kein Cache, dieser Job führt nur Skripte aus
+    key: "none"
+    policy: pull
+  only:
+    - tags
+  before_script:
+    - *auto_devops
+  variables:
+    DEPLOY_URL: handballtag.$AUTO_DEVOPS_DOMAIN # Muss auch in der environment url gesetzt werden
+    NAMESPACE: handballtag
+    RELEASE_NAME: master-handballtag-server
+  script:
+    - '[[ -z $CI_COMMIT_TAG ]] && CI_COMMIT_TAG=latest'
+    - 'export CI_COMMIT_TAG'
+    - initialize_tiller
+    - clone_chart
+    - KUBE_NAMESPACE=$NAMESPACE
+    - ensure_namespace
+    - create_docker_secret
+    - helm upgrade --install --wait
+      --set application.url=$DEPLOY_URL
+      --set application.environment=master
+      --set server.image.tag=$CI_COMMIT_TAG
+      --set pgAdmin.password=$PG_ADMIN_PASSWORD
+      --set postgres.password=$POSTGRES_PASSWORD
+      --values values-server.yaml --namespace $NAMESPACE $RELEASE_NAME helm-charts/server
+  environment:
+    name: kube
+    url: https://handballtag.$AUTO_DEVOPS_DOMAIN
+  allow_failure: true
+
+
+# Review Apps template
+review:
+  image: emundo/ci-base
+  stage: review
+  before_script:
+    - *auto_devops
+  variables:
+    CLIENT_GIT_URL: https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.schreib.io/tsv-forstenried/handballtag/client.git
+    DEPLOY_URL: $CI_COMMIT_REF_SLUG.handballtag.$AUTO_DEVOPS_DOMAIN # Muss auch in der environment url gesetzt werden
+  script:
+    - CLIENT_IMAGE_TAG=$CI_COMMIT_REF_SLUG
+    # Prüft ob das Docker Image für diesen branch auch im Client verfügbar ist und verwendet sonst das latest image
+    - "[[ `git ls-remote --heads $CLIENT_GIT_URL master1 | wc -l` -eq 0 ]] && CLIENT_IMAGE_TAG=latest"
+    - initialize_tiller
+    - ensure_namespace
+    - create_docker_secret
+    - helm upgrade --install --wait
+      --set application.url=$DEPLOY_URL
+      --set application.environment=$CI_COMMIT_REF_SLUG
+      --set server.image.tag=$CI_COMMIT_REF_SLUG
+      --set pgAdmin.password=$PG_ADMIN_PASSWORD
+      --set postgres.password=$POSTGRES_PASSWORD
+      --values values-server.yaml --namespace $KUBE_NAMESPACE $CI_COMMIT_REF_SLUG-server helm-charts/server
+    - helm upgrade --install --wait
+      --set application.environment=$CI_COMMIT_REF_SLUG
+      --set application.url=$DEPLOY_URL
+      --set client.image.tag=$CLIENT_IMAGE_TAG
+      --values values-client.yaml --namespace $KUBE_NAMESPACE $CI_COMMIT_REF_SLUG-client helm-charts/client
+  environment:
+    name: review/$CI_COMMIT_REF_NAME
+    url: http://$CI_COMMIT_REF_SLUG.handballtag.$AUTO_DEVOPS_DOMAIN
+    on_stop: stop_review
+  when: manual
+  except:
+    refs:
+      - master
+      - tags
+    variables:
+      - $REVIEW_DISABLED
+
+stop_review:
+  image: emundo/ci-base
+  stage: cleanup
+  variables:
+    GIT_STRATEGY: none
+  before_script:
+    - *auto_devops
+  script:
+    - initialize_tiller
+    - helm delete --purge $CI_COMMIT_REF_SLUG-server
+    - helm delete --purge $CI_COMMIT_REF_SLUG-client
+  environment:
+    name: review/$CI_COMMIT_REF_NAME
+    action: stop
+  when: manual
+  allow_failure: true
+  only:
+    refs:
+      - branches
+      - tags
+    kubernetes: active
+  except:
+    refs:
+      - master
+      - tags
+    variables:
+      - $REVIEW_DISABLED
