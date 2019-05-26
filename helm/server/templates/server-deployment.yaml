@@ -9,6 +9,7 @@ spec:
     selector:
         matchLabels:
             app: {{.Values.server.name}}
+            environment: {{.Values.application.environment}}
     replicas: {{.Values.server.replicas}}
     template:
         metadata:
@@ -57,7 +58,6 @@ kind: Service
 metadata:
     name: {{.Values.server.hostname}}
     labels:
-        app: {{.Values.application.name}}
         environment: {{.Values.application.environment}}
 spec:
     ports:
