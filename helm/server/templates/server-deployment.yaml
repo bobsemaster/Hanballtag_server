@@ -9,7 +9,6 @@ spec:
     selector:
         matchLabels:
             app: {{.Values.server.name}}
-            environment: {{.Values.application.environment}}
     replicas: {{.Values.server.replicas}}
     template:
         metadata:
@@ -64,4 +63,3 @@ spec:
         - port: 8080
     selector:
         app: {{.Values.server.name}}
-        environment: {{.Values.application.environment}}
