@@ -38,7 +38,7 @@ server:
   readinessProbeTimeoutSeconds: 10
   readinessProbeRetries: 6
   ## Pfad der zum health check genutzt werden soll
-  # probePath: /api/rest/info/version
+  probePath: /ping
   ## Name des Servers
   name: server
   ## Hostname muss mit dem Hostname in der Nginx Config übereinstimmen
