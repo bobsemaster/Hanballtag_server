@@ -7,9 +7,9 @@ application:
   name: handballtag-verwaltung
 
 
-## Dieser wert sollte über die CI gesetzt werden
-## Url unter der das Nginx Deployment verfügbar ist
-url: handballtag.kube.schreib.io
+  ## Dieser wert sollte über die CI gesetzt werden
+  ## Url unter der das Nginx Deployment verfügbar ist
+  url: handballtag.kube.schreib.io
 
 ingress:
   ## Einstellung um HTTPS mit Letsencrypt zu konfigurieren
@@ -55,8 +55,8 @@ server:
 
 postgres:
   hostname: postgres
-  database: database
-  user: postgres
+  database: handballtag
+  user: handball
   ## Das passwort sollte per CI gesetzt werden
   # password: password
   ## Das postgres image wird auch benutzt um zu schauen ob die Datenbank hochgefahren ist.
