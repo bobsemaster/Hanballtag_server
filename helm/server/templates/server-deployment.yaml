@@ -29,6 +29,7 @@ spec:
                           port: 8080
                           path: {{.Values.server.probePath}}
                       initialDelaySeconds: {{.Values.server.readinessProbeTimeoutSeconds}}
+                      periodSeconds: 5
                       failureThreshold: {{.Values.server.readinessProbeRetries}}
                   livenessProbe:
                       httpGet:

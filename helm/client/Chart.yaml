@@ -1,0 +1,4 @@
+apiVersion: v1
+description: Ein Helm Chart um einen Nginx zu starten der mit einem Payara backend funktioniert
+name: client
+version: 0.1.0

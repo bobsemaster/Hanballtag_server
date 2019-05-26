@@ -47,7 +47,6 @@ docker-container:
   variables:
     DOCKER_DRIVER: overlay
     DOCKER_HOST: tcp://localhost:2375
-
   script:
     # Tag with commit tag or latest if not aviable.
     - "[[ -z $CI_COMMIT_TAG ]] && CI_COMMIT_TAG=$CI_COMMIT_REF_SLUG"
