@@ -28,7 +28,7 @@ spec:
                                 key: password
                                 name: {{.Values.pgAdmin.name}}-password
                       - name: PGADMIN_DEFAULT_EMAIL
-                        value: mail@e-mundo.de
+                        value: {{.Values.pgAdmin.mail}}
                   ports:
                       - containerPort: 80
 ---
