@@ -29,6 +29,7 @@ spec:
                           port: 8080
                           path: {{.Values.server.probePath}}
                       initialDelaySeconds: {{.Values.server.readinessProbeTimeoutSeconds}}
+                      periodSeconds: 5
                       failureThreshold: {{.Values.server.readinessProbeRetries}}
                   livenessProbe:
                       httpGet:
@@ -56,11 +57,9 @@ kind: Service
 metadata:
     name: {{.Values.server.hostname}}
     labels:
-        app: {{.Values.application.name}}
         environment: {{.Values.application.environment}}
 spec:
     ports:
         - port: 8080
     selector:
         app: {{.Values.server.name}}
-        environment: {{.Values.application.environment}}

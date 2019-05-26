@@ -88,12 +88,12 @@ review:
       --set server.image.tag=$CI_COMMIT_REF_SLUG
       --set pgAdmin.password=$PG_ADMIN_PASSWORD
       --set postgres.password=$POSTGRES_PASSWORD
-      --values values-server.yaml --namespace $KUBE_NAMESPACE $CI_COMMIT_REF_SLUG-server helm-charts/server
+      --values values-server.yaml --namespace $KUBE_NAMESPACE $CI_COMMIT_REF_SLUG-server helm/server
     - helm upgrade --install --wait
       --set application.environment=$CI_COMMIT_REF_SLUG
       --set application.url=$DEPLOY_URL
       --set client.image.tag=$CLIENT_IMAGE_TAG
-      --values values-client.yaml --namespace $KUBE_NAMESPACE $CI_COMMIT_REF_SLUG-client helm-charts/client
+      --values values-client.yaml --namespace $KUBE_NAMESPACE $CI_COMMIT_REF_SLUG-client helm/client
   environment:
     name: review/$CI_COMMIT_REF_NAME
     url: http://$CI_COMMIT_REF_SLUG.handballtag.$AUTO_DEVOPS_DOMAIN

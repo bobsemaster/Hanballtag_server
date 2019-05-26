@@ -1,0 +1,27 @@
+# Standart Werte für das Nginx deployment
+
+application:
+  ## environment und name der Applikation setzen
+  ## Das environment wenn möglich per CI setzen
+  # environment: review
+  ## Name der Applikation
+  name: client-application
+  ## Url unter der der Client verfügbar sein soll
+  ## Dieser wert sollte über die CI gesetzt werden
+  url: kube.schreib.io
+
+ingress:
+  ## Einstellung um HTTPS mit Letsencrypt zu konfigurieren
+  tlsEnabled: true
+  serverHostname: server
+
+dockerRegistrySecretName: gitlab-registry
+
+client:
+  image:
+    ## hier das benötigte Image eintragen
+    name: registry.schreib.io/tsv-forstenried/handballtag/server/client
+    ## tag das benutzt werden soll einfügen wenn möglich per CI
+    # tag: latest
+  ## Name des unter dem der Client im Cluster verfügbar ist
+  name: nginx-client

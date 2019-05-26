@@ -9,7 +9,6 @@ variables:
 
 stages:
   - test-and-build
-  - docker
   - build
   - review
   - cleanup
@@ -29,26 +28,16 @@ unittest:
     # Test laufen lassen
     - gradle --parallel test
 
-build:
-  stage: test-and-build
-  script:
-    - gradle clean assemble dockerRest
-  artifacts:
-    paths:
-      - docker/rest/deploy/*
-    expire_in: 1 hrs
-
 docker-container:
-  image: docker:stable-dind
-  stage: docker
+  stage: test-and-build
   # Services und variables um docker in docker nutzen zu können
   services:
     - docker:dind
   variables:
     DOCKER_DRIVER: overlay
     DOCKER_HOST: tcp://localhost:2375
-
   script:
+    - gradle clean assemble dockerRest
     # Tag with commit tag or latest if not aviable.
     - "[[ -z $CI_COMMIT_TAG ]] && CI_COMMIT_TAG=$CI_COMMIT_REF_SLUG"
     - "[[ $CI_COMMIT_REF_NAME -eq 'master' ]] && CI_COMMIT_TAG=latest"

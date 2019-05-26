@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: {{ .Values.client.name }}
+    labels:
+        app: {{.Values.application.name}}
+        environment: {{.Values.application.environment}}
+spec:
+    selector:
+        matchLabels:
+            app: {{ .Values.client.name }}
+    template:
+        metadata:
+          name: {{ .Values.client.name }}
+          labels:
+            app: {{.Values.client.name}}
+            environment: {{.Values.application.environment}}
+        spec:
+            containers:
+                - name: {{ .Values.client.name }}
+                  image: {{ .Values.client.image.name }}:{{.Values.client.image.tag}}
+                  readinessProbe:
+                      httpGet:
+                          port: 80
+                  livenessProbe:
+                      httpGet:
+                          port: 80
+                  imagePullPolicy: Always
+                  ports:
+                      - containerPort: 80
+            imagePullSecrets:
+                - name: {{.Values.dockerRegistrySecretName}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: {{ .Values.client.name }}-service
+spec:
+    type: ClusterIP
+    ports:
+        - port: 80
+    selector:
+        app: {{ .Values.client.name }}
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+    name: {{.Values.client.name}}-ingress
+    labels:
+        app: {{.Values.application.name}}
+        environment: {{.Values.application.environment}}
+    annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /
+        kubernetes.io/ingress.class: "nginx"
+        {{- if eq .Values.ingress.tlsEnabled false}}
+        kubernetes.io/tls-acme: "false"
+        ingress.kubernetes.io/ssl-redirect: "false"
+        {{- end}}
+        {{- if .Values.ingress.tlsEnabled}}
+        kubernetes.io/tls-acme: "true"
+        {{- end}}
+spec:
+        {{- if .Values.ingress.tlsEnabled}}
+    tls:
+        - hosts:
+              - {{ .Values.application.url }}
+          secretName: {{.Values.application.name}}-nginx-tls-secret
+        {{- end}}
+    rules:
+        - host: {{ .Values.application.url }}
+          http:
+              paths:
+                  - path: /rest
+                    backend:
+                      serviceName: {{.Values.ingress.serverHostname}}
+                      servicePort: 8080
+                  - backend:
+                        serviceName: {{ .Values.client.name }}-service
+                        servicePort: 80
