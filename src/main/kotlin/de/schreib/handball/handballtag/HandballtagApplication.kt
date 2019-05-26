@@ -8,19 +8,6 @@ import org.springframework.web.filter.CommonsRequestLoggingFilter
 
 @SpringBootApplication
 class HandballtagApplication {
-    @Bean
-    fun requestLoggingFilter(): CommonsRequestLoggingFilter {
-        val loggingFilter = CommonsRequestLoggingFilter()
-        loggingFilter.setIncludeQueryString(true)
-        loggingFilter.setIncludeClientInfo(true)
-        // loggingFilter.setMaxPayloadLength(1000);
-        loggingFilter.setIncludePayload(false)
-        loggingFilter.setBeforeMessagePrefix(">")
-        loggingFilter.setBeforeMessagePrefix("<")
-        return loggingFilter
-    }
-
-
 }
 
 fun main(args: Array<String>) {
