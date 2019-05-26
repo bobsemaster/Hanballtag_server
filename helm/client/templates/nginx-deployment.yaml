@@ -70,6 +70,10 @@ spec:
         - host: {{ .Values.application.url }}
           http:
               paths:
+                  - path: /rest
+                    backend:
+                      serviceName: {{.Values.ingress.serverHostname}}
+                      servicePort: 8080
                   - backend:
                         serviceName: {{ .Values.client.name }}-service
                         servicePort: 80

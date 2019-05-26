@@ -13,6 +13,7 @@ application:
 ingress:
   ## Einstellung um HTTPS mit Letsencrypt zu konfigurieren
   tlsEnabled: true
+  serverHostname: server
 
 dockerRegistrySecretName: gitlab-registry
 
