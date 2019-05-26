@@ -37,6 +37,9 @@ spec:
                       initialDelaySeconds: {{.Values.server.readinessProbeTimeoutSeconds}}
                   image: {{.Values.server.image.name}}:{{.Values.server.image.tag}}
                   imagePullPolicy: Always
+                  env:
+                    - name: SERVER_PORT
+                      value: ""
                   ports:
                       - containerPort: 8080
                         name: "http-port"
