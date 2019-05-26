@@ -1,0 +1,18 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <changeSet author="RS" id="PM-1">
+        <comment>Push Message Tabelle anlegen</comment>
+        <createTable tableName="PUSH_MESSAGE">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="title" type="text"/>
+            <column name="content" type="text"/>
+            <column name="severity" type="text"/>
+            <column name="target_audience" type="text"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

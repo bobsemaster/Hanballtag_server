@@ -42,6 +42,7 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
             .rememberMeParameter("rememberMe").rememberMeCookieName("User")
             // 1 Monat eingeloggt bleiben
             .tokenValiditySeconds(30 * 24 * 60 * 60).and().exceptionHandling()
+            .and().httpBasic()
             .authenticationEntryPoint(Http403ForbiddenEntryPoint()).and().logout().permitAll().and().cors().and().csrf()
             .disable()
     }
