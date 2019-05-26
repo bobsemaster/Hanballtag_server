@@ -51,7 +51,6 @@ repositories {
 dependencies {
     detektPlugins "io.gitlab.arturbosch.detekt:detekt-formatting:1.0.0-RC14"
     // Production Monitoring
-    runtime('org.springframework.boot:spring-boot-starter-actuator')
 
     // Spring developement tools
     compile('org.springframework.boot:spring-boot-devtools')
@@ -90,9 +89,6 @@ dependencies {
 }
 
 kotlin {
-    experimental {
-        coroutines 'enable'
-    }
 }
 
 task dockerRest(type: Copy) {
