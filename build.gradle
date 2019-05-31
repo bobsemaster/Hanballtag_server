@@ -64,6 +64,8 @@ dependencies {
     compile("org.jetbrains.kotlin:kotlin-reflect")
     runtime('org.postgresql:postgresql')
 
+    implementation 'com.google.firebase:firebase-admin:6.8.1'
+
     // Mapping java8 Date types to database types
     compile('org.hibernate:hibernate-java8')
 
