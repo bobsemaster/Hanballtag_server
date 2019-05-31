@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.Resource
 import org.springframework.stereotype.Service
-import java.io.FileInputStream
 
 
 @Service
@@ -24,6 +23,7 @@ class PushMessageService @Autowired constructor(
     val secret: Resource
 ) {
     val log = LoggerFactory.getLogger(this.javaClass)
+
     init {
         val serviceAccount = secret.inputStream
 
@@ -47,3 +47,4 @@ class PushMessageService @Autowired constructor(
 
     }
 }
+
