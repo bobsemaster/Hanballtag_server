@@ -12,15 +12,8 @@ class PushMessage(
     @Id
     var id: Long?, var title: String, var content: String,
     @Enumerated(EnumType.STRING)
-    var targetTopic: TargetTopic,
-    @Enumerated(EnumType.STRING)
-    var severity: Severity = Severity.IMPORTANT
+    var targetTopic: TargetTopic
 )
-
-enum class Severity {
-    INFO,
-    IMPORTANT,
-}
 
 enum class TargetTopic {
     DEFAULT,

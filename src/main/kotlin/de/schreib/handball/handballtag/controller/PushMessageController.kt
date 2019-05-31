@@ -5,6 +5,7 @@ import de.schreib.handball.handballtag.entities.TargetTopic
 import de.schreib.handball.handballtag.repositories.PushMessageRepository
 import de.schreib.handball.handballtag.services.PushMessageService
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -23,7 +24,7 @@ class PushMessageController(
 
     @PostMapping("/{clientToken}")
     fun registerClient(
-        clientToken: String
+        @PathVariable clientToken: String
     ) {
         pushMessageService.registerClientToTopic(clientToken, TargetTopic.DEFAULT)
     }

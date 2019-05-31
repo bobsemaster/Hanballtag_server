@@ -11,8 +11,7 @@
             </column>
             <column name="title" type="text"/>
             <column name="content" type="text"/>
-            <column name="severity" type="text"/>
-            <column name="target_audience" type="text"/>
+            <column name="target_topic" type="text"/>
         </createTable>
     </changeSet>
 </databaseChangeLog>
