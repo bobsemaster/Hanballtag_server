@@ -25,7 +25,7 @@ class PushMessageService @Autowired constructor(
 ) {
     val log = LoggerFactory.getLogger(this.javaClass)
     init {
-        val serviceAccount = FileInputStream(secret.file)
+        val serviceAccount = secret.inputStream
 
         val options = FirebaseOptions.Builder().setCredentials(GoogleCredentials.fromStream(serviceAccount)).build()
         //setDatabaseUrl("https://kubernetes-241709.firebaseio.com") Brauch ich hoffentlich nicht
