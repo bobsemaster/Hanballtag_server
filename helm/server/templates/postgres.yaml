@@ -13,62 +13,6 @@ spec:
     clusterIP: None
 ---
 apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-    name: {{.Values.application.name}}-postgres-volume
-    labels:
-        app: {{.Values.application.name}}-postgres
-spec:
-    accessModes:
-        - ReadWriteOnce
-    resources:
-        requests:
-            storage: 100Mi
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-    name: {{.Values.application.name}}-postgres
-    labels:
-        app: {{.Values.application.name}}
-        environment: {{.Values.application.environment}}
-spec:
-    selector:
-        matchLabels:
-            app: {{.Values.application.name}}-postgres
-    strategy:
-        type: Recreate
-    template:
-        metadata:
-            labels:
-                app: {{.Values.application.name}}-postgres
-        spec:
-            containers:
-                - image: postgres:10.5-alpine
-                  name: {{.Values.application.name}}-postgres
-                  env:
-                      - name: POSTGRES_PASSWORD
-                        valueFrom:
-                            secretKeyRef:
-                                key: password
-                                name: postgres-password
-                      - name: POSTGRES_DB
-                        value: {{.Values.postgres.database}}
-                      - name: POSTGRES_USER
-                        value: {{.Values.postgres.user}}
-                      - name: TZ
-                        value: CET
-                  ports:
-                      - containerPort: 5432
-                  volumeMounts:
-                      - name: {{.Values.application.name}}-postgres-persistent-storage
-                        mountPath: /var/lib/postgres/data
-            volumes:
-                - name: {{.Values.application.name}}-postgres-persistent-storage
-                  persistentVolumeClaim:
-                      claimName: {{.Values.application.name}}-postgres-volume
----
-apiVersion: v1
 kind: Secret
 metadata:
     name: postgres-password
@@ -78,3 +22,117 @@ metadata:
 type: Opaque
 stringData:
     password: {{.Values.postgres.password}}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+    name: {{.Values.application.name}}-postgres
+    labels:
+        app: {{.Values.application.name}}
+        environment: {{.Values.application.environment}}
+spec:
+    serviceName: {{.Values.postgres.hostname}}
+    replicas: 1
+    updateStrategy:
+        type: RollingUpdate
+    selector:
+        matchLabels:
+            app: {{.Values.application.name}}-postgres
+    template:
+        metadata:
+            labels:
+                app: {{.Values.application.name}}-postgres
+        spec:
+            imagePullSecrets:
+                - name: {{ .Values.dockerRegistrySecretName }}
+            securityContext:
+                fsGroup: 1001
+            initContainers:
+                - name: init-chmod-data
+                  image: docker.io/bitnami/minideb:latest
+                  imagePullPolicy: "Always"
+                  resources:
+                      requests:
+                          cpu: 250m
+                          memory: 256Mi
+                  command:
+                      - sh
+                      - -c
+                      - |
+                          mkdir -p /schreib/postgresql/data
+                          chmod 700 /schreib/postgresql/data
+                          find /schreib/postgresql -mindepth 1 -maxdepth 1 -not -name ".snapshot" | \
+                            xargs chown -R 1001:1001
+                  securityContext:
+                      runAsUser: 0
+                  volumeMounts:
+                      - name: data
+                        mountPath: /schreib/postgresql
+            containers:
+                - image: {{ .Values.postgres.image }}
+                  name: {{.Values.application.name}}-postgres
+                  imagePullPolicy: "Always"
+                  resources:
+                      requests:
+                          cpu: 250m
+                          memory: 768Mi
+                  securityContext:
+                      runAsUser: 1001
+                  env:
+                      - name: POSTGRESQL_PORT_NUMBER
+                        value: "5432"
+                      - name: PGDATA
+                        value: "/schreib/postgresql/data"
+                      - name: POSTGRES_DB
+                        value: {{.Values.postgres.database}}
+                      - name: POSTGRES_USER
+                        value: {{.Values.postgres.user}}
+                      - name: TZ
+                        value: CET
+                      - name: POSTGRES_PASSWORD
+                        valueFrom:
+                            secretKeyRef:
+                                key: password
+                                name: postgres-password
+                  ports:
+                      - name: postgresql
+                        containerPort: 5432
+                  livenessProbe:
+                      exec:
+                          command:
+                              - sh
+                              - -c
+                              - exec pg_isready -U "{{ .Values.postgres.user}}" -h 127.0.0.1 -p 5432
+                      initialDelaySeconds: 30
+                      periodSeconds: 10
+                      timeoutSeconds: 5
+                      successThreshold: 1
+                      failureThreshold: 6
+                  readinessProbe:
+                      exec:
+                          command:
+                              - sh
+                              - -c
+                              - |
+                                  pg_isready -U "{{ .Values.postgres.user}}" -h 127.0.0.1 -p 5432
+                      initialDelaySeconds: 5
+                      periodSeconds: 10
+                      timeoutSeconds: 5
+                      successThreshold: 1
+                      failureThreshold: 6
+                  volumeMounts:
+                      - name: data
+                        mountPath: /schreib/postgresql
+    volumeClaimTemplates:
+        - metadata:
+              name: data
+          spec:
+              storageClassName: {{ .Values.postgres.storageType | default "standard" }}
+              accessModes:
+                  - "ReadWriteOnce"
+              resources:
+                  requests:
+                      storage: {{ .Values.postgres.volumeSize }}
+
+
+
