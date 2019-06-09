@@ -37,11 +37,7 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
             //Man muss für jeden Request authentifiziert sein
             .anyRequest().authenticated().and().formLogin().loginPage("/login")
             .failureHandler(SimpleUrlAuthenticationFailureHandler())
-            .successHandler(StatusCodeAuthenticationSuccessHandler()).permitAll().and().rememberMe()
-            .tokenRepository(persistentTokenRepository()).key("AppKey").alwaysRemember(true)
-            .rememberMeParameter("rememberMe").rememberMeCookieName("User")
-            // 1 Monat eingeloggt bleiben
-            .tokenValiditySeconds(30 * 24 * 60 * 60).and().exceptionHandling()
+            .successHandler(StatusCodeAuthenticationSuccessHandler()).permitAll()
             .and().httpBasic()
             .authenticationEntryPoint(Http403ForbiddenEntryPoint()).and().logout().permitAll().and().cors().and().csrf()
             .disable()
@@ -62,14 +58,6 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
         return source
     }
 
-    //Braucht table der nicht automatisch erzeugt wird
-    // create table persistent_logins (username varchar(64) not null, series varchar(64) primary key,token varchar(64) not null, last_used timestamp not null)
-    @Bean
-    fun persistentTokenRepository(): PersistentTokenRepository {
-        val jdbcTokenRepositoryImpl = JdbcTokenRepositoryImpl()
-        jdbcTokenRepositoryImpl.setDataSource(source)
-        return jdbcTokenRepositoryImpl
-    }
 
 
     @Bean
