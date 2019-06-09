@@ -46,7 +46,7 @@ spec:
             imagePullSecrets:
                 - name: {{ .Values.dockerRegistrySecretName }}
             securityContext:
-                fsGroup: 1001
+                fsGroup: {{.Values.postgres.postgresUID}}
             initContainers:
                 - name: init-chmod-data
                   image: docker.io/bitnami/minideb:latest
@@ -62,7 +62,7 @@ spec:
                           mkdir -p /schreib/postgresql/data
                           chmod 700 /schreib/postgresql/data
                           find /schreib/postgresql -mindepth 1 -maxdepth 1 -not -name ".snapshot" | \
-                            xargs chown -R 1001:1001
+                            xargs chown -R {{.Values.postgres.postgresUID}}:{{.Values.postgres.postgresUID}}
                   securityContext:
                       runAsUser: 0
                   volumeMounts:
@@ -77,7 +77,7 @@ spec:
                           cpu: 250m
                           memory: 768Mi
                   securityContext:
-                      runAsUser: 1001
+                      runAsUser: {{.Values.postgres.postgresUID}}
                   env:
                       - name: POSTGRESQL_PORT_NUMBER
                         value: "5432"

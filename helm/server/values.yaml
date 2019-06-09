@@ -61,3 +61,4 @@ postgres:
   ## dazu muss pg_isready im Container verfügbar sein
   image: postgres:11-alpine
   volumeSize: 5Gi
+  postgresUID: 70
