@@ -11,10 +11,10 @@ spec:
             app: {{ .Values.client.name }}
     template:
         metadata:
-          name: {{ .Values.client.name }}
-          labels:
-            app: {{.Values.client.name}}
-            environment: {{.Values.application.environment}}
+            name: {{ .Values.client.name }}
+            labels:
+                app: {{.Values.client.name}}
+                environment: {{.Values.application.environment}}
         spec:
             containers:
                 - name: {{ .Values.client.name }}
@@ -50,13 +50,13 @@ metadata:
         app: {{.Values.application.name}}
         environment: {{.Values.application.environment}}
     annotations:
-        nginx.ingress.kubernetes.io/rewrite-target: /
+        nginx.ingress.kubernetes.io/use-regex: "true"
         kubernetes.io/ingress.class: "nginx"
-        {{- if eq .Values.ingress.tlsEnabled false}}
+            {{- if eq .Values.ingress.tlsEnabled false}}
         kubernetes.io/tls-acme: "false"
         ingress.kubernetes.io/ssl-redirect: "false"
-        {{- end}}
-        {{- if .Values.ingress.tlsEnabled}}
+            {{- end}}
+            {{- if .Values.ingress.tlsEnabled}}
         kubernetes.io/tls-acme: "true"
         {{- end}}
 spec:
@@ -70,10 +70,10 @@ spec:
         - host: {{ .Values.application.url }}
           http:
               paths:
-                  - path: /rest
+                  - path: /rest/.*
                     backend:
-                      serviceName: {{.Values.ingress.serverHostname}}
-                      servicePort: 8080
+                        serviceName: {{.Values.ingress.serverHostname}}
+                        servicePort: 8080
                   - backend:
                         serviceName: {{ .Values.client.name }}-service
                         servicePort: 80
